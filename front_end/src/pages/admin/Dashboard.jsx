@@ -1,4 +1,5 @@
 import React from 'react';
+import SystemDateTime from '../../components/common/SystemDate.jsx';
 
 /* --- MOCK DATA --- */
 const stats = [
@@ -71,10 +72,9 @@ const DashboardOverview = () => {
           <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
           <p className="text-gray-500 text-sm mt-1">Welcome back, Administrator. Here's what's happening today.</p>
         </div>
-        <button className="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-lg text-sm font-medium shadow-sm">
-          <span className="material-icons-round text-gray-400">calendar_today</span>
-          October 24, 2023
-        </button>
+        
+          <SystemDateTime />
+        
       </div>
 
       {/* 2. Stats Grid */}
