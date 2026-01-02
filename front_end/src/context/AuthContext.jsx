@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
@@ -27,10 +28,10 @@ export const AuthProvider = ({ children }) => {
         }
     }, []);
 
-    const login = (email, password) => {
+    const login = (email) => {
         // Mock Login Logic
         // In a real app, this would be an API call
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             setTimeout(() => {
                 let role = 'employee';
                 let name = 'John Doe';

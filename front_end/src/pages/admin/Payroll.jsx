@@ -57,7 +57,13 @@ const Payroll = () => {
             </div>
 
             <Card title="Salary History">
-                <Table columns={columns} data={payrollData} />
+                <Table
+                    columns={columns}
+                    data={payrollData}
+                    actions={(row) => (
+                        <button className="text-primary hover:text-blue-900 text-sm font-medium">Edit</button>
+                    )}
+                />
             </Card>
         </div>
     );

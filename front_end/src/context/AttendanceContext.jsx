@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState } from 'react';
 
 const AttendanceContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAttendance = () => useContext(AttendanceContext);
 
 export const AttendanceProvider = ({ children }) => {

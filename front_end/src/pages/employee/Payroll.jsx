@@ -52,7 +52,7 @@ const EmployeePayroll = () => {
                 <Table
                     columns={columns}
                     data={payslips}
-                    actions={(row) => <Button variant="ghost" size="sm">Download PDF</Button>}
+                    actions={() => <Button variant="ghost" size="sm">Download PDF</Button>}
                 />
             </Card>
         </div>

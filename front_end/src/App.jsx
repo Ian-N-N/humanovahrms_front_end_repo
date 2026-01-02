@@ -46,6 +46,7 @@ function App() {
                 <Route path="/hr" element={<MainLayout role="hr" />}>
                   <Route path="dashboard" element={<HRDashboard />} />
                   <Route path="leaves" element={<LeaveManagement />} />
+                  <Route path="employees" element={<EmployeeList readOnly={true} />} />
                   <Route path="profile" element={<Profile />} />
                   <Route index element={<Navigate to="dashboard" replace />} />
                 </Route>

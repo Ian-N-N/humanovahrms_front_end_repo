@@ -22,7 +22,7 @@ const Login = () => {
             else if (user.role === 'hr') navigate('/hr/dashboard');
             else if (user.role === 'employee') navigate('/employee/dashboard');
             else navigate('/login');
-        } catch (error) {
+        } catch {
             alert('Login failed');
         } finally {
             setIsLoading(false);

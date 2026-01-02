@@ -7,7 +7,7 @@ import Table from '../../components/common/Table';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 
-const EmployeeList = () => {
+const EmployeeList = ({ readOnly = false }) => {
     const columns = [
         {
             header: 'Employee', accessor: 'name', render: (row) => (
@@ -43,9 +43,11 @@ const EmployeeList = () => {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-900">Employee Directory</h2>
-                <Link to="/admin/employees/new">
-                    <Button>+ Add New Employee</Button>
-                </Link>
+                {!readOnly && (
+                    <Link to="/admin/employees/new">
+                        <Button>+ Add New Employee</Button>
+                    </Link>
+                )}
             </div>
 
             <Card>
@@ -64,8 +66,8 @@ const EmployeeList = () => {
                 <Table
                     columns={columns}
                     data={data}
-                    actions={(row) => (
-                        <button className="text-primary hover:text-blue-900">Edit</button>
+                    actions={() => (
+                        !readOnly && <button className="text-primary hover:text-blue-900">Edit</button>
                     )}
                 />
             </Card>

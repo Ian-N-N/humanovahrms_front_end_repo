@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState } from 'react';
 
 const LeaveContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useLeave = () => useContext(LeaveContext);
 
 export const LeaveProvider = ({ children }) => {

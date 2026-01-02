@@ -26,7 +26,7 @@ const Sidebar = ({ role = 'admin' }) => {
         hr: [
             { name: 'Dashboard', path: '/hr/dashboard', icon: <IconDashboard /> },
             { name: 'Leaves', path: '/hr/leaves', icon: <IconCalendar /> },
-            { name: 'Employees', path: '/admin/employees', icon: <IconUsers /> },
+            { name: 'Employees', path: '/hr/employees', icon: <IconUsers /> },
             { name: 'Profile', path: '/hr/profile', icon: <IconUsers /> },
         ],
         employee: [

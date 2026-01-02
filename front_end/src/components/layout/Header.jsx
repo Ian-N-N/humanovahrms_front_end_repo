@@ -1,8 +1,8 @@
+import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 
-import React from 'react';
-
 const Header = ({ title }) => {
+    const { logout } = useAuth();
     return (
         <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6">
             <div>
