@@ -210,7 +210,7 @@ const Attendance = () => {
                         <StatusBadge status={row.status} />
                       </td>
                       <td className="py-4 px-6 text-right">
-                        {/* --- NEW: ADDED ONCLICK HANDLER --- */}
+                        {/* ---  ADDED ONCLICK HANDLER --- */}
                         <button 
                           onClick={() => handleViewDetails(row)}
                           className="text-gray-400 hover:text-blue-600 p-1 cursor-pointer"
@@ -229,7 +229,7 @@ const Attendance = () => {
 
             {/* --- MOBILE VIEW: CARDS --- */}
             <div className="block lg:hidden bg-gray-50 p-4 space-y-4">
-              {/* --- NEW: MAP OVER filteredData --- */}
+              {/* ---  MAP OVER filteredData --- */}
               {filteredData.map((row) => (
                 <div key={row.id} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
                   <div className="flex justify-between items-start mb-4">
@@ -262,7 +262,6 @@ const Attendance = () => {
                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                         <div className={`h-full rounded-full ${row.progress >= 100 ? 'bg-green-500' : 'bg-blue-500'}`} style={{ width: `${row.progress}%` }}></div>
                      </div>
-                     {/* --- NEW: ADDED BUTTON HANDLER --- */}
                      <button 
                        onClick={() => handleViewDetails(row)}
                        className="w-full mt-3 py-2 bg-blue-50 text-blue-600 text-xs font-bold rounded-lg hover:bg-blue-100 transition-colors"
