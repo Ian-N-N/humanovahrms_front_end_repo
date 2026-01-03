@@ -19,6 +19,7 @@ import EmployeeDashboard from './pages/employee/Dashboard';
 import LeavePortal from './pages/employee/LeavePortal';
 import EmployeePayroll from './pages/employee/Payroll';
 import EmployeeCreate from './pages/admin/EmployeeCreate';
+import EmployeeDetails from './pages/common/EmployeeDetails';
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
                   <Route path="dashboard" element={<HRDashboard />} />
                   <Route path="leaves" element={<LeaveManagement />} />
                   <Route path="employees" element={<EmployeeList readOnly={true} />} />
+                  <Route path="employees/:id" element={<EmployeeDetails />} />
                   <Route path="profile" element={<Profile />} />
                   <Route index element={<Navigate to="dashboard" replace />} />
                 </Route>

@@ -12,8 +12,12 @@ const EmployeeList = ({ readOnly = false }) => {
         {
             header: 'Employee', accessor: 'name', render: (row) => (
                 <div className="flex items-center">
-                    <div className="h-10 w-10 flex-shrink-0 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold">
-                        {row.name.charAt(0)}
+                    <div className="h-10 w-10 flex-shrink-0 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                        {row.image ? (
+                            <img src={row.image} alt={row.name} className="h-full w-full object-cover" />
+                        ) : (
+                            <span className="text-gray-500 font-bold">{row.name.charAt(0)}</span>
+                        )}
                     </div>
                     <div className="ml-4">
                         <div className="font-medium text-gray-900">{row.name}</div>
@@ -66,8 +70,15 @@ const EmployeeList = ({ readOnly = false }) => {
                 <Table
                     columns={columns}
                     data={data}
-                    actions={() => (
-                        !readOnly && <button className="text-primary hover:text-blue-900">Edit</button>
+                    actions={(row) => (
+                        <div className="flex gap-3">
+                            {readOnly && (
+                                <Link to={`/hr/employees/${row.id}`} className="text-gray-500 hover:text-blue-600 font-medium text-sm">
+                                    View
+                                </Link>
+                            )}
+                            {!readOnly && <button className="text-primary hover:text-blue-900">Edit</button>}
+                        </div>
                     )}
                 />
             </Card>
