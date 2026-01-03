@@ -65,11 +65,11 @@ const EmployeeDetails = () => {
                             </div>
                             <div>
                                 <label className="text-sm font-medium text-gray-500">Phone</label>
-                                <p className="text-gray-900">+1 (555) 123-4567</p>
+                                <p className="text-gray-900">{employee.phone || '+254 7XX XXX XXX'}</p>
                             </div>
                             <div>
                                 <label className="text-sm font-medium text-gray-500">Location</label>
-                                <p className="text-gray-900">San Francisco, CA</p>
+                                <p className="text-gray-900">{employee.location || 'Nairobi, Kenya'}</p>
                             </div>
                         </div>
 

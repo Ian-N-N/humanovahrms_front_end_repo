@@ -20,7 +20,13 @@ const EmployeeList = ({ readOnly = false }) => {
                         )}
                     </div>
                     <div className="ml-4">
-                        <div className="font-medium text-gray-900">{row.name}</div>
+                        {readOnly ? (
+                            <Link to={`/hr/employees/${row.id}`} className="hover:text-blue-600">
+                                <div className="font-medium text-gray-900 hover:text-blue-600 transition-colors">{row.name}</div>
+                            </Link>
+                        ) : (
+                            <div className="font-medium text-gray-900">{row.name}</div>
+                        )}
                         <div className="text-gray-500 text-xs">{row.email}</div>
                     </div>
                 </div>

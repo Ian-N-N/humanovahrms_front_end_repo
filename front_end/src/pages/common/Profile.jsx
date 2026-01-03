@@ -12,10 +12,10 @@ const Profile = () => {
     // Initial State mocking user data
     const [formData, setFormData] = useState({
         name: user?.name || 'User',
-        email: user?.email || 'user@company.com',
-        phone: '+1 555 123 4567',
-        address: '123 Main St, Springfield',
-        emergencyContact: 'Jane Doe (+1 555 987 6543)'
+        email: user?.email || 'user@humanova.co.ke',
+        phone: '+254 712 345 678',
+        address: 'P.O. Box 7894, Nairobi',
+        emergencyContact: 'Jane Doe (+254 722 000 111)'
     });
 
     const handleChange = (e) => {
