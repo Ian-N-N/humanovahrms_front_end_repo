@@ -42,7 +42,14 @@ const Sidebar = ({ role = 'admin' }) => {
     return (
         <aside className="w-64 bg-white border-r border-gray-200 min-h-screen flex flex-col">
             <div className="h-16 flex items-center px-6 border-b border-gray-200">
-                <span className="text-xl font-bold text-primary">ecoHRMS</span>
+                <div className="flex items-center gap-2 text-primary">
+                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <span className="text-xl font-bold tracking-tight">ecoHRMS</span>
+                </div>
             </div>
 
             <nav className="flex-1 px-4 py-4 space-y-1">

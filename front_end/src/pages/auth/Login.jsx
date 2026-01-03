@@ -33,8 +33,8 @@ const Login = () => {
         <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 {/* Logo Placeholder */}
-                <div className="mx-auto h-12 w-12 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                    eco
+                <div className="mx-auto h-16 w-16 flex items-center justify-center">
+                    <img src="/logo.svg" alt="ecoHRMS Logo" className="h-full w-full" />
                 </div>
                 <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
                     ecoHRMS

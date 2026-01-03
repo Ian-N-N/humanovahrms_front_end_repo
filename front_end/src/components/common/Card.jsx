@@ -3,7 +3,7 @@ import React from 'react';
 
 const Card = ({ children, className = '', title, action }) => {
     return (
-        <div className={`bg-white shadow rounded-lg p-6 ${className}`}>
+        <div className={`bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-xl p-6 border border-gray-100 ${className}`}>
             {(title || action) && (
                 <div className="flex justify-between items-center mb-4">
                     {title && <h3 className="text-lg font-medium text-gray-900">{title}</h3>}

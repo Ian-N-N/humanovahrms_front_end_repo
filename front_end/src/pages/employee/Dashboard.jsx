@@ -37,29 +37,64 @@ const EmployeeDashboard = () => {
             {/* Top Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <Card className="flex flex-col justify-between">
-                    <p className="text-sm text-gray-500 mb-2">Attendance</p>
-                    <h3 className="text-3xl font-bold text-blue-600">92%</h3>
-                    <span className="text-xs text-green-600 mt-2">↑ +2% vs last month</span>
-                </Card>
-                <Card className="flex flex-col justify-between">
-                    <p className="text-sm text-gray-500 mb-2">Leave Balance</p>
-                    <div className="flex items-end gap-2">
-                        <h3 className="text-3xl font-bold text-gray-900">12</h3>
-                        <span className="text-sm text-gray-500 mb-1">days</span>
+                    <div>
+                        <div className="flex justify-between">
+                            <p className="text-sm font-medium text-gray-500 mb-2">Attendance</p>
+                            <span className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            </span>
+                        </div>
+                        <h3 className="text-3xl font-bold text-gray-900">92%</h3>
                     </div>
-                    <span className="text-xs text-gray-400 mt-2">12 of 20 days remaining</span>
-                </Card>
-                <Card className="flex flex-col justify-between">
-                    <p className="text-sm text-gray-500 mb-2">Next Payroll</p>
-                    <h3 className="text-xl font-bold text-gray-900">Oct 30</h3>
-                    <span className="text-xs text-orange-600 mt-2">5 days left · Processing soon</span>
-                </Card>
-                <Card className="flex flex-col justify-between bg-gradient-to-br from-blue-50 to-white">
-                    <p className="text-sm text-gray-500 mb-1">{isCheckedIn ? 'Clocked In At' : 'Not Clocked In'}</p>
-                    <h3 className="text-2xl font-bold text-gray-900">{checkInTime || '--:--'}</h3>
-                    <span className={`text-xs mt-1 ${isCheckedIn ? 'text-green-600' : 'text-gray-400'}`}>
-                        {isCheckedIn ? '● On Time Today' : 'Click Clock In to start'}
+                    <span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded w-max mt-3 flex items-center">
+                        <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
+                        +2% increase
                     </span>
+                </Card>
+
+                <Card className="flex flex-col justify-between">
+                    <div>
+                        <div className="flex justify-between">
+                            <p className="text-sm font-medium text-gray-500 mb-2">Leave Balance</p>
+                            <span className="p-1.5 bg-purple-50 text-purple-600 rounded-lg">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            </span>
+                        </div>
+                        <div className="flex items-baseline gap-1">
+                            <h3 className="text-3xl font-bold text-gray-900">12</h3>
+                            <span className="text-sm text-gray-500">days</span>
+                        </div>
+                    </div>
+                    <div className="w-full bg-gray-100 rounded-full h-1.5 mt-4">
+                        <div className="bg-purple-500 h-1.5 rounded-full" style={{ width: '60%' }}></div>
+                    </div>
+                </Card>
+
+                <Card className="flex flex-col justify-between">
+                    <div>
+                        <div className="flex justify-between">
+                            <p className="text-sm font-medium text-gray-500 mb-2">Next Payroll</p>
+                            <span className="p-1.5 bg-orange-50 text-orange-600 rounded-lg">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            </span>
+                        </div>
+                        <h3 className="text-3xl font-bold text-gray-900">Oct 30</h3>
+                    </div>
+                    <span className="text-xs text-orange-600 font-medium mt-2 bg-orange-50 px-2 py-1 rounded w-max">Processing</span>
+                </Card>
+
+                <Card className="flex flex-col justify-between bg-gradient-to-br from-blue-600 to-blue-700 text-white relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-4 opacity-10">
+                        <svg className="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <div>
+                        <p className="text-blue-100 text-sm font-medium mb-1">{isCheckedIn ? 'Clocked In' : 'Not Clocked In'}</p>
+                        <h3 className="text-4xl font-bold text-white tracking-tight">{checkInTime || '08:58'}</h3>
+                    </div>
+                    <div className="mt-4 flex items-center text-xs font-medium bg-blue-500 bg-opacity-30 rounded px-2 py-1 w-max">
+                        <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+                        {isCheckedIn ? 'On Time Today' : 'Ready to start'}
+                    </div>
                 </Card>
             </div>
 
@@ -71,21 +106,25 @@ const EmployeeDashboard = () => {
                             <h3 className="text-lg font-bold text-gray-900">Quick Actions</h3>
                             <button className="text-sm text-primary">Customize</button>
                         </div>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-3 gap-6">
                             <button
                                 onClick={handleClockAction}
-                                className={`flex flex-col items-center justify-center p-6 text-white rounded-xl shadow-lg transition ${isCheckedIn ? 'bg-red-500 hover:bg-red-600' : 'bg-primary hover:bg-blue-700'}`}
+                                className={`flex flex-col items-center justify-center p-6 text-white rounded-2xl shadow-lg shadow-blue-200 transition-transform hover:scale-105 active:scale-95 ${isCheckedIn ? 'bg-red-500 hover:bg-red-600' : 'bg-primary hover:bg-blue-700'}`}
                             >
-                                <span className="text-2xl mb-2">⏱</span>
-                                <span className="font-medium">{isCheckedIn ? 'Clock Out' : 'Clock In'}</span>
+                                <span className="text-3xl mb-3">{isCheckedIn ? '🛑' : '⏱'}</span>
+                                <span className="font-bold text-lg">{isCheckedIn ? 'Clock Out' : 'Check In'}</span>
                             </button>
-                            <button onClick={() => navigate('/employee/leave')} className="flex flex-col items-center justify-center p-6 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition">
-                                <span className="text-2xl mb-2 text-gray-600">📅</span>
-                                <span className="font-medium text-gray-700">Request Leave</span>
+                            <button onClick={() => navigate('/employee/leave')} className="flex flex-col items-center justify-center p-6 bg-white border border-gray-100 shadow-sm rounded-2xl hover:shadow-md hover:border-blue-100 transition-all group">
+                                <div className="p-3 bg-purple-50 rounded-full mb-3 group-hover:bg-purple-100 transition-colors">
+                                    <svg className="w-8 h-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                </div>
+                                <span className="font-medium text-gray-700 group-hover:text-purple-700">Request Leave</span>
                             </button>
-                            <button className="flex flex-col items-center justify-center p-6 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition">
-                                <span className="text-2xl mb-2 text-gray-600">📄</span>
-                                <span className="font-medium text-gray-700">Payslip</span>
+                            <button className="flex flex-col items-center justify-center p-6 bg-white border border-gray-100 shadow-sm rounded-2xl hover:shadow-md hover:border-blue-100 transition-all group">
+                                <div className="p-3 bg-orange-50 rounded-full mb-3 group-hover:bg-orange-100 transition-colors">
+                                    <svg className="w-8 h-8 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                </div>
+                                <span className="font-medium text-gray-700 group-hover:text-orange-700">Payslip</span>
                             </button>
                         </div>
                     </div>

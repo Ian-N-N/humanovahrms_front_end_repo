@@ -33,15 +33,22 @@ const HRDashboard = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, idx) => (
-                    <Card key={idx}>
+                    <Card key={idx} className="flex flex-col justify-between">
                         <div className="flex justify-between items-start">
-                            <div>
-                                <p className="text-sm font-medium text-gray-500">{stat.label}</p>
-                                <h3 className="text-2xl font-bold text-gray-900 mt-2">{stat.value}</h3>
+                            <div className={`p-3 rounded-xl ${stat.color.replace('text-', 'bg-').split(' ')[0]} bg-opacity-20`}>
+                                {/* Using simple SVGs based on index/context */}
+                                {idx === 0 && <svg className={`w-6 h-6 ${stat.color}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>}
+                                {idx === 1 && <svg className={`w-6 h-6 ${stat.color}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+                                {idx === 2 && <svg className={`w-6 h-6 ${stat.color}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z" /></svg>}
+                                {idx === 3 && <svg className={`w-6 h-6 ${stat.color}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>}
                             </div>
-                            <span className={`px-2 py-1 rounded text-xs font-semibold ${stat.color}`}>
+                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${stat.color.replace('text-', 'bg-').split(' ')[0]} bg-opacity-30 ${stat.color.split(' ')[1]}`}>
                                 {stat.note}
                             </span>
+                        </div>
+                        <div className="mt-4">
+                            <h3 className="text-2xl font-bold text-gray-900">{stat.value}</h3>
+                            <p className="text-sm font-medium text-gray-500 mt-1">{stat.label}</p>
                         </div>
                     </Card>
                 ))}
