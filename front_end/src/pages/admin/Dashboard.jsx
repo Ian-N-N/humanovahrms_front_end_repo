@@ -1,140 +1,236 @@
-
-
 import React from 'react';
-import Card from '../../components/common/Card';
-import Button from '../../components/common/Button';
+import SystemDateTime from '../../components/common/SystemDate.jsx';
 
-const Dashboard = () => {
-    // Mock Data
-    const metrics = [
-        { label: 'Total Employees', value: '1,240', change: '+5%', note: 'last month', color: 'bg-blue-100 text-blue-800' },
-        { label: 'Active Departments', value: '12', change: '', note: '', color: 'bg-green-100 text-green-800' },
-        { label: 'Pending Leave', value: '8 Requests', change: '', note: 'Action needed', color: 'bg-yellow-100 text-yellow-800' },
-        { label: 'Attendance', value: '94%', change: '+2%', note: 'Today', color: 'bg-purple-100 text-purple-800' },
-    ];
+/* --- MOCK DATA --- */
+const stats = [
+  { label: "Total Employees", value: "1,240", badge: "+5%", badgeColor: "bg-blue-100 text-blue-600", icon: "groups" },
+  { label: "Active Departments", value: "12", badge: null, icon: "apartment" },
+  { label: "Pending Leave", value: "8 Requests", badge: "Action Needed", badgeColor: "bg-orange-100 text-orange-600", icon: "pending_actions" },
+  { label: "Today's Attendance", value: "94%", badge: "+2%", badgeColor: "bg-blue-100 text-blue-600", icon: "how_to_reg" },
+];
 
-    const recentActivity = [
-        { id: 1, user: 'John Audine', action: 'requested leave', time: '10 min ago', avatar: null },
-        { id: 2, user: 'New Employee', action: 'Onboarded', time: '2 hours ago', avatar: null },
-        { id: 3, user: 'Nancy Adelice', action: 'processed payroll', time: 'Yesterday', avatar: null },
-    ];
+const recentActivity = [
+  { name: "John Austine", action: "requested leave", time: "10 mins ago", type: "Sick Leave", avatar: "https://i.pravatar.cc/150?u=1" },
+  { name: "New Employee", action: "Onboarded", time: "2 hours ago", type: "Dan Odhiambo", avatar: "https://i.pravatar.cc/150?u=2" },
+  { name: "Nancy Adelice", action: "processed payroll", time: "Yesterday", type: "October Cycle", avatar: "https://i.pravatar.cc/150?u=3" },
+  { name: "Ian Njuguna", action: "updated profile", time: "1 day ago", type: "Personal Info", avatar: "https://i.pravatar.cc/150?u=4" },
+];
 
-    return (
-        <div className="space-y-6">
-            {/* Header Stats */}
-            <div>
-                <h2 className="text-2xl font-bold text-gray-800">Dashboard Overview</h2>
-                <p className="text-gray-500">Welcome back, Administrator. Here's what's happening today.</p>
-            </div>
+const topDepartments = [
+  { name: "Engineering", score: "98%", width: "98%" },
+  { name: "Sales", score: "92%", width: "92%" },
+];
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {metrics.map((metric, index) => (
-                    <Card key={index} className="flex flex-col justify-between">
-                        <div className="flex justify-between items-start">
-                            <div className={`p-3 rounded-xl ${metric.color.replace('text-', 'bg-').split(' ')[0]} bg-opacity-20`}>
-                                {/* Using simple SVGs based on label logic for demo */}
-                                {index === 0 && <svg className={`w-6 h-6 ${metric.color}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0z" /></svg>}
-                                {index === 1 && <svg className={`w-6 h-6 ${metric.color}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>}
-                                {index === 2 && <svg className={`w-6 h-6 ${metric.color}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>}
-                                {index === 3 && <svg className={`w-6 h-6 ${metric.color}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
-                            </div>
-                            {metric.change && (
-                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${metric.change.startsWith('+') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                                    {metric.change}
-                                </span>
-                            )}
-                        </div>
-                        <div className="mt-4">
-                            <h3 className="text-2xl font-bold text-gray-900">{metric.value}</h3>
-                            <p className="text-sm font-medium text-gray-500 mt-1">{metric.label}</p>
-                            {metric.note && <p className="text-xs text-gray-400 mt-1">{metric.note}</p>}
-                        </div>
-                    </Card>
-                ))}
-            </div>
+/* --- SUBCOMPONENTS --- */
 
-            <div className="flex gap-4">
-                <Button>+ Add Employee</Button>
-                <Button variant="outline">Manage Departments</Button>
-                <Button variant="ghost">View Reports</Button>
-            </div>
+// 1. Stat Card
+const StatCard = ({ label, value, badge, badgeColor, icon }) => (
+  <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between h-32 hover:shadow-md transition-shadow">
+    <div className="flex justify-between items-start">
+      <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+        <span className="material-icons-round">{icon}</span>
+      </div>
+      {badge && (
+        <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${badgeColor}`}>
+          {badge}
+        </span>
+      )}
+    </div>
+    <div>
+      <p className="text-gray-500 text-sm font-medium">{label}</p>
+      <h3 className="text-2xl font-bold text-gray-800 mt-1">{value}</h3>
+    </div>
+  </div>
+);
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Attendance Trends Placeholder */}
-                <Card title="Attendance Trends" className="lg:col-span-2">
-                    <div className="h-64 mt-4 relative">
-                        {/* Mock Graph using SVG */}
-                        <svg className="w-full h-full" viewBox="0 0 600 200" preserveAspectRatio="none">
-                            <defs>
-                                <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#4F46E5" stopOpacity="0.2" />
-                                    <stop offset="100%" stopColor="#4F46E5" stopOpacity="0" />
-                                </linearGradient>
-                            </defs>
-                            <path d="M0,150 Q100,100 200,120 T400,80 T600,100 V200 H0 Z" fill="url(#chartGradient)" />
-                            <path d="M0,150 Q100,100 200,120 T400,80 T600,100" fill="none" stroke="#4F46E5" strokeWidth="3" strokeLinecap="round" />
-                            {/* Grid Lines */}
-                            <line x1="0" y1="50" x2="600" y2="50" stroke="#E5E7EB" strokeDasharray="4" />
-                            <line x1="0" y1="100" x2="600" y2="100" stroke="#E5E7EB" strokeDasharray="4" />
-                            <line x1="0" y1="150" x2="600" y2="150" stroke="#E5E7EB" strokeDasharray="4" />
-                        </svg>
-                        <div className="flex justify-between text-xs text-gray-400 mt-2">
-                            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-                        </div>
-                    </div>
-                </Card>
+// 2. Action Buttons
+const ActionButtons = () => (
+  <div className="flex flex-wrap gap-4 mb-8">
+    <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium shadow-sm transition-colors">
+      <span className="material-icons-round text-lg">person_add</span>
+      Add Employee
+    </button>
+    <button className="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-6 py-3 rounded-xl font-medium shadow-sm transition-colors">
+      <span className="material-icons-round text-lg">domain</span>
+      Manage Departments
+    </button>
+    <button className="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-6 py-3 rounded-xl font-medium shadow-sm transition-colors">
+      <span className="material-icons-round text-lg">bar_chart</span>
+      View Reports
+    </button>
+  </div>
+);
 
-                {/* Recent Activity */}
-                <Card title="Recent Activity" action={<a href="#" className="text-sm text-primary">View All</a>}>
-                    <ul className="space-y-4">
-                        {recentActivity.map((activity) => (
-                            <li key={activity.id} className="flex items-center">
-                                <div className="h-10 w-10 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center">
-                                    <span className="text-xs font-bold text-gray-500">
-                                        {activity.user.charAt(0)}
-                                    </span>
-                                </div>
-                                <div className="ml-3">
-                                    <p className="text-sm font-medium text-gray-900">
-                                        {activity.user} <span className="text-gray-500 font-normal">{activity.action}</span>
-                                    </p>
-                                    <p className="text-xs text-gray-400">{activity.time}</p>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                </Card>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card title="Employees by Department">
-                    <div className="h-48 flex items-center justify-center relative">
-                        {/* Mock Donut */}
-                        <div className="w-32 h-32 rounded-full border-8 border-blue-500 border-r-blue-200 border-b-blue-100 transform -rotate-45"></div>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className="text-3xl font-bold text-gray-900">1,240</span>
-                            <span className="text-xs text-gray-500 uppercase tracking-wide">Total</span>
-                        </div>
-                    </div>
-                </Card>
-                <Card title="Top Departments">
-                    <div className="space-y-4">
-                        {['Engineering', 'Sales', 'Marketing'].map(dept => (
-                            <div key={dept}>
-                                <div className="flex justify-between text-sm mb-1">
-                                    <span>{dept}</span>
-                                    <span className="font-bold">94%</span>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                    <div className="bg-primary h-2 rounded-full" style={{ width: '94%' }}></div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </Card>
-            </div>
+/* --- MAIN DASHBOARD COMPONENT --- */
+const DashboardOverview = () => {
+  return (
+    <main className="flex-1 bg-gray-50 h-screen overflow-y-auto p-8 font-sans custom-scrollbar">
+      
+      {/* 1. Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
+          <p className="text-gray-500 text-sm mt-1">Welcome back, Administrator. Here's what's happening today.</p>
         </div>
-    );
+        
+          <SystemDateTime />
+        
+      </div>
+
+      {/* 2. Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {stats.map((stat, index) => (
+          <StatCard key={index} {...stat} />
+        ))}
+      </div>
+
+      {/* 3. Actions Row */}
+      <ActionButtons />
+
+      {/* 4. Main Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        
+        {/* Attendance Trends (Line Chart) */}
+        <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h3 className="font-bold text-gray-800">Attendance Trends</h3>
+              <p className="text-xs text-gray-400">Monthly overview</p>
+            </div>
+            <div className="flex items-center gap-2">
+               <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+               <span className="text-xs text-gray-500">Present</span>
+            </div>
+          </div>
+          
+          {/* Simulated SVG Line Chart */}
+          <div className="h-64 w-full relative">
+            {/* Grid Lines */}
+            <div className="absolute inset-0 flex flex-col justify-between text-xs text-gray-300">
+               <span>100%</span>
+               <span>75%</span>
+               <span>50%</span>
+               <span>25%</span>
+               <span>0%</span>
+            </div>
+            <svg className="absolute inset-0 w-full h-full pl-8" preserveAspectRatio="none">
+              {/* Gradient Area */}
+              <defs>
+                <linearGradient id="gradient" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.2" />
+                  <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <path 
+                d="M0,200 C100,150 200,250 300,150 C400,50 500,180 600,150 C700,120 800,160 900,140 L900,250 L0,250 Z" 
+                fill="url(#gradient)" 
+              />
+              {/* Blue Line */}
+              <path 
+                d="M0,200 C100,150 200,250 300,150 C400,50 500,180 600,150 C700,120 800,160 900,140" 
+                fill="none" 
+                stroke="#3B82F6" 
+                strokeWidth="3" 
+                strokeLinecap="round"
+              />
+            </svg>
+            <div className="absolute bottom-0 left-8 right-0 flex justify-between text-xs text-gray-400 pt-2">
+                <span>Week 1</span>
+                <span>Week 2</span>
+                <span>Week 3</span>
+                <span>Week 4</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="font-bold text-gray-800">Recent Activity</h3>
+            <button className="text-blue-600 text-sm font-medium">View All</button>
+          </div>
+          <div className="space-y-6">
+            {recentActivity.map((item, index) => (
+              <div key={index} className="flex gap-3">
+                <img src={item.avatar} alt={item.name} className="w-10 h-10 rounded-full object-cover" />
+                <div className="flex-1">
+                   <p className="text-sm text-gray-800">
+                     <span className="font-bold">{item.name}</span> {item.action}
+                   </p>
+                   <p className="text-xs text-gray-500 mt-0.5">
+                     {item.time} • <span className="text-gray-400">{item.type}</span>
+                   </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 5. Bottom Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Employees by Department (Donut Chart) */}
+        <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row items-center gap-8">
+          <div className="flex-1">
+             <h3 className="font-bold text-gray-800">Employees by Department</h3>
+             <p className="text-xs text-gray-400 mb-4">Distribution across sectors</p>
+          </div>
+          
+          {/* CSS Conic Gradient Donut */}
+          <div className="relative w-40 h-40 rounded-full" 
+               style={{ background: 'conic-gradient(#3B82F6 0% 35%, #1E40AF 35% 60%, #93C5FD 60% 75%, #E5E7EB 75% 100%)' }}>
+               <div className="absolute inset-3 bg-white rounded-full flex flex-col items-center justify-center">
+                  <span className="text-2xl font-bold text-gray-800">1,240</span>
+                  <span className="text-[10px] text-gray-400 uppercase tracking-wide">Total</span>
+               </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 text-sm">
+             <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+                <div><p className="font-bold text-gray-800">35%</p><p className="text-xs text-gray-500">Engineering</p></div>
+             </div>
+             <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-blue-900"></span>
+                <div><p className="font-bold text-gray-800">25%</p><p className="text-xs text-gray-500">Sales</p></div>
+             </div>
+             <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-blue-300"></span>
+                <div><p className="font-bold text-gray-800">15%</p><p className="text-xs text-gray-500">Marketing</p></div>
+             </div>
+             <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-gray-200"></span>
+                <div><p className="font-bold text-gray-800">25%</p><p className="text-xs text-gray-500">Other</p></div>
+             </div>
+          </div>
+        </div>
+
+        {/* Top Departments */}
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+           <h3 className="font-bold text-gray-800 mb-6">Top Departments</h3>
+           <div className="space-y-6">
+              {topDepartments.map((dept, index) => (
+                <div key={index}>
+                  <div className="flex justify-between text-sm mb-2">
+                     <span className="flex items-center gap-2 font-medium text-gray-700">
+                        <span className="material-icons-round text-blue-500 text-sm bg-blue-50 p-1 rounded">code</span>
+                        {dept.name}
+                     </span>
+                     <span className="font-bold text-blue-600">{dept.score}</span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-2">
+                     <div className="bg-blue-600 h-2 rounded-full" style={{ width: dept.width }}></div>
+                  </div>
+                </div>
+              ))}
+           </div>
+        </div>
+
+      </div>
+
+    </main>
+  );
 };
 
-export default Dashboard;
+export default DashboardOverview;

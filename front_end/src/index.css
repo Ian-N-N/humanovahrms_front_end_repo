@@ -1,17 +1,21 @@
-@import "tailwindcss";
+/* 1. These three lines load Tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
-  --color-primary: #2563EB;
-  --color-primary-light: #60A5FA;
-  --color-primary-dark: #1E40AF;
+/* 2. These imports load the fonts (Inter and Material Icons) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons+Round');
 
-  --color-secondary: #64748B;
-
-  --font-sans: Inter, system-ui, sans-serif;
+/* 3. This is the custom scrollbar style from your design */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
-
-@layer base {
-  body {
-    @apply bg-gray-50 text-gray-900;
-  }
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 20px;
 }

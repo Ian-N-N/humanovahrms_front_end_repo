@@ -1,34 +1,37 @@
+import React, { useState } from 'react';
 
-import React, { forwardRef } from 'react';
+const Input = ({ type, id, placeholder, label, ...props }) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const isPassword = type === 'password';
 
-const Input = forwardRef(({
-    label,
-    error,
-    type = 'text',
-    className = '',
-    ...props
-}, ref) => {
-    return (
-        <div className="w-full">
-            {label && (
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {label}
-                </label>
-            )}
-            <input
-                ref={ref}
-                type={type}
-                className={`w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary placeholder-gray-400 ${error ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : ''
-                    } ${className}`}
-                {...props}
-            />
-            {error && (
-                <p className="mt-1 text-sm text-red-600">{error}</p>
-            )}
-        </div>
-    );
-});
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
-Input.displayName = 'Input';
+  return (
+    <div className="relative">
+      {label && <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>}
+      <input
+        type={isPassword && !showPassword ? 'password' : 'text'}
+        id={id}
+        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-400 pr-10"
+        placeholder={placeholder}
+        {...props}
+      />
+      {isPassword && (
+        <button
+          type="button"
+          onClick={togglePasswordVisibility}
+          className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-gray-700"
+          style={{ top: label ? '24px' : '0' }}
+        >
+          <span className="material-icons-round text-lg">
+            {showPassword ? 'visibility_off' : 'visibility'}
+          </span>
+        </button>
+      )}
+    </div>
+  );
+};
 
 export default Input;
