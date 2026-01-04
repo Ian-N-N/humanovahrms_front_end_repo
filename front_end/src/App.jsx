@@ -22,6 +22,7 @@ import EmployeeDashboard from './pages/employee/Dashboard';
 import LeavePortal from './pages/employee/LeavePortal';
 import EmployeePayroll from './pages/employee/Payroll';
 import Profile from './pages/common/Profile';
+import HRDashboard from './pages/hr/Dashboard';
 
 // 4. Placeholder
 const PlaceholderPage = ({ title }) => (
@@ -57,6 +58,12 @@ const App = () => {
                     <Route path="/payroll" element={<Payroll />} />
                     <Route path="/leave" element={<LeaveManagement />} />
                     <Route path="/attendance" element={<Attendance />} />
+
+                    {/* --- HR Modules --- */}
+                    <Route path="/hr/dashboard" element={<HRDashboard />} />
+                    <Route path="/hr/leaves" element={<LeaveManagement />} />
+                    <Route path="/hr/employees" element={<Employees />} />
+                    <Route path="/hr" element={<Navigate to="/hr/dashboard" replace />} />
 
                     {/* --- Employee Modules (Restored from Dev-b) --- */}
                     <Route path="/employee/dashboard" element={<EmployeeDashboard />} />
