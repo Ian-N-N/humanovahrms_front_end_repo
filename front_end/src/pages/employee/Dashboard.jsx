@@ -112,7 +112,7 @@ const Dashboard = () => {
     ];
 
     return (
-        <main className="flex-1 bg-gray-50 h-screen overflow-y-auto p-8 font-sans custom-scrollbar">
+        <main className="flex-1 bg-gray-50 h-full overflow-y-auto p-8 font-sans custom-scrollbar">
 
             {/* 1. Header Section */}
             <Header user={user} isCheckedIn={isCheckedIn} />
