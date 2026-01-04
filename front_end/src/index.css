@@ -1,20 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons+Round');
+
 /* 1. These three lines load Tailwind */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* 2. These imports load the fonts (Inter and Material Icons) */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap');
-@import url('https://fonts.googleapis.com/icon?family=Material+Icons+Round');
 
 /* 3. This is the custom scrollbar style from your design */
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background-color: rgba(156, 163, 175, 0.5);
   border-radius: 20px;
