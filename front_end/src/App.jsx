@@ -60,7 +60,7 @@ const App = () => {
                   }
                 >
                   {/* --- Admin Modules --- */}
-                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/admin/dashboard" element={<Dashboard />} />
                   <Route path="/employees" element={<Employees />} />
                   <Route path="/departments" element={<Departments />} />
                   <Route path="/payroll" element={<Payroll />} />

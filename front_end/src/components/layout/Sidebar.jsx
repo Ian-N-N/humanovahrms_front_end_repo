@@ -41,7 +41,7 @@ const Sidebar = () => {
   // --- MENU CONFIGURATION ---
   const menus = {
     admin: [
-      { to: '/dashboard', icon: 'dashboard', label: 'Dashboard' },
+      { to: '/admin/dashboard', icon: 'dashboard', label: 'Dashboard' },
       { to: '/employees', icon: 'people', label: 'Employees' },
       { to: '/departments', icon: 'business', label: 'Departments' },
       { to: '/payroll', icon: 'payments', label: 'Payroll' },
@@ -89,7 +89,13 @@ const Sidebar = () => {
           </div>
           <div className="flex-1 min-w-0">
             <h4 className="text-sm font-bold text-gray-900 truncate">{user?.name || 'User'}</h4>
-            <p className="text-xs text-gray-500 truncate capitalize">{role.replace('_', ' ')}</p>
+            <p className="text-xs text-gray-500 truncate">{
+              {
+                admin: 'Admin',
+                hr: 'HR',
+                employee: 'Employee'
+              }[role] || role.replace('_', ' ')
+            }</p>
           </div>
         </div>
       </div>
