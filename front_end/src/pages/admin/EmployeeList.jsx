@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import EmployeeProfile from './EmployeeProfile';
-import EmployeeForm from './EmployeeCreate';
 import EmployeeEdit from './EmployeeEdit';
 
 /* --- MOCK DATA --- */
@@ -44,38 +44,38 @@ const EmployeesList = ({ data, onAddNew, onViewProfile }) => {
   // Search Logic: Filters the nested structure
   const filteredData = useMemo(() => {
     if (!searchTerm) return data;
-    
+
     const lowerTerm = searchTerm.toLowerCase();
-    
+
     return data.map(dept => {
       const filteredGroups = dept.groups.map(group => {
-        const filteredMembers = group.members.filter(member => 
-          member.name.toLowerCase().includes(lowerTerm) || 
+        const filteredMembers = group.members.filter(member =>
+          member.name.toLowerCase().includes(lowerTerm) ||
           group.role.toLowerCase().includes(lowerTerm)
         );
         return { ...group, members: filteredMembers };
-      }).filter(group => group.members.length > 0); 
+      }).filter(group => group.members.length > 0);
 
       return { ...dept, groups: filteredGroups };
-    }).filter(dept => dept.groups.length > 0); 
+    }).filter(dept => dept.groups.length > 0);
   }, [searchTerm, data]);
 
   return (
     <div className="animate-fade-in-up">
-       {/* Header & Controls */}
-       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+      {/* Header & Controls */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">All Employees</h1>
           <p className="text-sm text-gray-500 mt-1">Manage your team members and their account permissions.</p>
         </div>
-        
+
         <div className="flex items-center gap-3 w-full md:w-auto">
           {/* Search Bar */}
           <div className="relative flex-1 md:w-56">
             <span className="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
-            <input 
-              type="text" 
-              placeholder="Search employees..." 
+            <input
+              type="text"
+              placeholder="Search employees..."
               className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -84,19 +84,19 @@ const EmployeesList = ({ data, onAddNew, onViewProfile }) => {
 
           {/* View Toggle Buttons */}
           <div className="flex bg-white rounded-xl border border-gray-200 p-1 shadow-sm">
-            <button 
-                onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
-                title="Grid View"
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+              title="Grid View"
             >
-                <span className="material-icons-round text-xl block">grid_view</span>
+              <span className="material-icons-round text-xl block">grid_view</span>
             </button>
-            <button 
-                onClick={() => setViewMode('list')}
-                className={`p-1.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
-                title="List View"
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-1.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+              title="List View"
             >
-                <span className="material-icons-round text-xl block">view_list</span>
+              <span className="material-icons-round text-xl block">view_list</span>
             </button>
           </div>
 
@@ -123,46 +123,45 @@ const EmployeesList = ({ data, onAddNew, onViewProfile }) => {
                   <h3 className="text-sm font-semibold text-gray-500 mb-3 flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>{group.role}
                   </h3>
-                  
+
                   {/* --- CONDITIONAL LAYOUT: GRID OR LIST --- */}
-                  <div className={viewMode === 'grid' 
-                    ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" 
+                  <div className={viewMode === 'grid'
+                    ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"
                     : "space-y-3"
                   }>
                     {group.members.map((member) => (
-                      <div key={member.id} className={`bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all group ${
-                          viewMode === 'grid' 
+                      <div key={member.id} className={`bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all group ${viewMode === 'grid'
                           ? "p-4 flex flex-col items-center text-center" // Grid Styling
                           : "p-3 flex items-center justify-between gap-4" // List Styling
-                      }`}>
-                        
+                        }`}>
+
                         {/* Avatar & Basic Info */}
                         <div className={`flex ${viewMode === 'grid' ? 'flex-col items-center' : 'items-center gap-4 flex-1'}`}>
-                            <img 
-                                src={member.avatar} 
-                                alt={member.name} 
-                                className={`${viewMode === 'grid' ? 'w-16 h-16 mb-3' : 'w-10 h-10'} rounded-full object-cover`} 
-                            />
-                            <div className={viewMode === 'grid' ? 'text-center' : 'text-left'}>
-                                <h4 className="font-bold text-gray-900 text-sm">{member.name}</h4>
-                                <p className="text-[10px] text-gray-400">{member.email}</p>
-                            </div>
+                          <img
+                            src={member.avatar}
+                            alt={member.name}
+                            className={`${viewMode === 'grid' ? 'w-16 h-16 mb-3' : 'w-10 h-10'} rounded-full object-cover`}
+                          />
+                          <div className={viewMode === 'grid' ? 'text-center' : 'text-left'}>
+                            <h4 className="font-bold text-gray-900 text-sm">{member.name}</h4>
+                            <p className="text-[10px] text-gray-400">{member.email}</p>
+                          </div>
                         </div>
 
                         {/* Status (Visible in both, slightly different layout) */}
                         <div className={viewMode === 'grid' ? 'mt-3 mb-4' : ''}>
-                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${member.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
-                                {member.status}
-                            </span>
+                          <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${member.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                            {member.status}
+                          </span>
                         </div>
 
                         {/* Action Button */}
-                        <button 
-                            onClick={() => onViewProfile(member)} 
-                            className={viewMode === 'grid' 
-                                ? "w-full py-2 rounded-lg border border-blue-100 text-blue-600 text-xs font-semibold hover:bg-blue-50 transition-colors"
-                                : "px-4 py-2 rounded-lg border border-gray-200 text-gray-600 text-xs font-semibold hover:bg-gray-50 hover:text-blue-600 transition-colors"
-                            }
+                        <button
+                          onClick={() => onViewProfile(member)}
+                          className={viewMode === 'grid'
+                            ? "w-full py-2 rounded-lg border border-blue-100 text-blue-600 text-xs font-semibold hover:bg-blue-50 transition-colors"
+                            : "px-4 py-2 rounded-lg border border-gray-200 text-gray-600 text-xs font-semibold hover:bg-gray-50 hover:text-blue-600 transition-colors"
+                          }
                         >
                           {viewMode === 'grid' ? 'View Profile' : 'View'}
                         </button>
@@ -191,6 +190,7 @@ const EmployeesList = ({ data, onAddNew, onViewProfile }) => {
 const Employees = () => {
   const [currentView, setCurrentView] = useState('list');
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const navigate = useNavigate();
 
   // --- HANDLERS ---
   const handleViewProfile = (employee) => {
@@ -199,7 +199,7 @@ const Employees = () => {
   };
 
   const handleAddNew = () => {
-    setCurrentView('add');
+    navigate('/admin/employees/new');
   };
 
   const handleBackToList = () => {
@@ -208,51 +208,44 @@ const Employees = () => {
   };
 
   const handleEditProfile = () => {
-    setCurrentView('edit'); 
+    setCurrentView('edit');
   };
 
   const handleSaveEdit = (updatedData) => {
     // Merge new data with existing employee data
     const updatedEmployee = { ...selectedEmployee, ...updatedData };
-    setSelectedEmployee(updatedEmployee); 
+    setSelectedEmployee(updatedEmployee);
     alert('Profile Updated Successfully!');
-    setCurrentView('profile'); 
+    setCurrentView('profile');
   };
 
   const handleCancelEdit = () => {
-    setCurrentView('profile'); 
+    setCurrentView('profile');
   };
 
   return (
     <main className="flex-1 bg-gray-50 h-screen overflow-y-auto p-8 font-sans custom-scrollbar relative">
-      
+
       {/* View Switcher Logic */}
       {currentView === 'list' && (
-        <EmployeesList 
-          data={INITIAL_DATA} 
-          onAddNew={handleAddNew} 
-          onViewProfile={handleViewProfile} 
-        />
-      )}
-
-      {currentView === 'add' && (
-        <EmployeeForm 
-          onCancel={handleBackToList} 
-          onSubmit={() => { alert('Employee Added!'); handleBackToList(); }} 
+        <EmployeesList
+          data={INITIAL_DATA}
+          onAddNew={handleAddNew}
+          onViewProfile={handleViewProfile}
         />
       )}
 
       {currentView === 'profile' && (
-        <EmployeeProfile 
-          employee={selectedEmployee} 
+        <EmployeeProfile
+          employee={selectedEmployee}
           onBack={handleBackToList}
-          onEdit={handleEditProfile} 
+          onEdit={handleEditProfile}
         />
       )}
 
       {currentView === 'edit' && (
-        <EmployeeEdit 
-          employee={selectedEmployee} 
+        <EmployeeEdit
+          employee={selectedEmployee}
           onCancel={handleCancelEdit}
           onSave={handleSaveEdit}
         />

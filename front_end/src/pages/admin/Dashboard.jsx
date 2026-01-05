@@ -46,7 +46,7 @@ const StatCard = ({ label, value, badge, badgeColor, icon }) => (
 // 2. Action Buttons
 const ActionButtons = () => (
   <div className="flex flex-wrap gap-4 mb-8">
-    <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium shadow-sm transition-colors">
+    <button onClick={() => window.location.href = '/admin/employees/new'} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium shadow-sm transition-colors">
       <span className="material-icons-round text-lg">person_add</span>
       Add Employee
     </button>

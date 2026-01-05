@@ -26,7 +26,7 @@ const AuthPage = () => {
 
         // 2. Redirect based on local check or returned user role
         if (user.role === 'admin') {
-          navigate('/dashboard');
+          navigate('/admin/dashboard');
         } else if (user.role === 'hr') {
           navigate('/hr/dashboard');
         } else {

@@ -28,7 +28,7 @@ const HRDashboard = () => {
                     </div>
                     <div className="flex gap-2">
                         <Button variant="outline">Export Report</Button>
-                        <Button>+ Add Employee</Button>
+                        <Button onClick={() => window.location.href = '/admin/employees/new'}>+ Add Employee</Button>
                     </div>
                 </div>
 

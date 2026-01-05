@@ -11,6 +11,7 @@ import { AttendanceProvider } from './context/AttendanceContext';
 import Sidebar from "./components/layout/Sidebar";
 import Dashboard from "./pages/admin/Dashboard";
 import Employees from "./pages/admin/EmployeeList";
+import EmployeeCreate from "./pages/admin/EmployeeCreate";
 import Departments from "./pages/admin/DepartmentManagement";
 import AuthPage from "./pages/auth/Login";
 import Payroll from './pages/admin/PayrollManagement';
@@ -61,6 +62,7 @@ const App = () => {
                 >
                   {/* --- Admin Modules --- */}
                   <Route path="/admin/dashboard" element={<Dashboard />} />
+                  <Route path="/admin/employees/new" element={<EmployeeCreate />} />
                   <Route path="/employees" element={<Employees />} />
                   <Route path="/departments" element={<Departments />} />
                   <Route path="/payroll" element={<Payroll />} />
