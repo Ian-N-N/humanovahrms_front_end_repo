@@ -30,6 +30,14 @@ const Input = ({ type, id, placeholder, label, ...props }) => {
           </span>
         </button>
       )}
+      {type === 'date' && (
+        <div
+          className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 pointer-events-none"
+          style={{ top: label ? '24px' : '0' }}
+        >
+          <span className="material-icons-round text-lg">calendar_today</span>
+        </div>
+      )}
     </div>
   );
 };

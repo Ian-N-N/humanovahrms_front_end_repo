@@ -1,43 +1,37 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { useEmployee } from '../../context/EmployeeContext';
 import EmployeeProfile from './EmployeeProfile';
 import EmployeeEdit from './EmployeeEdit';
 
-/* --- MOCK DATA --- */
-const INITIAL_DATA = [
-  {
-    department: "Engineering",
-    groups: [
-      {
-        role: "Senior Software Engineers",
-        members: [
-          { id: 1, name: "Marcus Johnson", email: "marcus.j@ecohrms.com", phone: "+1 (555) 123-4567", status: "Active", joined: "April 15, 2023", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" },
-          { id: 2, name: "Sarah Connor", email: "sarah.c@ecohrms.com", phone: "+1 (555) 987-6543", status: "On Leave", joined: "May 10, 2022", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" }
-        ]
-      },
-      {
-        role: "QA Engineers",
-        members: [
-          { id: 3, name: "David Chen", email: "david.c@ecohrms.com", phone: "+1 (555) 555-5555", status: "Active", joined: "Jan 12, 2024", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" }
-        ]
-      }
-    ]
-  },
-  {
-    department: "Design",
-    groups: [
-      {
-        role: "Product Designers",
-        members: [
-          { id: 4, name: "Jessica Pearson", email: "jessica.p@ecohrms.com", phone: "+1 (555) 111-2222", status: "Active", joined: "Oct 04, 2023", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" },
-        ]
-      }
-    ]
-  }
-];
+// Helper to group flat employee data by department and role
+const groupEmployees = (flatList) => {
+  const depts = {};
+  flatList.forEach(emp => {
+    const deptName = emp.department || 'Unassigned';
+    const roleName = emp.role || 'General';
+
+    if (!depts[deptName]) depts[deptName] = { department: deptName, groups: {} };
+    if (!depts[deptName].groups[roleName]) depts[deptName].groups[roleName] = { role: roleName, members: [] };
+
+    depts[deptName].groups[roleName].members.push({
+      ...emp,
+      id: emp.id || Math.random(),
+      name: emp.name || 'Unknown',
+      avatar: emp.avatar || emp.image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=facearea&facepad=2&w=256&h=256&q=80',
+      joined: emp.joinDate || emp.joined || 'N/A'
+    });
+  });
+
+  return Object.values(depts).map(d => ({
+    ...d,
+    groups: Object.values(d.groups)
+  }));
+};
 
 /* --- INTERNAL COMPONENT: LIST VIEW --- */
-const EmployeesList = ({ data, onAddNew, onViewProfile }) => {
+const EmployeesList = ({ data, onAddNew, onViewProfile, onToggleStatus }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
 
@@ -131,8 +125,8 @@ const EmployeesList = ({ data, onAddNew, onViewProfile }) => {
                   }>
                     {group.members.map((member) => (
                       <div key={member.id} className={`bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all group ${viewMode === 'grid'
-                          ? "p-4 flex flex-col items-center text-center" // Grid Styling
-                          : "p-3 flex items-center justify-between gap-4" // List Styling
+                        ? "p-4 flex flex-col items-center text-center" // Grid Styling
+                        : "p-3 flex items-center justify-between gap-4" // List Styling
                         }`}>
 
                         {/* Avatar & Basic Info */}
@@ -155,16 +149,28 @@ const EmployeesList = ({ data, onAddNew, onViewProfile }) => {
                           </span>
                         </div>
 
-                        {/* Action Button */}
-                        <button
-                          onClick={() => onViewProfile(member)}
-                          className={viewMode === 'grid'
-                            ? "w-full py-2 rounded-lg border border-blue-100 text-blue-600 text-xs font-semibold hover:bg-blue-50 transition-colors"
-                            : "px-4 py-2 rounded-lg border border-gray-200 text-gray-600 text-xs font-semibold hover:bg-gray-50 hover:text-blue-600 transition-colors"
-                          }
-                        >
-                          {viewMode === 'grid' ? 'View Profile' : 'View'}
-                        </button>
+                        {/* Action Buttons */}
+                        <div className={`flex items-center gap-2 ${viewMode === 'grid' ? 'w-full' : ''}`}>
+                          <button
+                            onClick={() => onViewProfile(member)}
+                            className={viewMode === 'grid'
+                              ? "flex-1 py-2 rounded-lg border border-blue-100 text-blue-600 text-[10px] font-bold hover:bg-blue-50 transition-colors"
+                              : "px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 text-[10px] font-bold hover:bg-gray-50 hover:text-blue-600 transition-colors"
+                            }
+                          >
+                            {viewMode === 'grid' ? 'Profile' : 'View'}
+                          </button>
+
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onToggleStatus(member); }}
+                            className={viewMode === 'grid'
+                              ? `flex-1 py-2 rounded-lg border text-[10px] font-bold transition-colors ${member.status === 'Active' ? 'border-orange-100 text-orange-600 hover:bg-orange-50' : 'border-green-100 text-green-600 hover:bg-green-50'}`
+                              : `px-3 py-1.5 rounded-lg border text-[10px] font-bold transition-colors ${member.status === 'Active' ? 'border-orange-100 text-orange-600 hover:bg-orange-50' : 'border-green-100 text-green-600 hover:bg-green-50'}`
+                            }
+                          >
+                            {member.status === 'Active' ? 'Deactivate' : 'Activate'}
+                          </button>
+                        </div>
 
                       </div>
                     ))}
@@ -191,6 +197,11 @@ const Employees = () => {
   const [currentView, setCurrentView] = useState('list');
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { employees, loading, addEmployee, updateEmployee, activateEmployee, deactivateEmployee } = useEmployee();
+  const role = user?.role || 'admin';
+
+  const groupedData = useMemo(() => groupEmployees(employees), [employees]);
 
   // --- HANDLERS ---
   const handleViewProfile = (employee) => {
@@ -199,7 +210,7 @@ const Employees = () => {
   };
 
   const handleAddNew = () => {
-    navigate('/admin/employees/new');
+    navigate(`/${role}/employees/new`);
   };
 
   const handleBackToList = () => {
@@ -211,12 +222,29 @@ const Employees = () => {
     setCurrentView('edit');
   };
 
-  const handleSaveEdit = (updatedData) => {
-    // Merge new data with existing employee data
-    const updatedEmployee = { ...selectedEmployee, ...updatedData };
-    setSelectedEmployee(updatedEmployee);
-    alert('Profile Updated Successfully!');
-    setCurrentView('profile');
+  const handleToggleStatus = async (employee) => {
+    try {
+      if (employee.status === 'Active') {
+        await deactivateEmployee(employee.id);
+        alert(`${employee.name} deactivated successfully.`);
+      } else {
+        await activateEmployee(employee.id);
+        alert(`${employee.name} activated successfully.`);
+      }
+    } catch (error) {
+      alert('Failed to update employee status.');
+    }
+  };
+
+  const handleSaveEdit = async (updatedData) => {
+    try {
+      const updatedEmployee = await updateEmployee(selectedEmployee.id, updatedData);
+      setSelectedEmployee(updatedEmployee);
+      alert('Profile Updated Successfully!');
+      setCurrentView('profile');
+    } catch (error) {
+      alert('Failed to update profile.');
+    }
   };
 
   const handleCancelEdit = () => {
@@ -227,11 +255,16 @@ const Employees = () => {
     <main className="flex-1 bg-gray-50 h-screen overflow-y-auto p-8 font-sans custom-scrollbar relative">
 
       {/* View Switcher Logic */}
-      {currentView === 'list' && (
+      {loading && currentView === 'list' ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      ) : currentView === 'list' && (
         <EmployeesList
-          data={INITIAL_DATA}
+          data={groupedData}
           onAddNew={handleAddNew}
           onViewProfile={handleViewProfile}
+          onToggleStatus={handleToggleStatus}
         />
       )}
 

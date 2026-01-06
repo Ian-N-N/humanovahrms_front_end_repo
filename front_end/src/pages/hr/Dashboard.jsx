@@ -1,109 +1,124 @@
-
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
-import Table from '../../components/common/Table';
 
 const HRDashboard = () => {
+    const navigate = useNavigate();
+    const { user } = useAuth();
+    const displayName = user?.name || user?.email?.split('@')[0] || 'HR Manager';
+    const firstName = displayName.split(' ')[0];
+
     const stats = [
-        { label: 'Team Presence', value: '92%', note: 'Good', badgeColor: 'bg-green-100 text-green-800', iconBg: 'bg-green-100', iconColor: 'text-green-600' },
-        { label: 'Pending Approvals', value: '4', note: 'Action needed', badgeColor: 'bg-blue-100 text-blue-800', iconBg: 'bg-blue-100', iconColor: 'text-blue-600' },
-        { label: 'Upcoming Birthdays', value: '2', note: 'This week', badgeColor: 'bg-purple-100 text-purple-800', iconBg: 'bg-purple-100', iconColor: 'text-purple-600' },
-        { label: 'Avg Attendance', value: '95%', note: 'Last month', badgeColor: 'bg-red-100 text-red-800', iconBg: 'bg-red-100', iconColor: 'text-red-600' },
+        { label: 'Team Presence', value: '94%', note: 'Steady', badgeColor: 'bg-emerald-100 text-emerald-800', icon: 'groups', iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600' },
+        { label: 'Pending Approvals', value: '7', note: 'Priority', badgeColor: 'bg-orange-100 text-orange-800', icon: 'pending_actions', iconBg: 'bg-orange-50', iconColor: 'text-orange-600' },
+        { label: 'New Inquiries', value: '12', note: '2 today', badgeColor: 'bg-blue-100 text-blue-800', icon: 'mark_email_unread', iconBg: 'bg-blue-50', iconColor: 'text-blue-600' },
     ];
 
     const pendingLeaves = [
-        { id: 1, name: 'Mark Stevens', date: 'Oct 24 - 25', type: 'Sick Leave', avatar: 'M' },
-        { id: 2, name: 'Linda Thorne', date: 'Nov 01 - Nov 05', type: 'Vacation', avatar: 'L' },
-        { id: 3, name: 'David Chen', date: 'Oct 26', type: 'Remote Work', avatar: 'D' },
+        { id: 1, name: 'Mark Stevens', date: 'Oct 24 - 25', type: 'Sick Leave', avatar: 'MS' },
+        { id: 2, name: 'Linda Thorne', date: 'Nov 01 - Nov 05', type: 'Vacation', avatar: 'LT' },
+        { id: 3, name: 'David Chen', date: 'Oct 26', type: 'Remote Work', avatar: 'DC' },
     ];
 
     return (
-        <main className="flex-1 bg-gray-50 h-full overflow-y-auto p-8 font-sans custom-scrollbar">
-            <div className="space-y-6">
-                <div className="flex justify-between items-center">
+        <main className="flex-1 bg-[#FDFDFD] h-full overflow-y-auto p-6 lg:p-10 font-sans custom-scrollbar">
+            <div className="space-y-10">
+                <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-900">Good morning, Sarah</h2>
-                        <p className="text-gray-500">Here's what's happening in your organization today.</p>
+                        <h2 className="text-3xl font-black text-gray-900 tracking-tight">Good morning, {firstName} ☕</h2>
+                        <p className="text-gray-400 text-sm mt-1 font-medium">Manage your people and processes from one central hub.</p>
                     </div>
-                    <div className="flex gap-2">
-                        <Button variant="outline">Export Report</Button>
-                        <Button onClick={() => window.location.href = '/admin/employees/new'}>+ Add Employee</Button>
+                    <div className="flex gap-3">
+                        <button className="px-6 py-3 bg-white border border-gray-200 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:bg-gray-50 transition-all shadow-sm">
+                            Export PDF
+                        </button>
+                        <button
+                            onClick={() => navigate('/hr/employees/new')}
+                            className="px-6 py-3 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-100"
+                        >
+                            + New Employee
+                        </button>
                     </div>
-                </div>
+                </header>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {stats.map((stat, idx) => (
-                        <Card key={idx} className="flex flex-col justify-between">
-                            <div className="flex justify-between items-start">
-                                <div className={`p-3 rounded-xl ${stat.iconBg} bg-opacity-20`}>
-                                    {/* Using simple SVGs based on index/context */}
-                                    {idx === 0 && <svg className={`w-6 h-6 ${stat.iconColor}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>}
-                                    {idx === 1 && <svg className={`w-6 h-6 ${stat.iconColor}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
-                                    {idx === 2 && <svg className={`w-6 h-6 ${stat.iconColor}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z" /></svg>}
-                                    {idx === 3 && <svg className={`w-6 h-6 ${stat.iconColor}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>}
+                        <div key={idx} className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                            <div className="flex justify-between items-start mb-6">
+                                <div className={`w-14 h-14 rounded-2xl ${stat.iconBg} flex items-center justify-center`}>
+                                    <span className={`material-icons-round ${stat.iconColor} text-2xl`}>{stat.icon}</span>
                                 </div>
-                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${stat.badgeColor.replace('text-', 'bg-').split(' ')[0]} bg-opacity-30 ${stat.badgeColor.split(' ')[1]}`}>
+                                <span className={`text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-lg ${stat.badgeColor}`}>
                                     {stat.note}
                                 </span>
                             </div>
-                            <div className="mt-4">
-                                <h3 className="text-2xl font-bold text-gray-900">{stat.value}</h3>
-                                <p className="text-sm font-medium text-gray-500 mt-1">{stat.label}</p>
+                            <div>
+                                <h3 className="text-3xl font-black text-gray-900 tracking-tight">{stat.value}</h3>
+                                <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mt-1">{stat.label}</p>
                             </div>
-                        </Card>
+                        </div>
                     ))}
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <Card title="Pending Leave Requests" className="lg:col-span-2">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                    <section className="lg:col-span-2 bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                        <div className="flex justify-between items-center mb-8">
+                            <h3 className="text-lg font-black text-gray-900 tracking-tight uppercase tracking-widest">Active Requests</h3>
+                            <button className="text-blue-600 text-xs font-black uppercase tracking-widest hover:underline">View Ledger</button>
+                        </div>
                         <div className="space-y-4">
                             {pendingLeaves.map(leave => (
-                                <div key={leave.id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors border border-gray-100">
+                                <div key={leave.id} className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-3xl transition-all border border-gray-50 group">
                                     <div className="flex items-center">
-                                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                                        <div className="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 font-black text-sm group-hover:scale-110 transition-transform">
                                             {leave.avatar}
                                         </div>
-                                        <div className="ml-3">
-                                            <p className="text-sm font-medium text-gray-900">{leave.name}</p>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded">{leave.type}</span>
-                                                <span className="text-xs text-gray-500">{leave.date}</span>
+                                        <div className="ml-4">
+                                            <p className="text-sm font-black text-gray-900 tracking-tight">{leave.name}</p>
+                                            <div className="flex items-center gap-3 mt-1">
+                                                <span className="text-[10px] px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-lg font-black tracking-widest uppercase">{leave.type}</span>
+                                                <span className="text-[10px] text-gray-400 font-bold uppercase">{leave.date}</span>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="flex gap-2">
-                                        <button className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50" title="Reject">
-                                            <span className="sr-only">Reject</span>
-                                            ✕
+                                        <button className="w-10 h-10 rounded-2xl text-gray-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors" title="Reject">
+                                            <span className="material-icons-round text-lg">close</span>
                                         </button>
-                                        <button className="p-1 rounded-full text-blue-500 hover:bg-blue-50" title="Approve">
-                                            <span className="sr-only">Approve</span>
-                                            ✓
+                                        <button className="w-10 h-10 rounded-2xl text-emerald-500 bg-emerald-50 hover:bg-emerald-100 flex items-center justify-center transition-colors shadow-sm" title="Approve">
+                                            <span className="material-icons-round text-lg">check</span>
                                         </button>
                                     </div>
                                 </div>
                             ))}
                         </div>
-                        <div className="mt-4 text-center">
-                            <button className="text-sm text-primary font-medium hover:underline">View All Requests</button>
-                        </div>
-                    </Card>
+                    </section>
 
-                    <Card title="Department Headcount">
-                        <div className="h-48 flex items-center justify-center relative">
-                            {/* Mock Donut Chart */}
-                            <div className="h-32 w-32 rounded-full border-8 border-primary border-t-transparent border-r-blue-300 transform -rotate-45 relative flex items-center justify-center">
-                                <span className="text-2xl font-bold text-gray-800">124</span>
+                    <section className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden relative border-t-4 border-t-indigo-600/20">
+                        <h3 className="text-lg font-black text-gray-900 mb-8 tracking-tight uppercase tracking-widest">Global Density</h3>
+                        <div className="h-48 flex items-center justify-center relative mb-8">
+                            <div className="h-40 w-40 rounded-full border-[12px] border-blue-600 border-t-transparent border-r-indigo-200 border-b-gray-100 transform -rotate-45 relative flex flex-col items-center justify-center">
+                                <span className="text-3xl font-black text-gray-900 tracking-tighter">148</span>
+                                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest -mt-1">Total</span>
                             </div>
-                            <span className="absolute bottom-4 text-xs text-gray-500">Total Employees</span>
                         </div>
-                        <ul className="space-y-2 text-sm text-gray-600 mt-4">
-                            <li className="flex justify-between"><span>Engineering</span> <span>56%</span></li>
-                            <li className="flex justify-between"><span>Product</span> <span>25%</span></li>
-                            <li className="flex justify-between"><span>HR & Admin</span> <span>17%</span></li>
-                        </ul>
-                    </Card>
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-center bg-gray-50 p-3 rounded-2xl">
+                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Engineering</span>
+                                <span className="text-xs font-black text-gray-900">62%</span>
+                            </div>
+                            <div className="flex justify-between items-center bg-gray-50 p-3 rounded-2xl">
+                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Creative</span>
+                                <span className="text-xs font-black text-gray-900">28%</span>
+                            </div>
+                            <div className="flex justify-between items-center bg-gray-50 p-3 rounded-2xl">
+                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Executives</span>
+                                <span className="text-xs font-black text-gray-900">10%</span>
+                            </div>
+                        </div>
+                    </section>
                 </div>
             </div>
         </main>

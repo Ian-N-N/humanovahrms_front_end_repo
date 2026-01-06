@@ -42,17 +42,21 @@ const Sidebar = () => {
   const menus = {
     admin: [
       { to: '/admin/dashboard', icon: 'dashboard', label: 'Dashboard' },
+      { to: '/admin/analytics', icon: 'bar_chart', label: 'Analytics' },
       { to: '/employees', icon: 'people', label: 'Employees' },
       { to: '/departments', icon: 'business', label: 'Departments' },
       { to: '/payroll', icon: 'payments', label: 'Payroll' },
-      { to: '/leave', icon: 'event_available', label: 'Leave Management' },
+      { to: '/leave', icon: 'event_available', label: 'Leave' },
       { to: '/attendance', icon: 'schedule', label: 'Attendance' },
+      { to: '/admin/roles', icon: 'security', label: 'Roles' },
     ],
     hr: [
       { to: '/hr/dashboard', icon: 'dashboard', label: 'Dashboard' },
+      { to: '/hr/analytics', icon: 'insights', label: 'Insights' },
       { to: '/hr/employees', icon: 'people', label: 'Employees' },
-      { to: '/hr/leaves', icon: 'event_available', label: 'Leave Approvals' },
-      { to: '/candidates', icon: 'person_search', label: 'Candidates', badge: '13' },
+      { to: '/hr/departments', icon: 'business', label: 'Departments' },
+      { to: '/hr/leaves', icon: 'event_available', label: 'Leave' },
+      { to: '/hr/attendance', icon: 'schedule', label: 'Attendance' },
     ],
     employee: [
       { to: '/employee/dashboard', icon: 'dashboard', label: 'My Dashboard' },
@@ -88,11 +92,11 @@ const Sidebar = () => {
             />
           </div>
           <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-bold text-gray-900 truncate">{user?.name || 'User'}</h4>
+            <h4 className="text-sm font-bold text-gray-900 truncate">{user?.name || user?.email?.split('@')[0] || 'User'}</h4>
             <p className="text-xs text-gray-500 truncate">{
               {
-                admin: 'Admin',
-                hr: 'HR',
+                admin: 'Administrator',
+                hr: 'Human Resource Manager',
                 employee: 'Employee'
               }[role] || role.replace('_', ' ')
             }</p>
@@ -117,14 +121,6 @@ const Sidebar = () => {
           ))}
         </div>
 
-        {/* Recuitment Section only for Admin/HR */}
-        {(role === 'admin' || role === 'hr') && (
-          <div className="mb-6">
-            <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Recruitment</p>
-            <NavLink to="/jobs" icon="work" label="Jobs" active={isActive('/jobs')} />
-            {(role === 'admin') && <NavLink to="/candidates" icon="person_search" label="Candidates" badge="13" active={isActive('/candidates')} />}
-          </div>
-        )}
       </div>
 
       {/* Footer */}

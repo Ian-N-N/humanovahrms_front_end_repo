@@ -9,22 +9,18 @@ const BACKGROUND_IMAGE_URL = "https://images.unsplash.com/photo-1497366811353-68
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, register } = useAuth();
 
   const toggleView = () => setIsLogin(!isLogin);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value.toLowerCase();
-    // const password = document.getElementById('password').value; 
+    const password = document.getElementById('password').value;
 
     if (isLogin) {
-      // --- LOGIN LOGIC ---
       try {
-        // 1. Call Context Login (Simulation)
-        const user = await login(email);
-
-        // 2. Redirect based on local check or returned user role
+        const user = await login({ email, password });
         if (user.role === 'admin') {
           navigate('/admin/dashboard');
         } else if (user.role === 'hr') {
@@ -34,12 +30,40 @@ const AuthPage = () => {
         }
       } catch (error) {
         console.error("Login failed", error);
-        alert("Login simulation failed. Try admin@company.com");
+        alert(error.response?.data?.error || "Login failed. Please check your credentials.");
       }
     } else {
-      // --- REGISTER LOGIC ---
-      alert("Registration successful! Please sign in.");
-      setIsLogin(true);
+      const name = document.getElementById('name').value;
+      const role = document.getElementById('role').value;
+      const confirmPassword = document.getElementById('confirm_password').value;
+
+      if (password !== confirmPassword) {
+        alert("Passwords do not match!");
+        return;
+      }
+
+      try {
+        console.log("Attempting registration with:", { name, email, role });
+        const user = await register({ name, email, role, password });
+        alert("Registration successful! You are now logged in.");
+        if (user.role === 'admin') {
+          navigate('/admin/dashboard');
+        } else if (user.role === 'hr') {
+          navigate('/hr/dashboard');
+        } else {
+          navigate('/employee/dashboard');
+        }
+      } catch (error) {
+        console.error("Registration failed detail:", error);
+
+        // Check if it's a connection error (backend not running)
+        if (!error.response) {
+          alert("Could not connect to the backend server. Please ensure your Flask app is running at http://127.0.0.1:5000");
+        } else {
+          const serverError = error.response?.data?.error || error.response?.data?.message || "Registration failed.";
+          alert(`Server Error: ${serverError}`);
+        }
+      }
     }
   };
 
@@ -116,9 +140,9 @@ const AuthPage = () => {
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-700 focus:ring-2 focus:ring-primary focus:border-primary appearance-none transition-colors"
                   >
                     <option value="" disabled selected>Select your role</option>
-                    <option value="hr">HR Manager</option>
+                    <option value="admin">Admin</option>
+                    <option value="hr">HR</option>
                     <option value="employee">Employee</option>
-                    <option value="candidate">Candidate</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                     <span className="material-icons-round text-gray-500">expand_more</span>

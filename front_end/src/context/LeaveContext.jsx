@@ -1,35 +1,78 @@
-
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import leaveService from '../api/leaveService';
+import { useAuth } from './AuthContext';
 
 const LeaveContext = createContext();
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useLeave = () => useContext(LeaveContext);
 
 export const LeaveProvider = ({ children }) => {
-    const [leaves, setLeaves] = useState([
-        { id: 1, employeeId: 'EMP-001', employeeName: 'Sarah Jenkins', type: 'Sick', startDate: '2025-10-24', endDate: '2025-10-25', status: 'Pending', reason: 'Flu' },
-        { id: 2, employeeId: 'EMP-002', employeeName: 'Michael Foster', type: 'Vacation', startDate: '2025-11-01', endDate: '2025-11-05', status: 'Approved', reason: 'Family trip' },
-        { id: 3, employeeId: 'EMP-003', employeeName: 'Dries Vincent', type: 'Remote', startDate: '2025-10-26', endDate: '2025-10-26', status: 'Rejected', reason: 'Team onsite day' },
-    ]);
+    const { user } = useAuth();
+    const [leaves, setLeaves] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const applyLeave = (data) => {
-        const newLeave = {
-            id: Date.now(),
-            status: 'Pending',
-            ...data
-        };
-        setLeaves((prev) => [newLeave, ...prev]);
+    const fetchLeaves = useCallback(async () => {
+        // Guard: Only Admin and HR can fetch the full list
+        const role = user?.role;
+        if (role !== 'admin' && role !== 'hr') {
+            console.log("Skipping full leave fetch for non-admin/hr user.");
+            setLoading(false);
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const data = await leaveService.getAll();
+            setLeaves(data || []);
+        } catch (error) {
+            console.error("Failed to fetch leaves:", error);
+        } finally {
+            setLoading(false);
+        }
+    }, [user?.role]);
+
+    useEffect(() => {
+        fetchLeaves();
+    }, [fetchLeaves]);
+
+    const applyLeave = async (data) => {
+        try {
+            const newLeave = await leaveService.request(data);
+            setLeaves((prev) => [newLeave, ...prev]);
+            return newLeave;
+        } catch (error) {
+            console.error("Failed to apply for leave:", error);
+            throw error;
+        }
     };
 
-    const updateStatus = (id, status) => {
-        setLeaves((prev) => prev.map(leave => leave.id === id ? { ...leave, status } : leave));
+    const updateStatus = async (id, status) => {
+        try {
+            if (status === 'Approved') {
+                await leaveService.approve(id);
+            } else if (status === 'Rejected') {
+                await leaveService.reject(id);
+            }
+            setLeaves((prev) => prev.map(leave => leave.id === id ? { ...leave, status } : leave));
+        } catch (error) {
+            console.error(`Failed to ${status} leave:`, error);
+            throw error;
+        }
     };
 
     const getPendingCount = () => leaves.filter(l => l.status === 'Pending').length;
 
+    const value = {
+        leaves,
+        loading,
+        applyLeave,
+        updateStatus,
+        getPendingCount,
+        refetch: fetchLeaves
+    };
+
     return (
-        <LeaveContext.Provider value={{ leaves, applyLeave, updateStatus, getPendingCount }}>
+        <LeaveContext.Provider value={value}>
             {children}
         </LeaveContext.Provider>
     );
