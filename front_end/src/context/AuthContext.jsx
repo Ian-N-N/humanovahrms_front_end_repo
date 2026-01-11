@@ -102,28 +102,9 @@ export const AuthProvider = ({ children }) => {
             const response = await authService.register(userData);
             console.log("DEBUG: Full Register Response:", response);
 
-            const rawUser = response.user || response;
-            const finalToken = response.token || response.access_token || (response.user && (response.user.token || response.user.access_token));
-
-            console.log("DEBUG: Extracted Registered User:", rawUser);
-            console.log("DEBUG: Extracted Register Token:", finalToken ? "PRESENT (masked)" : "MISSING");
-
-            const normalizedUser = normalizeUser(rawUser) || { role: 'employee' };
-
-            // PERSIST REGISTRATION ROLE: If the user explicitly chose a role during sign-up,
-            // we use that for the initial session, as the backend might still be syncing.
-            if (userData.role && (normalizedUser.role === 'employee' || !normalizedUser.role)) {
-                normalizedUser.role = userData.role;
-                console.log("DEBUG: Using registration role for initial session:", normalizedUser.role);
-            }
-
-            setUser(normalizedUser);
-            localStorage.setItem('user', JSON.stringify(normalizedUser));
-
-            if (finalToken) {
-                localStorage.setItem('token', finalToken);
-            }
-            return normalizedUser;
+            // Just return the response without auto-login
+            // User will need to login manually with email + password
+            return response;
         } catch (error) {
             console.error("Registration failed:", error);
             throw error;

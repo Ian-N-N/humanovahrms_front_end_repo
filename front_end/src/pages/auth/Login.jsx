@@ -34,6 +34,7 @@ const AuthPage = () => {
       }
     } else {
       const name = document.getElementById('name').value;
+      const username = document.getElementById('username').value;
       const role = document.getElementById('role').value;
       const confirmPassword = document.getElementById('confirm_password').value;
 
@@ -43,16 +44,11 @@ const AuthPage = () => {
       }
 
       try {
-        console.log("Attempting registration with:", { name, email, role });
-        const user = await register({ name, email, role, password });
-        alert("Registration successful! You are now logged in.");
-        if (user.role === 'admin') {
-          navigate('/admin/dashboard');
-        } else if (user.role === 'hr') {
-          navigate('/hr/dashboard');
-        } else {
-          navigate('/employee/dashboard');
-        }
+        console.log("Attempting registration with:", { name, username, email, role });
+        await register({ name, username, email, role, password });
+        alert("Registration successful! Please login with your email and password.");
+        // Redirect to login page
+        setIsLogin(true);
       } catch (error) {
         console.error("Registration failed detail:", error);
 
@@ -120,6 +116,13 @@ const AuthPage = () => {
                   id="name"
                   label="Full Name"
                   placeholder="e.g. Jane Doe"
+                />
+
+                <Input
+                  type="text"
+                  id="username"
+                  label="Username"
+                  placeholder="e.g. janedoe"
                 />
               </>
             )}
