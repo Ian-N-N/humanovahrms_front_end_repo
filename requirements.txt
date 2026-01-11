@@ -12,43 +12,32 @@
 
 # INSTALLATION COMMANDS
 # ---------------------
-# To install all dependencies at once, run:
+# To install all dependencies at once (recommended), run:
 # cd front_end
 # npm install
 
 
-# DEPENDENCIES LIST
-# -----------------
+# DEPENDENCIES LIST (Reflecting package.json)
+# -------------------------------------------
 
 # Core React Framework
 react@^19.2.0
 react-dom@^19.2.0
 
 # Routing
-react-router-dom@^7.11.0  # Handles navigation (Login, Admin, Employee pages)
+react-router-dom@^7.11.0  # Handles navigation
 
-# UI & Styling
-tailwindcss@^4.1.18      # Utility-first CSS framework
-@tailwindcss/postcss@^4.1.18 # PostCSS plugin for Tailwind v4
-lucide-react@^0.562.0    # Icon library
+# UI Components & Icons
+lucide-react@^0.562.0     # Icons (Added missing dependency)
 
-# Build Tools & Configuration (Dev Dependencies)
-vite@^7.2.4              # Fast frontend build tool
-postcss@^8.5.6           # CSS Tooling
-autoprefixer@^10.4.23    # CSS vendor prefixing
+# DEV DEPENDENCIES (Build Tools & Styling)
+# ----------------------------------------
+vite@^7.2.4               # Build tool
+tailwindcss@^3.4.19       # Styling framework
+postcss@^8.5.6
+autoprefixer@^10.4.23
+eslint@^9.39.1            # Linting
+globals@^16.5.0
 
-# Linting (Dev Dependencies)
-eslint@^9.39.1
-@vitejs/plugin-react@^5.1.1
-
-
-# NEXT STEPS
-# ----------
-# 1. Navigate to the frontend folder:
-#    cd front_end
-#
-# 2. Install dependencies:
-#    npm install
-#
-# 3. Start the development server:
-#    npm run dev
+# Note: The authoritative source for dependencies is 'front_end/package.json'.
+# Running 'npm install' in the 'front_end' directory will install everything needed.

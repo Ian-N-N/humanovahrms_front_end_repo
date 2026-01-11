@@ -43,11 +43,10 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const register = async (name, email, password) => {
+    const register = async (name, username, email, password, role) => {
         try {
-            // Register endpoint returns { message: "User created..." }
-            // Usually doesn't auto-login, so we just return response
-            return await api.post('/auth/register', { name, email, password });
+            // Register endpoint now accepts username
+            return await api.post('/auth/register', { name, username, email, password, role });
         } catch (error) {
             console.error("Registration failed:", error);
             throw error;
@@ -55,7 +54,6 @@ export const AuthProvider = ({ children }) => {
     }
 
     const logout = () => {
-        authService.logout();
         setUser(null);
         localStorage.removeItem('hrms_user');
         localStorage.removeItem('hrms_token');

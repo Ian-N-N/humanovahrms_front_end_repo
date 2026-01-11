@@ -14,8 +14,9 @@ const AuthPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [name, setName] = useState(''); // Kept for future use if backend supports name on register
-  const [role, setRole] = useState('employee'); // Kept for UI, but backend currently defaults/ignores this
+  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
+  const [role, setRole] = useState('employee');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -51,7 +52,7 @@ const AuthPage = () => {
         if (password !== confirmPassword) {
           throw new Error("Passwords do not match");
         }
-        await register(name, email, password);
+        await register(name, username, email, password, role);
         alert("Registration successful! Please sign in.");
         setIsLogin(true);
         setPassword('');
@@ -120,6 +121,8 @@ const AuthPage = () => {
                   id="username"
                   label="Username"
                   placeholder="e.g. janedoe"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                 />
               </>
             )}
