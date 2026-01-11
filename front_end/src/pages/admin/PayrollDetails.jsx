@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatKSh } from '../../utils/formatters';
 
 const PayrollDetails = ({ employee, onBack }) => {
   if (!employee) return null;
@@ -57,16 +58,13 @@ const PayrollDetails = ({ employee, onBack }) => {
 
   const handleSave = () => {
     setIsEditing(false);
-    alert(`Payroll Updated! New Net Pay: ${formatKES(netPay)}`);
+    alert(`Payroll Updated! New Net Pay: ${formatKSh(netPay)}`);
   };
 
-  const formatKES = (amount) => {
-    return new Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES', minimumFractionDigits: 0 }).format(amount);
-  };
 
   return (
     <div className="w-full animate-fade-in-up pb-8">
-      
+
       {/* Header & Nav (Same as before) */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -94,7 +92,7 @@ const PayrollDetails = ({ employee, onBack }) => {
         </div>
         <div>
           {!isEditing ? (
-            <button 
+            <button
               onClick={() => setIsEditing(true)}
               className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-sm"
             >
@@ -110,18 +108,18 @@ const PayrollDetails = ({ employee, onBack }) => {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        
+
         {/* --- LEFT COLUMN: FINANCIALS --- */}
         <div className="xl:col-span-2 space-y-6">
           <div className={`bg-white rounded-2xl border shadow-sm p-6 md:p-8 transition-all ${isEditing ? 'border-blue-300 ring-4 ring-blue-50' : 'border-gray-100'}`}>
-            
+
             <div className="flex justify-between items-center mb-8 border-b border-gray-50 pb-4">
               <h2 className="text-lg font-bold text-gray-900">Salary Breakdown</h2>
               {isEditing && <span className="text-xs font-bold text-blue-600 animate-pulse bg-blue-50 px-2 py-1 rounded">Editing Mode</span>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-              
+
               {/* 1. EARNINGS SECTION (Static Keys) */}
               <div>
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-4">Earnings</h3>
@@ -132,7 +130,7 @@ const PayrollDetails = ({ employee, onBack }) => {
                     {isEditing ? (
                       <input type="number" name="basic" value={earnings.basic} onChange={handleEarningChange} className="w-28 px-2 py-1 text-right border border-blue-300 rounded bg-blue-50 font-bold" />
                     ) : (
-                      <span className="font-bold text-gray-900">{formatKES(earnings.basic)}</span>
+                      <span className="font-bold text-gray-900">{formatKSh(earnings.basic)}</span>
                     )}
                   </div>
                   {/* Allowances */}
@@ -141,7 +139,7 @@ const PayrollDetails = ({ employee, onBack }) => {
                     {isEditing ? (
                       <input type="number" name="houseAllowance" value={earnings.houseAllowance} onChange={handleEarningChange} className="w-28 px-2 py-1 text-right border border-blue-300 rounded bg-blue-50 font-bold" />
                     ) : (
-                      <span className="font-bold text-gray-900">{formatKES(earnings.houseAllowance)}</span>
+                      <span className="font-bold text-gray-900">{formatKSh(earnings.houseAllowance)}</span>
                     )}
                   </div>
                   <div className="flex justify-between items-center text-sm">
@@ -149,14 +147,14 @@ const PayrollDetails = ({ employee, onBack }) => {
                     {isEditing ? (
                       <input type="number" name="transportAllowance" value={earnings.transportAllowance} onChange={handleEarningChange} className="w-28 px-2 py-1 text-right border border-blue-300 rounded bg-blue-50 font-bold" />
                     ) : (
-                      <span className="font-bold text-gray-900">{formatKES(earnings.transportAllowance)}</span>
+                      <span className="font-bold text-gray-900">{formatKSh(earnings.transportAllowance)}</span>
                     )}
                   </div>
-                  
+
                   {/* Earnings Total */}
                   <div className="pt-4 border-t border-gray-100 flex justify-between items-center">
                     <span className="text-sm font-bold text-gray-800">Gross Earnings</span>
-                    <span className="text-sm font-bold text-green-600">{formatKES(totalEarnings)}</span>
+                    <span className="text-sm font-bold text-green-600">{formatKSh(totalEarnings)}</span>
                   </div>
                 </div>
               </div>
@@ -164,23 +162,23 @@ const PayrollDetails = ({ employee, onBack }) => {
               {/* 2. DEDUCTIONS SECTION (Dynamic Array) */}
               <div>
                 <div className="flex justify-between items-center mb-4">
-                   <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wide">Deductions</h3>
-                   {isEditing && (
-                     <button onClick={addDeduction} className="text-[10px] bg-blue-100 text-blue-700 px-2 py-1 rounded font-bold hover:bg-blue-200 transition-colors">
-                       + Add New
-                     </button>
-                   )}
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wide">Deductions</h3>
+                  {isEditing && (
+                    <button onClick={addDeduction} className="text-[10px] bg-blue-100 text-blue-700 px-2 py-1 rounded font-bold hover:bg-blue-200 transition-colors">
+                      + Add New
+                    </button>
+                  )}
                 </div>
 
                 <div className="space-y-3">
                   {deductions.map((deduction) => (
                     <div key={deduction.id} className="flex justify-between items-center text-sm group">
-                      
+
                       {/* Name Field */}
                       {isEditing ? (
-                        <input 
-                          type="text" 
-                          value={deduction.name} 
+                        <input
+                          type="text"
+                          value={deduction.name}
                           onChange={(e) => handleDeductionChange(deduction.id, 'name', e.target.value)}
                           className="w-32 px-2 py-1 border border-gray-300 rounded text-xs focus:border-blue-500 outline-none"
                         />
@@ -192,13 +190,13 @@ const PayrollDetails = ({ employee, onBack }) => {
                       <div className="flex items-center gap-2">
                         {isEditing ? (
                           <>
-                            <input 
-                              type="number" 
-                              value={deduction.amount} 
+                            <input
+                              type="number"
+                              value={deduction.amount}
                               onChange={(e) => handleDeductionChange(deduction.id, 'amount', e.target.value)}
                               className="w-24 px-2 py-1 text-right border border-blue-300 rounded bg-blue-50 font-bold text-xs"
                             />
-                            <button 
+                            <button
                               onClick={() => removeDeduction(deduction.id)}
                               className="text-red-400 hover:text-red-600 p-1 bg-red-50 rounded-md"
                             >
@@ -206,7 +204,7 @@ const PayrollDetails = ({ employee, onBack }) => {
                             </button>
                           </>
                         ) : (
-                          <span className="font-bold text-gray-900">{formatKES(deduction.amount)}</span>
+                          <span className="font-bold text-gray-900">{formatKSh(deduction.amount)}</span>
                         )}
                       </div>
                     </div>
@@ -215,7 +213,7 @@ const PayrollDetails = ({ employee, onBack }) => {
                   {/* Deductions Total */}
                   <div className="pt-4 border-t border-gray-100 flex justify-between items-center mt-4">
                     <span className="text-sm font-bold text-gray-800">Total Deductions</span>
-                    <span className="text-sm font-bold text-red-500">-{formatKES(totalDeductions)}</span>
+                    <span className="text-sm font-bold text-red-500">-{formatKSh(totalDeductions)}</span>
                   </div>
                 </div>
               </div>
@@ -228,7 +226,7 @@ const PayrollDetails = ({ employee, onBack }) => {
                 <p className="text-xs font-bold uppercase tracking-wide opacity-80">Net Salary Pay</p>
                 <p className="text-[10px] mt-1 opacity-70">{isEditing ? 'Calculating Live...' : 'Disbursed on Oct 28, 2023'}</p>
               </div>
-              <p className="text-3xl font-bold">{formatKES(netPay)}</p>
+              <p className="text-3xl font-bold">{formatKSh(netPay)}</p>
             </div>
           </div>
         </div>
@@ -237,17 +235,17 @@ const PayrollDetails = ({ employee, onBack }) => {
         <div className="space-y-6">
           {/* Payment Method Card */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-              <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-4">Payment Method</h2>
-              <div className="flex items-start gap-4">
-                 <div className="w-12 h-12 rounded-xl bg-gray-50 text-gray-600 flex items-center justify-center border border-gray-200">
-                    <span className="material-icons-round text-2xl">account_balance</span>
-                 </div>
-                 <div>
-                    <h3 className="font-bold text-gray-900">Equity Bank Kenya</h3>
-                    <p className="text-sm text-gray-500 font-mono mt-0.5">**** **** **** 4582</p>
-                    <p className="text-xs text-gray-400 mt-1">Branch: Westlands</p>
-                 </div>
+            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-4">Payment Method</h2>
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-gray-50 text-gray-600 flex items-center justify-center border border-gray-200">
+                <span className="material-icons-round text-2xl">account_balance</span>
               </div>
+              <div>
+                <h3 className="font-bold text-gray-900">Equity Bank Kenya</h3>
+                <p className="text-sm text-gray-500 font-mono mt-0.5">**** **** **** 4582</p>
+                <p className="text-xs text-gray-400 mt-1">Branch: Westlands</p>
+              </div>
+            </div>
           </div>
         </div>
 

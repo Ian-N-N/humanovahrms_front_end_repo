@@ -1,72 +1,146 @@
+import React, { useState } from 'react';
+import { usePayroll } from '../../context/PayrollContext';
 
-import React from 'react';
-import Card from '../../components/common/Card';
-import Table from '../../components/common/Table';
-import Button from '../../components/common/Button';
+const PayrollAdmin = () => {
+    const { payrolls, cycles, loading, createCycle, runPayroll, refetch } = usePayroll();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [newCycle, setNewCycle] = useState({ name: '', startDate: '', endDate: '' });
 
-const Payroll = () => {
-    // Mock Data
-    const payrollData = [
-        { id: 1, employee: 'Sarah Jenkins', role: 'Senior Dev', salary: '$5,000', bonus: '$500', total: '$5,500', status: 'Paid', date: 'Oct 30, 2025' },
-        { id: 2, employee: 'Michael Foster', role: 'Product Manager', salary: '$5,200', bonus: '$0', total: '$5,200', status: 'Processing', date: 'Oct 30, 2025' },
-        { id: 3, employee: 'Dries Vincent', role: 'SEO Specialist', salary: '$4,000', bonus: '$200', total: '$4,200', status: 'Paid', date: 'Oct 30, 2025' },
-    ];
+    const handleCreateCycle = async (e) => {
+        e.preventDefault();
+        try {
+            await createCycle(newCycle);
+            alert("Payroll cycle created!");
+            setIsModalOpen(false);
+            setNewCycle({ name: '', startDate: '', endDate: '' });
+        } catch (err) {
+            alert("Failed to create cycle.");
+        }
+    };
 
-    const columns = [
-        { header: 'Employee', accessor: 'employee' },
-        { header: 'Role', accessor: 'role' },
-        { header: 'Basic Salary', accessor: 'salary' },
-        { header: 'Bonus', accessor: 'bonus' },
-        { header: 'Total Payout', accessor: 'total' },
-        {
-            header: 'Status',
-            accessor: 'status',
-            render: (row) => (
-                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${row.status === 'Paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                    {row.status}
-                </span>
-            )
-        },
-        { header: 'Pay Date', accessor: 'date' },
-    ];
+    const handleRunPayroll = async (cycleId) => {
+        try {
+            if (!window.confirm("Confirm running payroll for this cycle?")) return;
+            await runPayroll({ cycle_id: cycleId });
+            alert("Payroll processed successfully!");
+        } catch (err) {
+            alert("Failed to process payroll.");
+        }
+    };
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-900">Payroll Management</h2>
-                <div className="flex gap-2">
-                    <Button variant="outline">Download Report</Button>
-                    <Button>Run Payroll (Oct)</Button>
+        <main className="flex-1 bg-gray-50 h-full overflow-y-auto p-4 lg:p-8 font-sans custom-scrollbar">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <div>
+                    <nav className="text-sm text-gray-500 mb-1">
+                        <span>Dashboard</span> / <span className="text-gray-900 font-medium">Payroll Management</span>
+                    </nav>
+                    <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Payroll Cycles</h1>
+                    <p className="text-gray-500 mt-1 text-sm">Manage payment cycles and employee compensation.</p>
                 </div>
+
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
+                >
+                    <span className="material-icons-round text-lg">add</span>
+                    New Cycle
+                </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card>
-                    <p className="text-sm text-gray-500">Total Payroll Cost</p>
-                    <h3 className="text-2xl font-bold text-gray-900">$14,900</h3>
-                </Card>
-                <Card>
-                    <p className="text-sm text-gray-500">Pending Payments</p>
-                    <h3 className="text-2xl font-bold text-yellow-600">1</h3>
-                </Card>
-                <Card>
-                    <p className="text-sm text-gray-500">Next Pay Date</p>
-                    <h3 className="text-2xl font-bold text-blue-600">Nov 30, 2025</h3>
-                </Card>
+            <div className="grid grid-cols-1 gap-6">
+                {cycles.length === 0 ? (
+                    <div className="bg-white rounded-2xl p-20 text-center border-2 border-dashed border-gray-100 italic text-gray-400">
+                        No payroll cycles defined yet. Create one to get started.
+                    </div>
+                ) : (
+                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                        <table className="w-full text-left">
+                            <thead>
+                                <tr className="bg-gray-50/50 border-b border-gray-100">
+                                    <th className="py-4 px-6 text-xs font-bold text-gray-400 uppercase">Cycle Name</th>
+                                    <th className="py-4 px-6 text-xs font-bold text-gray-400 uppercase">Period</th>
+                                    <th className="py-4 px-6 text-xs font-bold text-gray-400 uppercase">Status</th>
+                                    <th className="py-4 px-6 text-xs font-bold text-gray-400 uppercase text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                                {cycles.map((c) => (
+                                    <tr key={c.id}>
+                                        <td className="py-4 px-6 font-bold text-gray-900">{c.name}</td>
+                                        <td className="py-4 px-6 text-sm text-gray-600">{c.startDate} to {c.endDate}</td>
+                                        <td className="py-4 px-6">
+                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${c.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                                                {c.status || 'Active'}
+                                            </span>
+                                        </td>
+                                        <td className="py-4 px-6 text-right">
+                                            <button
+                                                onClick={() => handleRunPayroll(c.id)}
+                                                disabled={c.status === 'Completed'}
+                                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${c.status === 'Completed' ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}
+                                            >
+                                                {c.status === 'Completed' ? 'Processed' : 'Run Payroll'}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
 
-            <Card title="Salary History">
-                <Table
-                    columns={columns}
-                    data={payrollData}
-                    actions={(row) => (
-                        <button className="text-primary hover:text-blue-900 text-sm font-medium">Edit</button>
-                    )}
-                />
-            </Card>
-        </div>
+            {/* Modal Placeholder */}
+            {isModalOpen && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-scale-in">
+                        <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+                            <h3 className="text-lg font-bold text-gray-900">Create New Cycle</h3>
+                            <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                                <span className="material-icons-round">close</span>
+                            </button>
+                        </div>
+                        <form onSubmit={handleCreateCycle} className="p-6 space-y-4">
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-gray-400 uppercase">Cycle Name</label>
+                                <input
+                                    type="text" required
+                                    value={newCycle.name}
+                                    onChange={e => setNewCycle(p => ({ ...p, name: e.target.value }))}
+                                    className="w-full px-4 py-2 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g. January 2024"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-gray-400 uppercase">Start Date</label>
+                                    <input
+                                        type="date" required
+                                        value={newCycle.startDate}
+                                        onChange={e => setNewCycle(p => ({ ...p, startDate: e.target.value }))}
+                                        className="w-full px-4 py-2 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-gray-400 uppercase">End Date</label>
+                                    <input
+                                        type="date" required
+                                        value={newCycle.endDate}
+                                        onChange={e => setNewCycle(p => ({ ...p, endDate: e.target.value }))}
+                                        className="w-full px-4 py-2 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                            </div>
+                            <button type="submit" className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 mt-4">
+                                Create Cycle
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+        </main>
     );
 };
 
-export default Payroll;
+export default PayrollAdmin;

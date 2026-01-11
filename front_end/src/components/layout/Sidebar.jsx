@@ -48,18 +48,22 @@ const Sidebar = () => {
   // --- MENU CONFIGURATION ---
   const menus = {
     admin: [
-      { to: '/dashboard', icon: 'dashboard', label: 'Dashboard' },
+      { to: '/admin/dashboard', icon: 'dashboard', label: 'Dashboard' },
+      { to: '/admin/analytics', icon: 'bar_chart', label: 'Analytics' },
       { to: '/employees', icon: 'people', label: 'Employees' },
       { to: '/departments', icon: 'business', label: 'Departments' },
       { to: '/payroll', icon: 'payments', label: 'Payroll' },
-      { to: '/leave', icon: 'event_available', label: 'Leave Management' },
+      { to: '/leave', icon: 'event_available', label: 'Leave' },
       { to: '/attendance', icon: 'schedule', label: 'Attendance' },
+      { to: '/admin/roles', icon: 'security', label: 'Roles' },
     ],
     hr: [
       { to: '/hr/dashboard', icon: 'dashboard', label: 'Dashboard' },
+      { to: '/hr/analytics', icon: 'insights', label: 'Insights' },
       { to: '/hr/employees', icon: 'people', label: 'Employees' },
-      { to: '/hr/leaves', icon: 'event_available', label: 'Leave Approvals' },
-      { to: '/candidates', icon: 'person_search', label: 'Candidates', badge: '13' },
+      { to: '/hr/departments', icon: 'business', label: 'Departments' },
+      { to: '/hr/leaves', icon: 'event_available', label: 'Leave' },
+      { to: '/hr/attendance', icon: 'schedule', label: 'Attendance' },
     ],
     employee: [
       { to: '/employee/dashboard', icon: 'dashboard', label: 'My Dashboard' },
@@ -96,7 +100,9 @@ const Sidebar = () => {
           </div>
           <div className="flex-1 min-w-0">
             <h4 className="text-sm font-bold text-gray-900 truncate">{user?.name || user?.email || 'User'}</h4>
-            <p className="text-xs text-gray-500 truncate capitalize">{roleDisplay}</p>
+            <p className="text-xs text-gray-500 truncate capitalize">
+              {typeof user?.role === 'object' ? user.role.name || 'Employee' : user?.role || 'Employee'}
+            </p>
           </div>
         </div>
       </div>
