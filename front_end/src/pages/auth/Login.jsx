@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Input from '../../components/common/Input';
 
-// Using the Unsplash image BUT WILL HAVE TO DOWNLOAD IT LATER FOR SECURITY REASONS
 const BACKGROUND_IMAGE_URL = "https://images.unsplash.com/photo-1497366811353-6870744d04b2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80";
 
 const AuthPage = () => {
@@ -11,55 +10,58 @@ const AuthPage = () => {
   const navigate = useNavigate();
   const { login, register } = useAuth();
 
-  const toggleView = () => setIsLogin(!isLogin);
+  // State for form fields
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName] = useState(''); // Kept for future use if backend supports name on register
+  const [role, setRole] = useState('employee'); // Kept for UI, but backend currently defaults/ignores this
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const toggleView = () => {
+    setIsLogin(!isLogin);
+    setError('');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const email = document.getElementById('email').value.toLowerCase();
-    const password = document.getElementById('password').value;
+    setError('');
+    setLoading(true);
 
-    if (isLogin) {
-      try {
-        const user = await login({ email, password });
-        if (user.role === 'admin') {
-          navigate('/admin/dashboard');
-        } else if (user.role === 'hr') {
+    try {
+      if (isLogin) {
+        // --- LOGIN LOGIC ---
+        const user = await login(email, password);
+
+        // Check role.name (backend returns object) or fallback
+        const roleName = user.role?.name ? user.role.name.toLowerCase() : (user.role || 'employee');
+
+        if (roleName === 'admin') {
+          navigate('/dashboard');
+        } else if (roleName === 'hr manager' || roleName === 'hr') {
           navigate('/hr/dashboard');
         } else {
           navigate('/employee/dashboard');
         }
-      } catch (error) {
-        console.error("Login failed", error);
-        alert(error.response?.data?.error || "Login failed. Please check your credentials.");
-      }
-    } else {
-      const name = document.getElementById('name').value;
-      const username = document.getElementById('username').value;
-      const role = document.getElementById('role').value;
-      const confirmPassword = document.getElementById('confirm_password').value;
 
-      if (password !== confirmPassword) {
-        alert("Passwords do not match!");
-        return;
-      }
-
-      try {
-        console.log("Attempting registration with:", { name, username, email, role });
-        await register({ name, username, email, role, password });
-        alert("Registration successful! Please login with your email and password.");
-        // Redirect to login page
-        setIsLogin(true);
-      } catch (error) {
-        console.error("Registration failed detail:", error);
-
-        // Check if it's a connection error (backend not running)
-        if (!error.response) {
-          alert("Could not connect to the backend server. Please ensure your Flask app is running at http://127.0.0.1:5000");
-        } else {
-          const serverError = error.response?.data?.error || error.response?.data?.message || "Registration failed.";
-          alert(`Server Error: ${serverError}`);
+      } else {
+        // --- REGISTER LOGIC ---
+        if (password !== confirmPassword) {
+          throw new Error("Passwords do not match");
         }
+        await register(name, email, password);
+        alert("Registration successful! Please sign in.");
+        setIsLogin(true);
+        setPassword('');
+        setConfirmPassword('');
       }
+    } catch (err) {
+      console.error("Auth failed", err);
+      setError(err.message || "Authentication failed. Please check your credentials.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -96,26 +98,21 @@ const AuthPage = () => {
 
           <form className="space-y-5" onSubmit={handleSubmit}>
 
+            {error && (
+              <div className="p-3 bg-red-100 border border-red-200 text-red-700 rounded-lg text-sm text-center">
+                {error}
+              </div>
+            )}
+
             {!isLogin && (
               <>
-                <div className="flex flex-col items-center mb-6">
-                  <div className="relative group cursor-pointer">
-                    <div className="w-24 h-24 rounded-full bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden hover:border-primary transition-colors">
-                      <span className="material-icons-round text-gray-400 text-4xl">person</span>
-                    </div>
-                    <div className="absolute bottom-0 right-0 bg-primary text-white p-1.5 rounded-full shadow-md hover:bg-primary-dark transition-colors">
-                      <span className="material-icons-round text-xs block">camera_alt</span>
-                    </div>
-                  </div>
-                  <p className="text-primary text-sm font-medium mt-2 cursor-pointer hover:text-primary-dark">Upload a new photo</p>
-                  <p className="text-xs text-gray-400 mt-1">JPG, GIF or PNG. Max size 800K</p>
-                </div>
-
                 <Input
                   type="text"
                   id="name"
                   label="Full Name"
                   placeholder="e.g. Jane Doe"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                 />
 
                 <Input
@@ -132,6 +129,8 @@ const AuthPage = () => {
               id="email"
               label="Email Address"
               placeholder={isLogin ? "you@example.com" : "e.g. jane@ecohrms.com"}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
 
             {!isLogin && (
@@ -141,10 +140,10 @@ const AuthPage = () => {
                   <select
                     id="role"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-700 focus:ring-2 focus:ring-primary focus:border-primary appearance-none transition-colors"
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
                   >
-                    <option value="" disabled selected>Select your role</option>
-                    <option value="admin">Admin</option>
-                    <option value="hr">HR</option>
+                    <option value="hr">HR Manager</option>
                     <option value="employee">Employee</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
@@ -160,6 +159,8 @@ const AuthPage = () => {
                 id="password"
                 label="Password"
                 placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -168,12 +169,16 @@ const AuthPage = () => {
                   id="password"
                   label="Password"
                   placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
                 <Input
                   type="password"
                   id="confirm_password"
                   label="Confirm Password"
                   placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                 />
               </div>
             )}
@@ -189,7 +194,7 @@ const AuthPage = () => {
                 </>
               ) : (
                 <label className="flex items-start text-gray-600 cursor-pointer mt-2">
-                  <input type="checkbox" className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary mr-2 mt-0.5" />
+                  <input type="checkbox" className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary mr-2 mt-0.5" required />
                   <span>
                     I agree to the <a href="#" className="text-primary hover:underline">Terms of Service</a> and <a href="#" className="text-primary hover:underline">Privacy Policy</a>.
                   </span>
@@ -199,9 +204,10 @@ const AuthPage = () => {
 
             <button
               type="submit"
-              className="w-full py-3.5 px-4 bg-primary hover:bg-primary-dark text-white font-bold rounded-lg shadow-md transition-all transform active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              disabled={loading}
+              className="w-full py-3.5 px-4 bg-primary hover:bg-primary-dark text-white font-bold rounded-lg shadow-md transition-all transform active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {isLogin ? 'Sign In' : 'Register Account'}
+              {loading ? (isLogin ? 'Signing In...' : 'Registering...') : (isLogin ? 'Sign In' : 'Register Account')}
             </button>
           </form>
 

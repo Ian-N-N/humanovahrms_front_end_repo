@@ -33,8 +33,15 @@ const Sidebar = () => {
   const { user, logout } = useAuth(); // Get user and logout
   const currentPath = location.pathname;
 
-  // Default to 'guest' or 'employee' if no user found (safe fallback)
-  const role = user?.role || 'employee';
+  // Extract role name safely. Backend returns role: { id: 1, name: 'Admin' }
+  const roleObj = user?.role;
+  const roleName = roleObj?.name ? roleObj.name.toLowerCase() : (roleObj || 'employee');
+  const roleDisplay = roleObj?.name || 'Employee';
+
+  // Normalize for menu selection key (admin, hr, employee)
+  let menuKey = 'employee';
+  if (roleName.includes('admin')) menuKey = 'admin';
+  else if (roleName.includes('hr')) menuKey = 'hr';
 
   const isActive = (path) => currentPath === path;
 
@@ -66,7 +73,7 @@ const Sidebar = () => {
     ]
   };
 
-  const currentMenu = menus[role] || menus['employee'];
+  const currentMenu = menus[menuKey] || menus['employee'];
 
   return (
     <aside className="w-64 bg-white border-r border-gray-100 flex-shrink-0 flex flex-col h-screen font-sans z-20">
@@ -87,19 +94,13 @@ const Sidebar = () => {
           <div className="w-10 h-10 rounded-full bg-blue-100 flex-shrink-0 overflow-hidden border border-gray-200">
             <img
               src={user?.avatar || "https://i.pravatar.cc/150?u=default"}
-              alt={role}
+              alt={roleName}
               className="w-full h-full object-cover"
             />
           </div>
           <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-bold text-gray-900 truncate">{user?.name || user?.email?.split('@')[0] || 'User'}</h4>
-            <p className="text-xs text-gray-500 truncate">{
-              {
-                admin: 'Administrator',
-                hr: 'Human Resource Manager',
-                employee: 'Employee'
-              }[role] || role.replace('_', ' ')
-            }</p>
+            <h4 className="text-sm font-bold text-gray-900 truncate">{user?.name || user?.email || 'User'}</h4>
+            <p className="text-xs text-gray-500 truncate capitalize">{roleDisplay}</p>
           </div>
         </div>
       </div>
@@ -121,6 +122,14 @@ const Sidebar = () => {
           ))}
         </div>
 
+        {/* Recuitment Section only for Admin/HR */}
+        {(menuKey === 'admin' || menuKey === 'hr') && (
+          <div className="mb-6">
+            <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Recruitment</p>
+            <NavLink to="/jobs" icon="work" label="Jobs" active={isActive('/jobs')} />
+            {(menuKey === 'admin') && <NavLink to="/candidates" icon="person_search" label="Candidates" badge="13" active={isActive('/candidates')} />}
+          </div>
+        )}
       </div>
 
       {/* Footer */}
