@@ -51,7 +51,7 @@ const AuthPage = () => {
         if (password !== confirmPassword) {
           throw new Error("Passwords do not match");
         }
-        await register(name, email, password);
+        await register(name, email, password, role);
         alert("Registration successful! Please sign in.");
         setIsLogin(true);
         setPassword('');
