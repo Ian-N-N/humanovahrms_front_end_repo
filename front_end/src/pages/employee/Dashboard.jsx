@@ -1,24 +1,26 @@
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useAttendance } from '../../context/AttendanceContext';
 import { useNotification } from '../../context/NotificationContext';
+import { useLeave } from '../../context/LeaveContext';
+// import { usePayroll } from '../../context/PayrollContext'; // Uncomment if PayrollContext is available/used
 
 /* --- MOCK DATA --- */
-const announcements = [
-    { title: "Office Maintenance", desc: "Scheduled maintenance for the HVAC system this Friday. Please work remotely...", time: "2 hours ago", icon: "campaign", color: "bg-blue-100 text-blue-600" },
-    { title: "Health Benefit Update", desc: "New dental coverage has been added to the standard plan effective next...", time: "Yesterday", icon: "health_and_safety", color: "bg-indigo-100 text-indigo-600" },
-];
+// const announcements = [
+//     { title: "Office Maintenance", desc: "Scheduled maintenance for the HVAC system this Friday. Please work remotely...", time: "2 hours ago", icon: "campaign", color: "bg-blue-100 text-blue-600" },
+//     { title: "Health Benefit Update", desc: "New dental coverage has been added to the standard plan effective next...", time: "Yesterday", icon: "health_and_safety", color: "bg-indigo-100 text-indigo-600" },
+// ];
 
-const weeklyHours = [
-    { day: "Mon", height: "60%", active: false },
-    { day: "Tue", height: "100%", active: true },
-    { day: "Wed", height: "80%", active: true },
-    { day: "Thu", height: "45%", active: false },
-    { day: "Fri", height: "70%", active: false },
-    { day: "Sat", height: "30%", active: false },
-    { day: "Sun", height: "30%", active: false },
-];
+// const weeklyHours = [
+//     { day: "Mon", height: "60%", active: false },
+//     { day: "Tue", height: "100%", active: true },
+//     { day: "Wed", height: "80%", active: true },
+//     { day: "Thu", height: "45%", active: false },
+//     { day: "Fri", height: "70%", active: false },
+//     { day: "Sat", height: "30%", active: false },
+//     { day: "Sun", height: "30%", active: false },
+// ];
 
 const StatCard = ({ title, value, subtext, icon, iconBg, iconColor, footer, footerColor }) => (
     <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
@@ -62,9 +64,15 @@ const QuickAction = ({ icon, label, primary = false, onClick }) => (
 
 const Dashboard = () => {
     const { user } = useAuth();
-    const { isCheckedIn, checkInTime, clockIn, clockOut } = useAttendance();
+    const { isCheckedIn, checkInTime, clockIn, clockOut, records, refetch: refetchAttendance } = useAttendance();
     const { showNotification } = useNotification();
+    const { leaves, fetchLeaves } = useLeave();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        refetchAttendance();
+        fetchLeaves();
+    }, [refetchAttendance, fetchLeaves]);
 
     const handleClockAction = async () => {
         try {
@@ -77,13 +85,53 @@ const Dashboard = () => {
             }
         } catch (error) {
             console.error("Clock action error:", error);
-            const errorMsg = error.response?.data?.error || 'Could not complete clock action. Please check your connection.';
+            // Try to get a specific error message
+            const errorMsg = error.response?.data?.error ||
+                error.response?.data?.message ||
+                error.message ||
+                'Could not complete clock action.';
             showNotification(errorMsg, 'error');
         }
-    };
+    }
+    // --- REAL DATA CALCULATIONS ---
 
+    // 1. Leave Balance
+    const safeLeaves = Array.isArray(leaves) ? leaves : [];
+    const approvedLeaves = safeLeaves.filter(l => l.status === 'Approved');
+    // Assuming a default allocation of 21 days if not from backend
+    const totalLeaveDaysTaken = approvedLeaves.reduce((acc, curr) => {
+        // Simple 1 day per request logic if duration not present, ideally backend sends this
+        return acc + (curr.duration || 1);
+    }, 0);
+    const leaveBalance = 21 - totalLeaveDaysTaken;
+
+    // 2. Attendance Score (Mock calculation based on presence)
+    // Real logic would compare days active vs working days
+    const attendanceScore = records && records.length > 0 ? "95%" : "--%";
+
+    // 3. Weekly Engagement (Chart Data)
+    const weeklyHours = useMemo(() => {
+        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const today = new Date();
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - today.getDay() + 1); // Start from Monday
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        return days.map((day, index) => {
+            // Find records for this specific day
+            // Note: This matches day name blindly, in real app match Date objects
+            const isToday = index === today.getDay();
+
+            // Placeholder height until we strictly parse dates from records
+            const height = isToday && isCheckedIn ? "60%" : "20%";
+
+            return { day, height, active: isToday };
+        });
+    }, [records, isCheckedIn]);
+
+    // Safe defaults for user
     const displayName = user?.name || user?.email?.split('@')[0] || 'Member';
-    const firstName = displayName.split(' ')[0];
+    const firstName = displayName.split(' ')[0] || 'Member';
 
     return (
         <main className="flex-1 bg-[#FDFDFD] h-full overflow-y-auto p-6 lg:p-10 font-sans custom-scrollbar">
@@ -109,33 +157,33 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                 <StatCard
                     title="Attendance Score"
-                    value="98.5%"
+                    value={attendanceScore}
                     icon="auto_graph"
                     iconBg="bg-blue-50"
                     iconColor="text-blue-600"
-                    footer="Excellent"
+                    footer="Good"
                     footerColor="bg-blue-100 text-blue-700"
-                    subtext="Top 10% this month"
+                // subtext="Top 10% this month" // Removed as it's mock data
                 />
                 <StatCard
                     title="Leave Balance"
-                    value="14 Days"
+                    value={`${leaveBalance} Days`}
                     icon="holiday_village"
                     iconBg="bg-indigo-50"
                     iconColor="text-indigo-600"
                     footer="Available"
                     footerColor="bg-indigo-100 text-indigo-700"
-                    subtext="Next accrual in 12 days"
+                // subtext="Next accrual in 12 days" // Removed as it's mock data
                 />
                 <StatCard
                     title="Next Payday"
-                    value="Oct 30"
+                    value="Oct 30" // Placeholder until Payroll integration
                     icon="token"
                     iconBg="bg-emerald-50"
                     iconColor="text-emerald-600"
                     footer="Active"
                     footerColor="bg-emerald-100 text-emerald-700"
-                    subtext="4 days remaining"
+                // subtext="4 days remaining" // Removed as it's mock data
                 />
                 <StatCard
                     title="Session Start"
@@ -203,9 +251,9 @@ const Dashboard = () => {
                                                 ${item.active ? 'bg-gradient-to-t from-blue-700 to-blue-500' : 'bg-gray-50 group-hover:bg-gray-100'}`}
                                             style={{ height: item.height }}
                                         >
-                                            <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-[10px] font-black py-1 px-2 rounded-lg transition-all duration-300">
+                                            {/* <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-[10px] font-black py-1 px-2 rounded-lg transition-all duration-300">
                                                 8.5h
-                                            </div>
+                                            </div> */}
                                         </div>
                                     </div>
                                     <span className={`text-[10px] font-black uppercase tracking-widest ${item.active ? 'text-blue-600' : 'text-gray-300'}`}>
@@ -221,7 +269,7 @@ const Dashboard = () => {
                 <div className="space-y-8">
 
                     {/* Feed */}
-                    <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm border-b-4 border-b-blue-600/10">
+                    {/* <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm border-b-4 border-b-blue-600/10">
                         <div className="flex justify-between items-center mb-8">
                             <h3 className="text-lg font-black text-gray-900">Feed</h3>
                             <button className="w-8 h-8 rounded-full hover:bg-gray-50 flex items-center justify-center transition-colors">
@@ -244,17 +292,20 @@ const Dashboard = () => {
                                 </div>
                             ))}
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Quick Profile Widget */}
                     <div className="bg-gradient-to-br from-gray-900 to-blue-900 p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
                         <div className="relative z-10 flex items-center gap-4">
                             <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white text-xl font-black border border-white/20">
-                                {user?.name?.charAt(0)}
+                                {firstName.charAt(0)}
                             </div>
                             <div>
-                                <h4 className="text-white font-black text-sm tracking-tight">{user?.name}</h4>
-                                <p className="text-white/50 text-[10px] font-black uppercase tracking-widest">{user?.role || 'Contributor'}</p>
+                                <h4 className="text-white font-black text-sm tracking-tight">{user?.name || "User"}</h4>
+                                <p className="text-white/50 text-[10px] font-black uppercase tracking-widest">
+                                    {/* Handle role whether it is a string or an object */}
+                                    {typeof user?.role === 'object' ? user.role.name || 'Employee' : user?.role || 'Employee'}
+                                </p>
                             </div>
                         </div>
                         <button

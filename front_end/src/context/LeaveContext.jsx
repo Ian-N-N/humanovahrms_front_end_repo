@@ -12,20 +12,33 @@ export const LeaveProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     const fetchLeaves = useCallback(async () => {
-        // Guard: Only Admin and HR can fetch the full list
         const role = user?.role;
-        if (role !== 'admin' && role !== 'hr') {
-            console.log("Skipping full leave fetch for non-admin/hr user.");
-            setLoading(false);
-            return;
-        }
+        // Handle role object or string
+        const roleName = typeof role === 'object' ? role?.name?.toLowerCase() : role?.toLowerCase();
+
+        if (!roleName) return;
 
         try {
             setLoading(true);
-            const data = await leaveService.getAll();
+            let data = [];
+
+            if (roleName === 'admin' || roleName === 'hr' || roleName === 'hr manager') {
+                data = await leaveService.getAll();
+            } else {
+                // For employees, fetch personal leaves
+                // Assuming leaveService.getPersonalHistory exists, otherwise fall back to getAll and filter (though less secure)
+                try {
+                    data = await leaveService.getPersonalHistory();
+                } catch (err) {
+                    console.warn("Personal leave history endpoint failed, falling back to empty list", err);
+                    data = [];
+                }
+            }
             setLeaves(data || []);
         } catch (error) {
             console.error("Failed to fetch leaves:", error);
+            // Don't crash the app, just empty list
+            setLeaves([]);
         } finally {
             setLoading(false);
         }
@@ -68,6 +81,7 @@ export const LeaveProvider = ({ children }) => {
         applyLeave,
         updateStatus,
         getPendingCount,
+        fetchLeaves,
         refetch: fetchLeaves
     };
 

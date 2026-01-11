@@ -36,11 +36,17 @@ export const AttendanceProvider = ({ children }) => {
                 }
             }
 
-            setRecords(data || []);
+            // Ensure data is an array
+            if (!Array.isArray(data)) {
+                console.warn("Attendance data is not an array:", data);
+                data = [];
+            }
+
+            setRecords(data);
 
             // Logic to determine if user is checked in based on records
             // Look for a record with no clockOut/checkOut time
-            const activeRecord = (data || []).find(rec => !rec.clock_out && !rec.clockOut && !rec.checkOut && !rec.check_out);
+            const activeRecord = data.find(rec => !rec.clock_out && !rec.clockOut && !rec.checkOut && !rec.check_out);
 
             if (activeRecord) {
                 setIsCheckedIn(true);

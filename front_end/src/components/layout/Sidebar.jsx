@@ -100,7 +100,9 @@ const Sidebar = () => {
           </div>
           <div className="flex-1 min-w-0">
             <h4 className="text-sm font-bold text-gray-900 truncate">{user?.name || user?.email || 'User'}</h4>
-            <p className="text-xs text-gray-500 truncate capitalize">{roleDisplay}</p>
+            <p className="text-xs text-gray-500 truncate capitalize">
+              {typeof user?.role === 'object' ? user.role.name || 'Employee' : user?.role || 'Employee'}
+            </p>
           </div>
         </div>
       </div>

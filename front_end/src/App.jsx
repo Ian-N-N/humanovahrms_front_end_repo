@@ -9,8 +9,8 @@ import { AttendanceProvider } from './context/AttendanceContext';
 import { PayrollProvider } from './context/PayrollContext';
 import { DepartmentProvider } from './context/DepartmentContext';
 import { NotificationProvider } from './context/NotificationContext';
-
 // 2. Components & Pages
+import ErrorBoundary from './components/common/ErrorBoundary';
 import Sidebar from "./components/layout/Sidebar";
 import Dashboard from "./pages/admin/Dashboard";
 import Employees from "./pages/admin/EmployeeList";
@@ -47,73 +47,75 @@ const PlaceholderPage = ({ title }) => (
 const App = () => {
   return (
     <Router>
-      <AuthProvider>
-        <EmployeeProvider>
-          <LeaveProvider>
-            <AttendanceProvider>
-              <PayrollProvider>
-                <DepartmentProvider>
-                  <NotificationProvider>
+      <ErrorBoundary>
+        <AuthProvider>
+          <EmployeeProvider>
+            <LeaveProvider>
+              <AttendanceProvider>
+                <PayrollProvider>
+                  <DepartmentProvider>
+                    <NotificationProvider>
 
-                    <Routes>
-                      {/* --- PUBLIC ROUTES --- */}
-                      <Route path="/login" element={<AuthPage />} />
-                      <Route path="/register" element={<AuthPage />} />
+                      <Routes>
+                        {/* --- PUBLIC ROUTES --- */}
+                        <Route path="/login" element={<AuthPage />} />
+                        <Route path="/register" element={<AuthPage />} />
 
-                      <Route path="/" element={<Navigate to="/login" replace />} />
+                        <Route path="/" element={<Navigate to="/login" replace />} />
 
-                      {/* --- PROTECTED ROUTES --- */}
-                      <Route
-                        element={
-                          <div className="flex h-screen bg-gray-50 overflow-hidden">
-                            <Sidebar />
-                            <div className="flex-1 flex flex-col h-full relative overflow-hidden">
-                              <Outlet />
+                        {/* --- PROTECTED ROUTES --- */}
+                        <Route
+                          element={
+                            <div className="flex h-screen bg-gray-50 overflow-hidden">
+                              <Sidebar />
+                              <div className="flex-1 flex flex-col h-full relative overflow-hidden">
+                                <Outlet />
+                              </div>
                             </div>
-                          </div>
-                        }
-                      >
-                        {/* Admin Modules */}
-                        <Route path="/admin/dashboard" element={<Dashboard />} />
-                        <Route path="/admin/analytics" element={<Analytics />} />
-                        <Route path="/admin/roles" element={<RolePermission />} />
-                        <Route path="/employees" element={<Employees />} />
-                        <Route path="/employees/new" element={<EmployeeCreate />} />
-                        <Route path="/departments" element={<Departments />} />
-                        <Route path="/payroll" element={<Payroll />} />
-                        <Route path="/leave" element={<LeaveManagement />} />
-                        <Route path="/attendance" element={<Attendance />} />
+                          }
+                        >
+                          {/* Admin Modules */}
+                          <Route path="/admin/dashboard" element={<Dashboard />} />
+                          <Route path="/admin/analytics" element={<Analytics />} />
+                          <Route path="/admin/roles" element={<RolePermission />} />
+                          <Route path="/employees" element={<Employees />} />
+                          <Route path="/employees/new" element={<EmployeeCreate />} />
+                          <Route path="/departments" element={<Departments />} />
+                          <Route path="/payroll" element={<Payroll />} />
+                          <Route path="/leave" element={<LeaveManagement />} />
+                          <Route path="/attendance" element={<Attendance />} />
 
-                        {/* HR Modules */}
-                        <Route path="/hr/dashboard" element={<HRDashboard />} />
-                        <Route path="/hr/employees" element={<Employees />} />
-                        <Route path="/hr/departments" element={<Departments />} />
-                        <Route path="/hr/leaves" element={<LeaveReview />} />
-                        <Route path="/hr/attendance" element={<AttendanceSummary />} />
-                        <Route path="/hr/analytics" element={<DepartmentAnalytics />} />
-                        <Route path="/hr" element={<Navigate to="/hr/dashboard" replace />} />
+                          {/* HR Modules */}
+                          <Route path="/hr/dashboard" element={<HRDashboard />} />
+                          <Route path="/hr/employees" element={<Employees />} />
+                          <Route path="/hr/departments" element={<Departments />} />
+                          <Route path="/hr/leaves" element={<LeaveReview />} />
+                          <Route path="/hr/attendance" element={<AttendanceSummary />} />
+                          <Route path="/hr/analytics" element={<DepartmentAnalytics />} />
+                          <Route path="/hr" element={<Navigate to="/hr/dashboard" replace />} />
 
-                        {/* Employee Modules */}
-                        <Route path="/employee/dashboard" element={<EmployeeDashboard />} />
-                        <Route path="/employee/leave" element={<LeavePortal />} />
-                        <Route path="/employee/payroll" element={<EmployeePayroll />} />
-                        <Route path="/profile" element={<Profile />} />
+                          {/* Employee Modules */}
+                          <Route path="/employee/dashboard" element={<EmployeeDashboard />} />
+                          <Route path="/employee/leave" element={<LeavePortal />} />
+                          <Route path="/employee/payroll" element={<EmployeePayroll />} />
+                          <Route path="/profile" element={<Profile />} />
 
-                        {/* Settings & Extras */}
-                        <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
+                          {/* Settings & Extras */}
+                          <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
 
-                        {/* 404 Fallback */}
-                        <Route path="*" element={<PlaceholderPage title="404 - Not Found" />} />
-                      </Route>
-                    </Routes>
+                          {/* 404 Fallback */}
+                          <Route path="*" element={<PlaceholderPage title="404 - Not Found" />} />
+                        </Route>
+                      </Routes>
 
-                  </NotificationProvider>
-                </DepartmentProvider>
-              </PayrollProvider>
-            </AttendanceProvider>
-          </LeaveProvider>
-        </EmployeeProvider>
-      </AuthProvider>
+                    </NotificationProvider>
+                  </DepartmentProvider>
+                </PayrollProvider>
+              </AttendanceProvider>
+            </LeaveProvider>
+          </EmployeeProvider>
+        </AuthProvider>
+      </ErrorBoundary>
     </Router >
   );
 };

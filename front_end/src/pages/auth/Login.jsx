@@ -37,10 +37,11 @@ const AuthPage = () => {
         const user = await login(email, password);
 
         // Check role.name (backend returns object) or fallback
-        const roleName = user.role?.name ? user.role.name.toLowerCase() : (user.role || 'employee');
+        const rawRole = user.role?.name || user.role || 'employee';
+        const roleName = String(rawRole).toLowerCase().trim();
 
         if (roleName === 'admin') {
-          navigate('/dashboard');
+          navigate('/admin/dashboard');
         } else if (roleName === 'hr manager' || roleName === 'hr') {
           navigate('/hr/dashboard');
         } else {
@@ -146,6 +147,7 @@ const AuthPage = () => {
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
                   >
+                    <option value="admin">Admin</option>
                     <option value="hr">HR Manager</option>
                     <option value="employee">Employee</option>
                   </select>

@@ -6,6 +6,7 @@ const leaveService = {
     request: (leaveData) => httpClient.post('/leave', leaveData),
     approve: (id) => httpClient.put(`/leave/${id}/approve`),
     reject: (id) => httpClient.put(`/leave/${id}/reject`),
+    getPersonalHistory: () => httpClient.get('/leave/history'),
 };
 
 export default leaveService;
