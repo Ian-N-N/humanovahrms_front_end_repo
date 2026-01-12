@@ -36,10 +36,10 @@ const DashboardOverview = () => {
 
   const stats = useMemo(() => {
     return [
-      { label: "Total Workforce", value: employees.length, icon: "groups", onClick: () => navigate('/employees') },
-      { label: "Business Units", value: departments.length, icon: "corporate_fare", onClick: () => navigate('/departments') },
-      { label: "Pending Leave", value: leaves.filter(l => l.status === 'Pending').length, icon: "event_note", badge: "Action Required", badgeColor: "bg-orange-100 text-orange-700", onClick: () => navigate('/leave') },
-      { label: "Today's Pulse", value: records.length > 0 ? `${Math.round((records.filter(r => r.status !== 'Absent').length / (employees.length || 1)) * 100)}%` : "0%", icon: "speed", onClick: () => navigate('/attendance') },
+      { label: "Total Workforce", value: employees.length, icon: "groups", onClick: () => navigate('/admin/employees') },
+      { label: "Business Units", value: departments.length, icon: "corporate_fare", onClick: () => navigate('/admin/departments') },
+      { label: "Pending Leave", value: leaves.filter(l => l.status === 'Pending').length, icon: "event_note", badge: "Action Required", badgeColor: "bg-orange-100 text-orange-700", onClick: () => navigate('/admin/leave') },
+      { label: "Today's Pulse", value: records.length > 0 ? `${Math.round((records.filter(r => r.status !== 'Absent').length / (employees.length || 1)) * 100)}%` : "0%", icon: "speed", onClick: () => navigate('/admin/attendance') },
     ];
   }, [employees, departments, leaves, records, navigate]);
 
@@ -65,11 +65,11 @@ const DashboardOverview = () => {
       </div>
 
       <div className="flex flex-wrap gap-4 mb-10">
-        <button onClick={() => navigate('/employees/new')} className="flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-200 transition-all active:scale-95">
+        <button onClick={() => navigate('/admin/new_employee')} className="flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-200 transition-all active:scale-95">
           <span className="material-icons-round text-lg">person_add</span>
           Onboard Talent
         </button>
-        <button onClick={() => navigate('/departments')} className="flex items-center gap-3 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-sm transition-all active:scale-95">
+        <button onClick={() => navigate('/admin/departments')} className="flex items-center gap-3 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-sm transition-all active:scale-95">
           <span className="material-icons-round text-lg">domain</span>
           Org Structure
         </button>

@@ -50,11 +50,11 @@ const Sidebar = () => {
     admin: [
       { to: '/admin/dashboard', icon: 'dashboard', label: 'Dashboard' },
       { to: '/admin/analytics', icon: 'bar_chart', label: 'Analytics' },
-      { to: '/employees', icon: 'people', label: 'Employees' },
-      { to: '/departments', icon: 'business', label: 'Departments' },
-      { to: '/payroll', icon: 'payments', label: 'Payroll' },
-      { to: '/leave', icon: 'event_available', label: 'Leave' },
-      { to: '/attendance', icon: 'schedule', label: 'Attendance' },
+      { to: '/admin/employees', icon: 'people', label: 'Employees' },
+      { to: '/admin/departments', icon: 'business', label: 'Departments' },
+      { to: '/admin/payroll', icon: 'payments', label: 'Payroll' },
+      { to: '/admin/leave', icon: 'event_available', label: 'Leave' },
+      { to: '/admin/attendance', icon: 'schedule', label: 'Attendance' },
       { to: '/admin/roles', icon: 'security', label: 'Roles' },
     ],
     hr: [

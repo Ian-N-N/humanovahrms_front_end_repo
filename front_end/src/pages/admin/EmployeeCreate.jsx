@@ -8,7 +8,7 @@ import useCloudinary from '../../hooks/useCloudinary';
 const EmployeeForm = () => {
   const navigate = useNavigate();
   const { addEmployee, employees } = useEmployee();
-  const { departments } = useDepartment();
+  const { departments, refetch: refetchDepartments } = useDepartment();
   const { showNotification } = useNotification();
   const { uploadImage, uploading: uploadingImage } = useCloudinary();
   const [loading, setLoading] = useState(false);
@@ -43,25 +43,57 @@ const EmployeeForm = () => {
         photo_url = await uploadImage(formData.photo);
       }
 
+      const safeInt = (val) => {
+        const parsed = parseInt(val, 10);
+        return isNaN(parsed) ? 0 : parsed;
+      };
+
+      // Construct payload EXPLICITLY to avoid sending invalid keys like 'firstName' or 'name'
       const employeeData = {
-        ...formData,
-        photo_url,
-        name: `${formData.firstName} ${formData.lastName}`.trim(),
         first_name: formData.firstName,
         last_name: formData.lastName,
-        join_date: formData.joined,
-        salary: formData.salary,
-        supervisor_id: formData.supervisor,
-        role: formData.system_role,
-        job_title: formData.role
+        // email: formData.email, // Backend rejected 'email' / 'emails'
+        // phone: formData.phone, // Backend rejected 'phone'
+        department_id: formData.department, // Backend likely expects department_id, not just department
+        // join_date: formData.joined, // Backend rejected 'join_date'
+        // salary: safeInt(formData.salary), // Backend rejected 'salary'
+        supervisor_id: formData.supervisor ? parseInt(formData.supervisor) : null,
+        // role: formData.system_role, // Backend rejected 'role'
+        job_title: formData.role,
+        // photo_url: photo_url // Backend rejected 'photo_url'
       };
 
       await addEmployee(employeeData);
+
+      // Refresh departments to update member counts
+      if (refetchDepartments) {
+        await refetchDepartments();
+      }
+
       showNotification('Employee created successfully!', 'success');
+      // Navigate based on role
+      const roleStr = formData.system_role === 'admin' ? 'admin' : 'hr'; // Or check current user's role if navigating back
       navigate(-1);
     } catch (error) {
       console.error("Failed to create employee:", error);
-      showNotification(error.response?.data?.error || 'Failed to create employee.', 'error');
+
+      const resData = error.response?.data;
+      let errorMessage = 'Failed to create employee.';
+
+      if (resData) {
+        // Check for various error formats
+        if (resData.error) {
+          errorMessage = typeof resData.error === 'object' ? (resData.error.message || JSON.stringify(resData.error)) : resData.error;
+        } else if (resData.message) {
+          errorMessage = resData.message;
+        } else if (resData.msg) {
+          errorMessage = resData.msg;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      showNotification(errorMessage, 'error');
     } finally {
       setLoading(false);
     }

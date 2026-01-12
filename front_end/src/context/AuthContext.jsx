@@ -25,7 +25,18 @@ export const AuthProvider = ({ children }) => {
         } finally {
             setLoading(false);
         }
-        setLoading(false);
+
+        // Listen for 401 Unauthorized events from httpClient
+        const handleUnauthorized = () => {
+            console.log("Received auth:unauthorized event. Logging out...");
+            logout();
+        };
+
+        window.addEventListener('auth:unauthorized', handleUnauthorized);
+
+        return () => {
+            window.removeEventListener('auth:unauthorized', handleUnauthorized);
+        };
     }, []);
 
     const login = async (email, password) => {

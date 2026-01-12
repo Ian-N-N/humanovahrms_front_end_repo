@@ -9,18 +9,25 @@ import EmployeeEdit from './EmployeeEdit';
 const groupEmployees = (flatList) => {
   const depts = {};
   flatList.forEach(emp => {
-    const deptName = emp.department || 'Unassigned';
-    const roleName = emp.role || 'General';
+    const deptName = emp.department || (emp.department_id ? `Dept ${emp.department_id}` : 'Unassigned');
+    // Backend returns 'job_title', frontend used 'role'. Map them.
+    const roleName = emp.job_title || emp.role || 'General';
 
     if (!depts[deptName]) depts[deptName] = { department: deptName, groups: {} };
     if (!depts[deptName].groups[roleName]) depts[deptName].groups[roleName] = { role: roleName, members: [] };
 
+    // Construct full name if missing (Backend sends first_name, last_name)
+    const fullName = emp.name || (emp.first_name && emp.last_name ? `${emp.first_name} ${emp.last_name}` : 'Unknown');
+
     depts[deptName].groups[roleName].members.push({
       ...emp,
       id: emp.id || Math.random(),
-      name: emp.name || 'Unknown',
-      avatar: emp.avatar || emp.image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=facearea&facepad=2&w=256&h=256&q=80',
-      joined: emp.joinDate || emp.joined || 'N/A'
+      name: fullName,
+      role: roleName, // Ensure role is populated for display
+      department: deptName, // Ensure department is populated
+      avatar: emp.photo_url || emp.avatar || emp.image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=facearea&facepad=2&w=256&h=256&q=80',
+      joined: emp.join_date || emp.joinDate || emp.joined || 'N/A',
+      status: emp.status || 'Active'
     });
   });
 
@@ -213,7 +220,11 @@ const Employees = () => {
   };
 
   const handleAddNew = () => {
-    navigate(`/${role}/employees/new`);
+    if (role === 'admin') {
+      navigate('/admin/new_employee');
+    } else {
+      navigate(`/${role}/employees/new`);
+    }
   };
 
   const handleBackToList = () => {
@@ -242,10 +253,28 @@ const Employees = () => {
   const handleSaveEdit = async (updatedData) => {
     try {
       const updatedEmployee = await updateEmployee(selectedEmployee.id, updatedData);
-      setSelectedEmployee(updatedEmployee);
+
+      // The API returns snake_case fields (first_name, last_name).
+      // We need to merge this with the existing data and ensure 'name' is updated for the UI.
+      const newName = (updatedData.first_name && updatedData.last_name)
+        ? `${updatedData.first_name} ${updatedData.last_name}`
+        : (updatedEmployee.name || selectedEmployee.name);
+
+      const mergedEmployee = {
+        ...selectedEmployee,
+        ...updatedEmployee,
+        name: newName,
+        job_title: updatedData.job_title || updatedEmployee.job_title || selectedEmployee.job_title,
+        // Ensure other fields are preserved or mapped if the API returns them
+        department: updatedEmployee.department || selectedEmployee.department,
+        status: updatedEmployee.status || selectedEmployee.status
+      };
+
+      setSelectedEmployee(mergedEmployee);
       alert('Profile Updated Successfully!');
       setCurrentView('profile');
     } catch (error) {
+      console.error("Update failed:", error);
       alert('Failed to update profile.');
     }
   };
