@@ -1,26 +1,89 @@
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useEmployee } from '../../context/EmployeeContext';
+import { useDepartment } from '../../context/DepartmentContext';
+import { useLeave } from '../../context/LeaveContext';
+import { useAttendance } from '../../context/AttendanceContext';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 
 const HRDashboard = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { employees, refetch: fetchEmployees } = useEmployee();
+    const { departments, refetch: fetchDepartments } = useDepartment();
+    const { leaves, refetch: fetchLeaves } = useLeave();
+    const { records, refetch: fetchAttendance } = useAttendance();
+
+    useEffect(() => {
+        fetchEmployees();
+        fetchDepartments();
+        fetchLeaves();
+        fetchAttendance();
+    }, []);
+
     const displayName = user?.name || user?.email?.split('@')[0] || 'HR Manager';
     const firstName = displayName.split(' ')[0];
 
-    const stats = [
-        { label: 'Team Presence', value: '94%', note: 'Steady', badgeColor: 'bg-emerald-100 text-emerald-800', icon: 'groups', iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600' },
-        { label: 'Pending Approvals', value: '7', note: 'Priority', badgeColor: 'bg-orange-100 text-orange-800', icon: 'pending_actions', iconBg: 'bg-orange-50', iconColor: 'text-orange-600' },
-        { label: 'New Inquiries', value: '12', note: '2 today', badgeColor: 'bg-blue-100 text-blue-800', icon: 'mark_email_unread', iconBg: 'bg-blue-50', iconColor: 'text-blue-600' },
-    ];
+    // --- REAL DATA CALCULATIONS ---
+    const stats = useMemo(() => {
+        const safeEmployees = Array.isArray(employees) ? employees : [];
+        const safeRecords = Array.isArray(records) ? records : [];
+        const safeLeaves = Array.isArray(leaves) ? leaves : [];
 
-    const pendingLeaves = [
-        { id: 1, name: 'Mark Stevens', date: 'Oct 24 - 25', type: 'Sick Leave', avatar: 'MS' },
-        { id: 2, name: 'Linda Thorne', date: 'Nov 01 - Nov 05', type: 'Vacation', avatar: 'LT' },
-        { id: 3, name: 'David Chen', date: 'Oct 26', type: 'Remote Work', avatar: 'DC' },
-    ];
+        // 1. Team Presence (Percentage of people clocked in today)
+        // Note: For a real app, you'd filter records by today's date
+        // Since database might be sparse, we'll just check active sessions
+        const activeSessions = safeRecords.filter(r => !r.clock_out).length;
+        const presence = safeEmployees.length > 0
+            ? `${Math.round((activeSessions / safeEmployees.length) * 100)}%`
+            : "0%";
+
+        // 2. Pending Approvals
+        const pendingCount = safeLeaves.filter(l => l.status === 'Pending').length;
+
+        // 3. New Hires (Last 30 days)
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const newHiresCount = safeEmployees.filter(emp => {
+            const hireDate = new Date(emp.hire_date || emp.created_at);
+            return hireDate >= thirtyDaysAgo;
+        }).length;
+
+        return [
+            { label: 'Team Presence', value: presence, note: activeSessions > 0 ? 'Live Now' : 'Quiet', badgeColor: 'bg-emerald-100 text-emerald-800', icon: 'groups', iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600' },
+            { label: 'Pending Approvals', value: pendingCount, note: 'Action Required', badgeColor: 'bg-orange-100 text-orange-800', icon: 'pending_actions', iconBg: 'bg-orange-50', iconColor: 'text-orange-600' },
+            { label: 'Recent Onboarding', value: newHiresCount, note: 'Last 30 Days', badgeColor: 'bg-blue-100 text-blue-800', icon: 'person_add', iconBg: 'bg-blue-50', iconColor: 'text-blue-600' },
+        ];
+    }, [employees, records, leaves]);
+
+    const activeLeaves = useMemo(() => {
+        return (Array.isArray(leaves) ? leaves : [])
+            .filter(l => l.status === 'Pending')
+            .slice(0, 4)
+            .map(l => ({
+                id: l.id,
+                name: l.employee_name || `Employee #${l.employee_id}`,
+                date: `${l.start_date} - ${l.end_date}`,
+                type: l.leave_type || 'General Leave',
+                avatar: (l.employee_name || 'E').charAt(0)
+            }));
+    }, [leaves]);
+
+    const densityData = useMemo(() => {
+        const safeDepts = Array.isArray(departments) ? departments : [];
+        const safeEmps = Array.isArray(employees) ? employees : [];
+        const total = safeEmps.length || 1;
+
+        return safeDepts.slice(0, 3).map(dept => {
+            const count = safeEmps.filter(e => e.department_id === dept.id || e.department === dept.name).length;
+            return {
+                name: dept.name,
+                percent: Math.round((count / total) * 100)
+            };
+        });
+    }, [departments, employees]);
 
     return (
         <main className="flex-1 bg-[#FDFDFD] h-full overflow-y-auto p-6 lg:p-10 font-sans custom-scrollbar">
@@ -69,7 +132,7 @@ const HRDashboard = () => {
                             <button className="text-blue-600 text-xs font-black uppercase tracking-widest hover:underline">View Ledger</button>
                         </div>
                         <div className="space-y-4">
-                            {pendingLeaves.map(leave => (
+                            {activeLeaves.map(leave => (
                                 <div key={leave.id} className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-3xl transition-all border border-gray-50 group">
                                     <div className="flex items-center">
                                         <div className="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 font-black text-sm group-hover:scale-110 transition-transform">
@@ -84,15 +147,22 @@ const HRDashboard = () => {
                                         </div>
                                     </div>
                                     <div className="flex gap-2">
-                                        <button className="w-10 h-10 rounded-2xl text-gray-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors" title="Reject">
+                                        <button
+                                            onClick={() => navigate('/hr/leave')}
+                                            className="w-10 h-10 rounded-2xl text-gray-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors" title="Reject">
                                             <span className="material-icons-round text-lg">close</span>
                                         </button>
-                                        <button className="w-10 h-10 rounded-2xl text-emerald-500 bg-emerald-50 hover:bg-emerald-100 flex items-center justify-center transition-colors shadow-sm" title="Approve">
+                                        <button
+                                            onClick={() => navigate('/hr/leave')}
+                                            className="w-10 h-10 rounded-2xl text-emerald-500 bg-emerald-50 hover:bg-emerald-100 flex items-center justify-center transition-colors shadow-sm" title="Approve">
                                             <span className="material-icons-round text-lg">check</span>
                                         </button>
                                     </div>
                                 </div>
                             ))}
+                            {activeLeaves.length === 0 && (
+                                <p className="text-center py-10 text-gray-400 font-bold italic text-sm">No pending requests to show.</p>
+                            )}
                         </div>
                     </section>
 
@@ -100,23 +170,20 @@ const HRDashboard = () => {
                         <h3 className="text-lg font-black text-gray-900 mb-8 tracking-tight uppercase tracking-widest">Global Density</h3>
                         <div className="h-48 flex items-center justify-center relative mb-8">
                             <div className="h-40 w-40 rounded-full border-[12px] border-blue-600 border-t-transparent border-r-indigo-200 border-b-gray-100 transform -rotate-45 relative flex flex-col items-center justify-center">
-                                <span className="text-3xl font-black text-gray-900 tracking-tighter">148</span>
+                                <span className="text-3xl font-black text-gray-900 tracking-tighter">{employees.length || 0}</span>
                                 <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest -mt-1">Total</span>
                             </div>
                         </div>
                         <div className="space-y-3">
-                            <div className="flex justify-between items-center bg-gray-50 p-3 rounded-2xl">
-                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Engineering</span>
-                                <span className="text-xs font-black text-gray-900">62%</span>
-                            </div>
-                            <div className="flex justify-between items-center bg-gray-50 p-3 rounded-2xl">
-                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Creative</span>
-                                <span className="text-xs font-black text-gray-900">28%</span>
-                            </div>
-                            <div className="flex justify-between items-center bg-gray-50 p-3 rounded-2xl">
-                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Executives</span>
-                                <span className="text-xs font-black text-gray-900">10%</span>
-                            </div>
+                            {densityData.map((dept, idx) => (
+                                <div key={idx} className="flex justify-between items-center bg-gray-50 p-3 rounded-2xl">
+                                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{dept.name}</span>
+                                    <span className="text-xs font-black text-gray-900">{dept.percent}%</span>
+                                </div>
+                            ))}
+                            {densityData.length === 0 && (
+                                <p className="text-center text-[10px] text-gray-400 font-black uppercase tracking-widest">No department data</p>
+                            )}
                         </div>
                     </section>
                 </div>

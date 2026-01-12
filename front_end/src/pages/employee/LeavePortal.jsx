@@ -9,14 +9,14 @@ const LeavePortal = () => {
     const { showNotification } = useNotification();
     const [isApplying, setIsApplying] = useState(false);
     const [formData, setFormData] = useState({
-        type: 'Sick Leave',
-        startDate: '',
-        endDate: '',
+        leave_type: 'Sick Leave',
+        start_date: '',
+        end_date: '',
         reason: ''
     });
 
     const myLeaves = useMemo(() => {
-        return leaves.filter(l => l.user_id === user?.id || l.employee_id === user?.id);
+        return leaves.filter(l => l.user_id === user?.id);
     }, [leaves, user?.id]);
 
     const handleSubmit = async (e) => {
@@ -25,7 +25,7 @@ const LeavePortal = () => {
             await applyLeave(formData);
             showNotification('Leave application submitted successfully!', 'success');
             setIsApplying(false);
-            setFormData({ type: 'Sick Leave', startDate: '', endDate: '', reason: '' });
+            setFormData({ leave_type: 'Sick Leave', start_date: '', end_date: '', reason: '' });
         } catch (err) {
             showNotification('Failed to submit leave request.', 'error');
         }
@@ -62,8 +62,8 @@ const LeavePortal = () => {
                                 <div className="space-y-1">
                                     <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Leave Type</label>
                                     <select
-                                        value={formData.type}
-                                        onChange={e => setFormData(p => ({ ...p, type: e.target.value }))}
+                                        value={formData.leave_type}
+                                        onChange={e => setFormData(p => ({ ...p, leave_type: e.target.value }))}
                                         className="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold text-gray-800 focus:ring-2 focus:ring-blue-500"
                                     >
                                         <option>Sick Leave</option>
@@ -77,8 +77,8 @@ const LeavePortal = () => {
                                         <label className="text-xs font-black text-gray-400 uppercase tracking-widest">From</label>
                                         <input
                                             type="date" required
-                                            value={formData.startDate}
-                                            onChange={e => setFormData(p => ({ ...p, startDate: e.target.value }))}
+                                            value={formData.start_date}
+                                            onChange={e => setFormData(p => ({ ...p, start_date: e.target.value }))}
                                             className="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold text-gray-800 focus:ring-2 focus:ring-blue-500"
                                         />
                                     </div>
@@ -86,8 +86,8 @@ const LeavePortal = () => {
                                         <label className="text-xs font-black text-gray-400 uppercase tracking-widest">To</label>
                                         <input
                                             type="date" required
-                                            value={formData.endDate}
-                                            onChange={e => setFormData(p => ({ ...p, endDate: e.target.value }))}
+                                            value={formData.end_date}
+                                            onChange={e => setFormData(p => ({ ...p, end_date: e.target.value }))}
                                             className="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold text-gray-800 focus:ring-2 focus:ring-blue-500"
                                         />
                                     </div>
@@ -139,17 +139,17 @@ const LeavePortal = () => {
                                 <div key={l.id} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all group">
                                     <div className="flex justify-between items-start mb-6">
                                         <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-                                            {l.type.charAt(0)}
+                                            {(l.leave_type || 'L').charAt(0)}
                                         </div>
-                                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${l.status === 'Approved' ? 'bg-green-50 text-green-600 border-green-100' :
-                                            l.status === 'Rejected' ? 'bg-red-50 text-red-600 border-red-100' :
+                                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${l.status?.toLowerCase() === 'approved' ? 'bg-green-50 text-green-600 border-green-100' :
+                                            l.status?.toLowerCase() === 'rejected' ? 'bg-red-50 text-red-600 border-red-100' :
                                                 'bg-orange-50 text-orange-600 border-orange-100'
                                             }`}>
                                             {l.status}
                                         </span>
                                     </div>
-                                    <h4 className="text-lg font-black text-gray-900 mb-1">{l.type}</h4>
-                                    <p className="text-xs text-blue-500 font-bold mb-4">{l.startDate} • {l.days} Days</p>
+                                    <h4 className="text-lg font-black text-gray-900 mb-1">{l.leave_type}</h4>
+                                    <p className="text-xs text-blue-500 font-bold mb-4">{l.start_date} to {l.end_date} • {l.days} Days</p>
                                     <p className="text-xs text-gray-400 font-medium line-clamp-2 italic mb-6">"{l.reason}"</p>
                                     <div className="flex items-center gap-2 pt-4 border-t border-gray-50">
                                         <span className="material-icons-round text-gray-300 text-sm">history_edu</span>

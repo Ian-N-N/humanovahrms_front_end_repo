@@ -45,7 +45,8 @@ const Departments = () => {
       }
       handleBack();
     } catch (err) {
-      alert("Failed to save department.");
+      const errorMsg = err.response?.data?.message || err.message || "Failed to save department.";
+      alert(errorMsg);
     }
   };
 
@@ -69,11 +70,13 @@ const Departments = () => {
       <div className="flex items-center justify-between pt-4 border-t border-gray-50">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500">
-            {dept.head?.charAt(0) || 'H'}
+            {dept.manager ? dept.manager.first_name.charAt(0) : 'N'}
           </div>
           <div>
             <p className="text-[10px] text-gray-400 uppercase font-semibold">Head</p>
-            <p className="text-xs font-bold text-gray-700">{dept.head || 'Not Assigned'}</p>
+            <p className="text-xs font-bold text-gray-700">
+              {dept.manager ? `${dept.manager.first_name} ${dept.manager.last_name}` : 'Not Assigned'}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md text-gray-500">
@@ -95,7 +98,9 @@ const Departments = () => {
       </div>
       <div className="hidden md:block text-right pr-4">
         <p className="text-[10px] text-gray-400 uppercase font-semibold">Head</p>
-        <p className="text-sm font-medium text-gray-700">{dept.head || 'N/A'}</p>
+        <p className="text-sm font-medium text-gray-700">
+          {dept.manager ? `${dept.manager.first_name} ${dept.manager.last_name}` : 'N/A'}
+        </p>
       </div>
       <div className="hidden sm:flex items-center gap-1 bg-gray-50 px-3 py-1 rounded-md text-gray-500">
         <span className="material-icons-round text-sm">people</span>

@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { usePayroll } from '../../context/PayrollContext';
 import { useAuth } from '../../context/AuthContext';
+import { formatKSh } from '../../utils/formatters';
 
 const PayrollEmployee = () => {
     const { user } = useAuth();
@@ -24,7 +25,7 @@ const PayrollEmployee = () => {
                     </div>
                     <div>
                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Monthly Salary</p>
-                        <p className="text-xl font-black text-gray-900">${myPayrolls[0]?.gross_salary || '0.00'}</p>
+                        <p className="text-xl font-black text-gray-900">{formatKSh(myPayrolls[0]?.gross_salary || 0)}</p>
                     </div>
                 </div>
             </div>
@@ -64,10 +65,10 @@ const PayrollEmployee = () => {
                                             {pay.paid_at || new Date().toLocaleDateString()}
                                         </td>
                                         <td className="py-6 px-8 text-sm font-bold text-gray-600">
-                                            ${pay.gross_salary}
+                                            {formatKSh(pay.gross_salary)}
                                         </td>
                                         <td className="py-6 px-8 text-center">
-                                            <span className="text-lg font-black text-green-600">${pay.net_salary}</span>
+                                            <span className="text-lg font-black text-green-600">{formatKSh(pay.net_salary)}</span>
                                         </td>
                                         <td className="py-6 px-8 text-right">
                                             <button className="px-6 py-2 bg-blue-50 text-blue-600 font-black rounded-xl text-xs hover:bg-blue-600 hover:text-white transition-all">

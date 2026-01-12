@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEmployee } from '../../context/EmployeeContext';
 import { useDepartment } from '../../context/DepartmentContext';
@@ -21,10 +21,23 @@ const EmployeeForm = () => {
     joined: new Date().toISOString().split('T')[0],
     role: '',
     status: 'Active',
-    salary: '',
     supervisor: '',
-    system_role: 'employee' // admin, hr, employee
+    system_role: 'employee', // admin, hr, employee
   });
+  const [users, setUsers] = useState([]); // List of users to link
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const { default: httpClient } = await import('../../api/httpClient');
+        const data = await httpClient.get('/users');
+        setUsers(data || []);
+      } catch (err) {
+        console.error("Failed to fetch users:", err);
+      }
+    };
+    fetchUsers();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -44,16 +57,16 @@ const EmployeeForm = () => {
       }
 
       const employeeData = {
-        ...formData,
-        photo_url,
-        name: `${formData.firstName} ${formData.lastName}`.trim(),
         first_name: formData.firstName,
         last_name: formData.lastName,
-        join_date: formData.joined,
-        salary: formData.salary,
-        supervisor_id: formData.supervisor,
-        role: formData.system_role,
-        job_title: formData.role
+        phone_number: formData.phone,
+        profile_photo_url: photo_url,
+        department_id: formData.department,
+        supervisor_id: formData.supervisor || null,
+        job_title: formData.role,
+        basic_salary: formData.salary,
+        hire_date: formData.joined,
+        user_id: formData.user_id || null
       };
 
       await addEmployee(employeeData);
@@ -185,7 +198,7 @@ const EmployeeForm = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">Monthly Salary</label>
+                <label className="text-sm font-medium text-gray-700">Monthly Salary (KES)</label>
                 <input
                   type="number"
                   name="salary"
@@ -193,7 +206,7 @@ const EmployeeForm = () => {
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  placeholder="e.g. 5000"
+                  placeholder="e.g. 50000"
                 />
               </div>
               <div className="space-y-1">
@@ -213,6 +226,21 @@ const EmployeeForm = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1">
+                <label className="text-sm font-medium text-gray-700">Link User Account</label>
+                <select
+                  name="user_id"
+                  value={formData.user_id}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white font-medium"
+                >
+                  <option value="">No Account Linked</option>
+                  {users.map(u => (
+                    <option key={u.id} value={u.id}>{u.email} ({u.role.name})</option>
+                  ))}
+                </select>
+                <p className="text-[10px] text-gray-400 mt-1">Required for attendance features.</p>
+              </div>
+              <div className="space-y-1">
                 <label className="text-sm font-medium text-gray-700">Supervisor</label>
                 <select
                   name="supervisor"
@@ -226,6 +254,9 @@ const EmployeeForm = () => {
                   ))}
                 </select>
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1">
                 <label className="text-sm font-medium text-gray-700">Date Joined</label>
                 <input

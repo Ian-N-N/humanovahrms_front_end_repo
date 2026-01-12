@@ -1,45 +1,41 @@
-import React, { useState } from 'react';
-import PayrollDetails from './PayrollDetails'; /* --- 1. IMPORT THE NEW COMPONENT --- */
+import React, { useState, useMemo } from 'react';
+import PayrollDetails from './PayrollDetails';
 import { formatKSh } from '../../utils/formatters';
-
-/* --- MOCK DATA (Same as before) --- */
-const PAYROLL_DATA = [
-  { id: 'EMP-001', name: 'Sarah Wanjiru', role: 'Senior Engineer', dept: 'Engineering', basic: 180000, allowance: 20000, deduction: 15000, status: 'Paid', date: 'Oct 2023', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
-  { id: 'EMP-002', name: 'Michael Otieno', role: 'Sales Lead', dept: 'Sales', basic: 120000, allowance: 45000, deduction: 12000, status: 'Pending', date: 'Oct 2023', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
-  { id: 'EMP-003', name: 'Emily Nyambura', role: 'HR Manager', dept: 'HR', basic: 150000, allowance: 10000, deduction: 14000, status: 'Paid', date: 'Oct 2023', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
-  { id: 'EMP-004', name: 'David Kim', role: 'Product Designer', dept: 'Design', basic: 140000, allowance: 5000, deduction: 11000, status: 'Processing', date: 'Oct 2023', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
-  { id: 'EMP-005', name: 'Chris Paul', role: 'Intern', dept: 'Engineering', basic: 40000, allowance: 2000, deduction: 500, status: 'Pending', date: 'Oct 2023', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
-];
-
-const formatKES = (amount) => {
-  return formatKSh(amount);
-};
-
-const StatCard = ({ label, value, subtext, icon, color }) => (
-  <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between min-w-[200px]">
-    <div>
-      <p className="text-gray-500 text-xs font-bold uppercase tracking-wide">{label}</p>
-      <h3 className="text-2xl font-bold text-gray-900 mt-1">{value}</h3>
-      <p className={`text-xs mt-1 font-medium ${subtext.includes('+') ? 'text-green-600' : 'text-gray-400'}`}>{subtext}</p>
-    </div>
-    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${color}`}>
-      <span className="material-icons-round text-lg">{icon}</span>
-    </div>
-  </div>
-);
+import { usePayroll } from '../../context/PayrollContext';
 
 const Payroll = () => {
+  const { payrolls, cycles, loading, createCycle, runPayroll } = usePayroll();
   const [activeTab, setActiveTab] = useState('current');
-  const [selectedMonth, setSelectedMonth] = useState('October 2023');
+  const [selectedMonth, setSelectedMonth] = useState('January 2024');
 
-  /* --- 2. ADDED STATE FOR VIEW SWITCHING --- */
-  const [currentView, setCurrentView] = useState('list'); // 'list' or 'details'
+  const [currentView, setCurrentView] = useState('list');
   const [selectedEmployee, setSelectedEmployee] = useState(null);
 
+  // Filter payrolls for current month/cycle if needed
+  const displayPayrolls = useMemo(() => {
+    // For now, show all payrolls or filter by selected month
+    return Array.isArray(payrolls) ? payrolls : [];
+  }, [payrolls]);
+
   // Totals Calculation
-  const totalDeductions = PAYROLL_DATA.reduce((acc, curr) => acc + curr.deduction, 0);
-  const totalNet = PAYROLL_DATA.reduce((acc, curr) => acc + (curr.basic + curr.allowance - curr.deduction), 0);
-  const totalAllowances = PAYROLL_DATA.reduce((acc, curr) => acc + curr.allowance, 0);
+  const totalDeductions = displayPayrolls.reduce((acc, curr) => acc + (Number(curr.tax_paid) + Number(curr.nssf) + Number(curr.nhif) + Number(curr.housing_levy)), 0);
+  const totalNet = displayPayrolls.reduce((acc, curr) => acc + Number(curr.net_salary), 0);
+  const totalGross = displayPayrolls.reduce((acc, curr) => acc + Number(curr.gross_salary), 0);
+
+  const handleRunPayroll = async () => {
+    try {
+      const activeCycle = cycles.find(c => c.status === 'Active');
+      if (!activeCycle) {
+        alert("Please create an active payroll cycle first.");
+        return;
+      }
+      if (!window.confirm(`Run payroll for ${activeCycle.name}?`)) return;
+      await runPayroll({ cycle_id: activeCycle.id });
+      alert("Payroll processed successfully!");
+    } catch (err) {
+      alert("Failed to process payroll.");
+    }
+  };
 
   /* --- 3. ADDED HANDLER FUNCTIONS --- */
   const handleViewEmployee = (employee) => {
@@ -124,33 +120,34 @@ const Payroll = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {PAYROLL_DATA.map((row, index) => {
-                    const netPay = row.basic + row.allowance - row.deduction;
+                  {displayPayrolls.map((row, index) => {
+                    const totalDeds = Number(row.tax_paid) + Number(row.nssf) + Number(row.nhif) + Number(row.housing_levy);
                     return (
                       <tr key={index} className="hover:bg-gray-50/80 transition-colors">
                         <td className="py-4 px-6">
                           <div className="flex items-center gap-3">
-                            <img src={row.avatar} alt={row.name} className="w-9 h-9 rounded-full object-cover border border-gray-100" />
+                            <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                              {row.employee?.name?.charAt(0) || 'E'}
+                            </div>
                             <div>
-                              <p className="font-bold text-gray-900 text-sm">{row.name}</p>
-                              <p className="text-xs text-gray-400">{row.role}</p>
+                              <p className="font-bold text-gray-900 text-sm">{row.employee?.name || 'Unknown'}</p>
+                              <p className="text-xs text-gray-400">{row.employee?.role || 'Staff'}</p>
                             </div>
                           </div>
                         </td>
-                        <td className="py-4 px-6 text-right text-sm font-medium text-gray-600">{formatKES(row.basic)}</td>
-                        <td className="py-4 px-6 text-right text-sm font-medium text-green-600">+{formatKES(row.allowance)}</td>
-                        <td className="py-4 px-6 text-right text-sm font-medium text-red-500">-{formatKES(row.deduction)}</td>
-                        <td className="py-4 px-6 text-right text-sm font-bold text-gray-900">{formatKES(netPay)}</td>
+                        <td className="py-4 px-6 text-right text-sm font-medium text-gray-600">{formatKSh(row.basic_salary)}</td>
+                        <td className="py-4 px-6 text-right text-sm font-medium text-green-600">+{formatKSh(0)}</td>
+                        <td className="py-4 px-6 text-right text-sm font-medium text-red-500">-{formatKSh(totalDeds)}</td>
+                        <td className="py-4 px-6 text-right text-sm font-bold text-gray-900">{formatKSh(row.net_salary)}</td>
                         <td className="py-4 px-6 text-center">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border 
-                            ${row.status === 'Paid' ? 'bg-green-50 text-green-700 border-green-100' :
-                              row.status === 'Pending' ? 'bg-orange-50 text-orange-700 border-orange-100' :
-                                'bg-blue-50 text-blue-700 border-blue-100'}`}>
+                            ${row.status === 'paid' ? 'bg-green-50 text-green-700 border-green-100' :
+                              row.status === 'processed' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                                'bg-orange-50 text-orange-700 border-orange-100'}`}>
                             {row.status}
                           </span>
                         </td>
                         <td className="py-4 px-6 text-right">
-                          {/* --- 5. ATTACH HANDLER TO BUTTON --- */}
                           <button
                             onClick={() => handleViewEmployee(row)}
                             className="text-blue-600 hover:text-blue-800 text-xs font-bold hover:underline"
@@ -166,20 +163,22 @@ const Payroll = () => {
             </div>
 
             <div className="block lg:hidden bg-gray-50 p-4 space-y-4">
-              {PAYROLL_DATA.map((row, index) => {
-                const netPay = row.basic + row.allowance - row.deduction;
+              {displayPayrolls.map((row, index) => {
+                const totalDeds = Number(row.tax_paid) + Number(row.nssf) + Number(row.nhif) + Number(row.housing_levy);
                 return (
                   <div key={index} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex items-center gap-3">
-                        <img src={row.avatar} alt={row.name} className="w-12 h-12 rounded-full object-cover border border-gray-100" />
+                        <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                          {row.employee?.name?.charAt(0) || 'E'}
+                        </div>
                         <div>
-                          <h4 className="font-bold text-gray-900">{row.name}</h4>
-                          <p className="text-xs text-gray-500">{row.role}</p>
+                          <h4 className="font-bold text-gray-900">{row.employee?.name || 'Unknown'}</h4>
+                          <p className="text-xs text-gray-500">{row.employee?.role || 'Staff'}</p>
                         </div>
                       </div>
                       <span className={`px-2 py-1 rounded-md text-xs font-bold border 
-                          ${row.status === 'Paid' ? 'bg-green-50 text-green-700 border-green-100' :
+                          ${row.status === 'paid' ? 'bg-green-50 text-green-700 border-green-100' :
                           'bg-orange-50 text-orange-700 border-orange-100'}`}>
                         {row.status}
                       </span>
@@ -188,11 +187,11 @@ const Payroll = () => {
                     <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm border-t border-gray-100 pt-3">
                       <div>
                         <p className="text-gray-400 text-xs mb-0.5">Basic Pay</p>
-                        <p className="font-medium text-gray-700">{formatKES(row.basic)}</p>
+                        <p className="font-medium text-gray-700">{formatKSh(row.basic_salary)}</p>
                       </div>
                       <div className="text-right">
                         <p className="text-gray-400 text-xs mb-0.5">Net Pay</p>
-                        <p className="font-bold text-blue-600 text-lg leading-tight">{formatKES(netPay)}</p>
+                        <p className="font-bold text-blue-600 text-lg leading-tight">{formatKSh(row.net_salary)}</p>
                       </div>
                     </div>
 
@@ -209,7 +208,7 @@ const Payroll = () => {
             </div>
 
             <div className="p-4 border-t border-gray-100 bg-white flex justify-between items-center rounded-b-2xl">
-              <span className="text-xs text-gray-500">Showing 5 records</span>
+              <span className="text-xs text-gray-500">Showing {displayPayrolls.length} records</span>
               <div className="flex gap-2">
                 <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50">
                   <span className="material-icons-round text-sm">chevron_left</span>

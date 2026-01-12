@@ -1,7 +1,7 @@
 const BASE_URL = '/api';
 
 const request = async (endpoint, options = {}) => {
-    const token = localStorage.getItem('hrms_token');
+    const token = localStorage.getItem('token');
 
     const headers = {
         'Content-Type': 'application/json',
@@ -19,8 +19,8 @@ const request = async (endpoint, options = {}) => {
 
         // Handle 401 Unauthorized globally
         if (response.status === 401) {
-            localStorage.removeItem('hrms_token');
-            localStorage.removeItem('hrms_user');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
             window.location.href = '/login';
             throw new Error('Session expired. Please login again.');
         }

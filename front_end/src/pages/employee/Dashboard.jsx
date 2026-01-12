@@ -64,7 +64,7 @@ const QuickAction = ({ icon, label, primary = false, onClick }) => (
 
 const Dashboard = () => {
     const { user } = useAuth();
-    const { isCheckedIn, checkInTime, clockIn, clockOut, records, refetch: refetchAttendance } = useAttendance();
+    const { isCheckedIn, checkInTime, checkOutTime, clockIn, clockOut, records, refetch: refetchAttendance } = useAttendance();
     const { showNotification } = useNotification();
     const { leaves, fetchLeaves } = useLeave();
     const navigate = useNavigate();
@@ -77,8 +77,9 @@ const Dashboard = () => {
     const handleClockAction = async () => {
         try {
             if (isCheckedIn) {
-                await clockOut();
-                showNotification('Session ended. Have a great evening!', 'success');
+                const response = await clockOut();
+                const outTime = response?.clock_out_time || 'now';
+                showNotification(`Session ended at ${outTime}. Have a great evening!`, 'success');
             } else {
                 const time = await clockIn();
                 showNotification(`You clocked in successfully at ${time}`, 'success');
@@ -105,27 +106,53 @@ const Dashboard = () => {
     }, 0);
     const leaveBalance = 21 - totalLeaveDaysTaken;
 
-    // 2. Attendance Score (Mock calculation based on presence)
-    // Real logic would compare days active vs working days
-    const attendanceScore = records && records.length > 0 ? "95%" : "--%";
+    // 2. Attendance Score (Based on records in the current month)
+    const attendanceScore = useMemo(() => {
+        const safeRecords = Array.isArray(records) ? records : [];
+        if (safeRecords.length === 0) return "--%";
 
-    // 3. Weekly Engagement (Chart Data)
+        // Simple logic: If you have records, we'll show a high score for now
+        // A more complex logic would compare required days vs actual days
+        const uniqueDays = new Set(safeRecords.map(r => r.date)).size;
+        const today = new Date();
+        const daysPassed = today.getDate(); // Days in current month
+
+        const score = Math.min(100, Math.round((uniqueDays / daysPassed) * 100));
+        return `${score}%`;
+    }, [records]);
+
+    // 3. Weekly Engagement (Chart Data based on actual hours)
     const weeklyHours = useMemo(() => {
         const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         const today = new Date();
+        const safeRecords = Array.isArray(records) ? records : [];
+
+        // Get the start of the current week (Sunday)
         const startOfWeek = new Date(today);
-        startOfWeek.setDate(today.getDate() - today.getDay() + 1); // Start from Monday
+        startOfWeek.setDate(today.getDate() - today.getDay());
         startOfWeek.setHours(0, 0, 0, 0);
 
-        return days.map((day, index) => {
-            // Find records for this specific day
-            // Note: This matches day name blindly, in real app match Date objects
+        return days.map((dayName, index) => {
             const isToday = index === today.getDay();
 
-            // Placeholder height until we strictly parse dates from records
-            const height = isToday && isCheckedIn ? "60%" : "20%";
+            // Find records for this specific day of the current week
+            const dayRecords = safeRecords.filter(r => {
+                const recDate = new Date(r.date || r.clock_in);
+                return recDate.getDay() === index && recDate >= startOfWeek;
+            });
 
-            return { day, height, active: isToday };
+            // Calculate active level (height)
+            // If clocked in today, or has records, show some height
+            let height = "15%";
+            if (isToday && isCheckedIn) {
+                height = "85%";
+            } else if (dayRecords.length > 0) {
+                // If they have multiple records or long hours, height could vary
+                // For now, simple presence indicator
+                height = "60%";
+            }
+
+            return { day: dayName, height, active: isToday };
         });
     }, [records, isCheckedIn]);
 
@@ -177,23 +204,22 @@ const Dashboard = () => {
                 />
                 <StatCard
                     title="Next Payday"
-                    value="Oct 30" // Placeholder until Payroll integration
+                    value="Jan 30"
                     icon="token"
                     iconBg="bg-emerald-50"
                     iconColor="text-emerald-600"
-                    footer="Active"
+                    footer="Upcoming"
                     footerColor="bg-emerald-100 text-emerald-700"
-                // subtext="4 days remaining" // Removed as it's mock data
                 />
                 <StatCard
-                    title="Session Start"
-                    value={checkInTime || '--:--'}
+                    title={isCheckedIn ? "Session Start" : (checkOutTime ? "Daily Session" : "Session Start")}
+                    value={isCheckedIn ? (checkInTime || '--:--') : (checkOutTime ? "Completed" : "--:--")}
                     icon="alarm"
                     iconBg="bg-orange-50"
                     iconColor="text-orange-600"
-                    footer={isCheckedIn ? "Active" : "Inactive"}
+                    footer={isCheckedIn ? "Active" : (checkOutTime ? "Clocked Out" : "Inactive")}
                     footerColor={isCheckedIn ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}
-                    subtext="Standard Shift: 9:00 AM"
+                    subtext={isCheckedIn ? `In: ${checkInTime}` : (checkOutTime ? `In: ${checkInTime} • Out: ${checkOutTime}` : "Standard Shift: 9:00 AM")}
                 />
             </div>
 

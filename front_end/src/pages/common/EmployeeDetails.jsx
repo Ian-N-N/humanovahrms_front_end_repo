@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { formatKSh } from '../../utils/formatters';
 
 const EmployeeDetails = ({ employee, onBack }) => {
     if (!employee) return null;
@@ -76,7 +77,7 @@ const EmployeeDetails = ({ employee, onBack }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-12">
                             <div className="space-y-1">
                                 <p className="text-xs font-black text-gray-300 uppercase">Monthly Gross Salary</p>
-                                <p className="text-sm font-bold text-gray-900">${employee.salary || '0.00'}</p>
+                                <p className="text-sm font-bold text-gray-900">{formatKSh(employee.salary || 0)}</p>
                             </div>
                             <div className="space-y-1">
                                 <p className="text-xs font-black text-gray-300 uppercase">Reported Supervisor</p>

@@ -13,18 +13,25 @@ export const EmployeeProvider = ({ children }) => {
 
     const fetchEmployees = useCallback(async () => {
         // Guard: Only Admin and HR can fetch the full list
-        const role = user?.role;
-        if (role !== 'admin' && role !== 'hr') {
-            console.log("Skipping full employee fetch for non-admin/hr user.");
+        const roleObj = user?.role;
+        const roleName = (roleObj?.name || (typeof roleObj === 'string' ? roleObj : '')).toLowerCase();
+
+        const isAuthorized = roleName === 'admin' || roleName === 'hr' || roleName === 'hr manager';
+
+        if (!isAuthorized) {
+            console.log("Skipping full employee fetch for unauthorized user.");
             setLoading(false);
             return;
         }
 
         try {
             setLoading(true);
-            const data = await employeeService.getAll();
-            console.log("Employee list from backend:", data);
-            setEmployees(data || []);
+            const response = await employeeService.getAll();
+            console.log("Employee list from backend:", response);
+
+            // Fix: Unwrap paginated data if present, otherwise fallback
+            const data = response?.employees || (Array.isArray(response) ? response : []);
+            setEmployees(data);
         } catch (error) {
             console.error("Failed to fetch employees:", error);
         } finally {

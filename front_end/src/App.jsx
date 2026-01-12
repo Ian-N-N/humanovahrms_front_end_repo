@@ -88,6 +88,7 @@ const App = () => {
                           {/* HR Modules */}
                           <Route path="/hr/dashboard" element={<HRDashboard />} />
                           <Route path="/hr/employees" element={<Employees />} />
+                          <Route path="/hr/employees/new" element={<EmployeeCreate />} />
                           <Route path="/hr/departments" element={<Departments />} />
                           <Route path="/hr/leaves" element={<LeaveReview />} />
                           <Route path="/hr/attendance" element={<AttendanceSummary />} />

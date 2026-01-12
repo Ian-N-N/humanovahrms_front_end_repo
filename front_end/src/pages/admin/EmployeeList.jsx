@@ -8,6 +8,7 @@ import EmployeeEdit from './EmployeeEdit';
 // Helper to group flat employee data by department and role
 const groupEmployees = (flatList) => {
   const depts = {};
+  if (!Array.isArray(flatList)) return [];
   flatList.forEach(emp => {
     const deptName = emp.department || 'Unassigned';
     const roleName = emp.role || 'General';
