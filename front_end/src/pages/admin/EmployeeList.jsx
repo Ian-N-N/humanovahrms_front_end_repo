@@ -199,7 +199,10 @@ const Employees = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { employees, loading, addEmployee, updateEmployee, activateEmployee, deactivateEmployee } = useEmployee();
-  const role = user?.role || 'admin';
+
+  // Fix: Handle role being an object { id, name } or a string
+  const roleObj = user?.role;
+  const role = roleObj?.name ? roleObj.name.toLowerCase() : (typeof roleObj === 'string' ? roleObj : 'admin');
 
   const groupedData = useMemo(() => groupEmployees(employees), [employees]);
 

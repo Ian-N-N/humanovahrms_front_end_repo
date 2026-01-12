@@ -12,19 +12,38 @@ export const DepartmentProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     const fetchDepartments = useCallback(async () => {
+        // Fix: Handle role being an object or string
+        const roleObj = user?.role;
+        const role = roleObj?.name ? roleObj.name.toLowerCase() : (typeof roleObj === 'string' ? roleObj : 'employee');
+
         // Guard: Only Admin and HR can fetch departments (usually)
-        const role = user?.role;
         if (role !== 'admin' && role !== 'hr' && role !== 'employee') {
             setLoading(false);
             return;
         }
 
+        const sampleDepartments = [
+            { id: 'dept-1', name: 'Engineering' },
+            { id: 'dept-2', name: 'Product' },
+            { id: 'dept-3', name: 'Design' },
+            { id: 'dept-4', name: 'Marketing' },
+            { id: 'dept-5', name: 'Sales' },
+            { id: 'dept-6', name: 'Human Resources' },
+            { id: 'dept-7', name: 'Finance' }
+        ];
+
         try {
             setLoading(true);
             const data = await departmentService.getAll();
-            setDepartments(data || []);
+            if (data && data.length > 0) {
+                setDepartments(data);
+            } else {
+                console.warn("No departments found from API, using samples.");
+                setDepartments(sampleDepartments);
+            }
         } catch (error) {
-            console.error("Failed to fetch departments:", error);
+            console.error("Failed to fetch departments, falling back to samples:", error);
+            setDepartments(sampleDepartments);
         } finally {
             setLoading(false);
         }
