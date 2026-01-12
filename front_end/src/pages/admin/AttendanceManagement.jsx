@@ -43,8 +43,8 @@ const Attendance = () => {
           role: "Unknown",
           avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(rec.user_id || 'U')}&background=random`
         },
-        checkIn: rec.clock_in || rec.clockIn || rec.checkIn || rec.check_in || "--:--",
-        checkOut: rec.clock_out || rec.clockOut || rec.checkOut || rec.check_out || "--:--",
+        checkIn: rec.clock_in_time || rec.clock_in || rec.clockIn || rec.checkIn || rec.check_in || "--:--",
+        checkOut: rec.clock_out_time || rec.clock_out || rec.clockOut || rec.checkOut || rec.check_out || "--:--",
         workHours: rec.work_hours || rec.workHours || "0h 00m",
         status: rec.status || "On Time"
       };

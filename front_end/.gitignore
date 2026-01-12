@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Testing and Debug Scripts (from automation)
+verify_*.py
+debug_*.py
+test_*.py
+inspect_*.py
+check_*.py
+reset_db.py

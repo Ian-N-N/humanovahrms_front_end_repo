@@ -12,9 +12,8 @@ export const LeaveProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     const fetchLeaves = useCallback(async () => {
-        const role = user?.role;
-        // Handle role object or string
-        const roleName = typeof role === 'object' ? role?.name?.toLowerCase() : role?.toLowerCase();
+        const roleObj = user?.role;
+        const roleName = (roleObj?.name || (typeof roleObj === 'string' ? roleObj : '')).toLowerCase();
 
         if (!roleName) return;
 
@@ -61,19 +60,19 @@ export const LeaveProvider = ({ children }) => {
 
     const updateStatus = async (id, status) => {
         try {
-            if (status === 'Approved') {
+            if (status.toLowerCase() === 'approved') {
                 await leaveService.approve(id);
-            } else if (status === 'Rejected') {
+            } else if (status.toLowerCase() === 'rejected') {
                 await leaveService.reject(id);
             }
-            setLeaves((prev) => prev.map(leave => leave.id === id ? { ...leave, status } : leave));
+            setLeaves((prev) => prev.map(leave => leave.id === id ? { ...leave, status: status.toLowerCase() } : leave));
         } catch (error) {
             console.error(`Failed to ${status} leave:`, error);
             throw error;
         }
     };
 
-    const getPendingCount = () => leaves.filter(l => l.status === 'Pending').length;
+    const getPendingCount = () => leaves.filter(l => l.status?.toLowerCase() === 'pending').length;
 
     const value = {
         leaves,

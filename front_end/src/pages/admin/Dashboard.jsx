@@ -46,6 +46,8 @@ const DashboardOverview = () => {
   const displayName = user?.name || user?.email?.split('@')[0] || 'Administrator';
   const firstName = displayName.split(' ')[0];
 
+  const safeEmployees = Array.isArray(employees) ? employees : [];
+
   return (
     <main className="flex-1 bg-[#FDFDFD] h-full overflow-y-auto p-6 lg:p-10 font-sans custom-scrollbar">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
@@ -87,18 +89,46 @@ const DashboardOverview = () => {
               <p className="text-gray-400 text-xs font-medium uppercase tracking-widest mt-1">Global Activity Trends</p>
             </div>
           </div>
-          <div className="h-72 bg-gray-50 rounded-3xl flex items-center justify-center border border-dashed border-gray-200">
-            <div className="text-center">
-              <span className="material-icons-round text-5xl text-gray-200 block mb-4">insights</span>
-              <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Real-time charts loading...</p>
+          <div className="h-72 bg-gray-50 rounded-3xl flex items-end justify-between p-8 pt-12 gap-2 relative overflow-hidden">
+            <div className="absolute top-4 left-8">
+              <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Past 7 Days Presence</span>
             </div>
+            {useMemo(() => {
+              const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+              const safeRecords = Array.isArray(records) ? records : [];
+              const safeEmps = Array.isArray(employees) ? employees : [];
+              const total = safeEmps.length || 1;
+
+              return days.map((day, idx) => {
+                const count = safeRecords.filter(r => {
+                  const d = new Date(r.date || r.clock_in);
+                  return d.getDay() === (idx + 1) % 7; // Sync with days array
+                }).length;
+                const height = `${Math.max(10, Math.min(100, (count / total) * 100))}%`;
+                return (
+                  <div key={idx} className="flex-1 flex flex-col items-center gap-2 group">
+                    <div className="w-full bg-blue-100 rounded-xl transition-all duration-500 hover:bg-blue-600 relative" style={{ height }}>
+                      <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded font-black whitespace-nowrap z-10">
+                        {count} Active
+                      </div>
+                    </div>
+                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-tighter">{day}</span>
+                  </div>
+                );
+              });
+            }, [records, employees])}
+            {(!records || records.length === 0) && (
+              <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-[2px]">
+                <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Awaiting Pulse Data...</p>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
           <h3 className="text-lg font-black text-gray-900 mb-8 tracking-tight">Live Activity</h3>
           <div className="space-y-6">
-            {employees.slice(0, 5).map((emp, i) => (
+            {safeEmployees.slice(0, 5).map((emp, i) => (
               <div key={i} className="flex gap-4 group cursor-pointer">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center text-blue-600 font-black text-sm group-hover:scale-110 transition-transform">
                   {emp.name?.charAt(0)}

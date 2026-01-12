@@ -13,8 +13,12 @@ export const PayrollProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     const fetchData = useCallback(async () => {
-        const role = user?.role;
-        if (role !== 'admin' && role !== 'hr') {
+        const roleObj = user?.role;
+        const roleName = (roleObj?.name || (typeof roleObj === 'string' ? roleObj : '')).toLowerCase();
+
+        const isAuthorized = roleName === 'admin' || roleName === 'hr' || roleName === 'hr manager';
+
+        if (!isAuthorized) {
             setLoading(false);
             return;
         }

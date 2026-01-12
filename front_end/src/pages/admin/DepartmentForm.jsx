@@ -1,15 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import employeeService from '../../api/employeeService';
 
 const DepartmentForm = ({ department, onCancel, onSave }) => {
   const isEdit = !!department;
-  
+
+  const [employees, setEmployees] = useState([]);
   const [formData, setFormData] = useState({
     name: department?.name || '',
-    head: department?.head || '',
-    members: department?.members || '',
+    manager_id: department?.manager_id || '',
     description: department?.description || '',
     theme: department?.theme || 'blue'
   });
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const response = await employeeService.getAll();
+        // Assuming response is array or has employees property
+        setEmployees(Array.isArray(response) ? response : response.employees || []);
+      } catch (error) {
+        console.error("Failed to load employees for manager selection", error);
+      }
+    };
+    fetchEmployees();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -33,16 +47,16 @@ const DepartmentForm = ({ department, onCancel, onSave }) => {
             <span className="material-icons-round">close</span>
           </button>
         </div>
-        
+
         <form className="p-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-1">
             <label className="text-sm font-medium text-gray-700">Department Name</label>
-            <input 
-              type="text" 
-              name="name" 
-              value={formData.name} 
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
               onChange={handleChange}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               placeholder="e.g. Engineering"
               required
             />
@@ -50,21 +64,26 @@ const DepartmentForm = ({ department, onCancel, onSave }) => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Department Head</label>
-              <input 
-                type="text" 
-                name="head" 
-                value={formData.head} 
+              <label className="text-sm font-medium text-gray-700">Department Head (Manager)</label>
+              <select
+                name="manager_id"
+                value={formData.manager_id}
                 onChange={handleChange}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none" 
-                placeholder="e.g. Sarah Jenkins" 
-              />
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+              >
+                <option value="">Select Manager...</option>
+                {employees.map(emp => (
+                  <option key={emp.id} value={emp.id}>
+                    {emp.first_name} {emp.last_name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="space-y-1">
               <label className="text-sm font-medium text-gray-700">Theme Color</label>
-              <select 
-                name="theme" 
-                value={formData.theme} 
+              <select
+                name="theme"
+                value={formData.theme}
                 onChange={handleChange}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
               >
@@ -79,12 +98,12 @@ const DepartmentForm = ({ department, onCancel, onSave }) => {
 
           <div className="space-y-1">
             <label className="text-sm font-medium text-gray-700">Description</label>
-            <textarea 
-              name="description" 
-              value={formData.description} 
+            <textarea
+              name="description"
+              value={formData.description}
               onChange={handleChange}
-              rows="3" 
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+              rows="3"
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               placeholder="Brief description of responsibilities..."
             ></textarea>
           </div>

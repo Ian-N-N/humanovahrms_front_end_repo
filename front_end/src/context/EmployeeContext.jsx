@@ -21,16 +21,14 @@ export const EmployeeProvider = ({ children }) => {
     };
 
     const fetchEmployees = useCallback(async () => {
+        // Guard: Only Admin and HR can fetch the full list
         const roleObj = user?.role;
-        const role = roleObj?.name
-            ? roleObj.name.toLowerCase()
-            : typeof roleObj === 'string'
-                ? roleObj.toLowerCase()
-                : 'employee';
+        const roleName = (roleObj?.name || (typeof roleObj === 'string' ? roleObj : '')).toLowerCase();
 
-        // Only Admin and HR can see full list
-        if (role !== 'admin' && role !== 'hr') {
-            setEmployees([]);
+        const isAuthorized = roleName === 'admin' || roleName === 'hr' || roleName === 'hr manager';
+
+        if (!isAuthorized) {
+            console.log("Skipping full employee fetch for unauthorized user.");
             setLoading(false);
             return;
         }
@@ -38,10 +36,12 @@ export const EmployeeProvider = ({ children }) => {
         try {
             setLoading(true);
             const response = await employeeService.getAll();
-            console.log("Employee API raw response:", response);
+            console.log("Employee list from backend:", response);
 
-            const normalized = normalizeEmployees(response);
-            setEmployees(normalized);
+            // Fix: Unwrap paginated data if present, otherwise fallback
+            // Prioritize normalized approach from HEAD if needed, but main's unwrap is more specific
+            const data = response?.employees || (Array.isArray(response) ? response : normalizeEmployees(response));
+            setEmployees(data);
         } catch (error) {
             console.error("Failed to fetch employees:", error);
             setEmployees([]);

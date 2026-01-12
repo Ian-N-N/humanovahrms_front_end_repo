@@ -12,6 +12,7 @@ export const AttendanceProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [isCheckedIn, setIsCheckedIn] = useState(false);
     const [checkInTime, setCheckInTime] = useState(null);
+    const [checkOutTime, setCheckOutTime] = useState(null);
 
     const fetchAttendance = useCallback(async () => {
         const role = user?.role;
@@ -50,10 +51,20 @@ export const AttendanceProvider = ({ children }) => {
 
             if (activeRecord) {
                 setIsCheckedIn(true);
-                setCheckInTime(activeRecord.clock_in || activeRecord.clockIn || activeRecord.checkIn || activeRecord.check_in || activeRecord.time);
+                setCheckInTime(activeRecord.clock_in_time || activeRecord.clock_in);
+                setCheckOutTime(null);
             } else {
                 setIsCheckedIn(false);
-                setCheckInTime(null);
+                // If not checked in, check if there's a record for today to show the last session
+                const today = new Date().toISOString().split('T')[0];
+                const todayRecord = data.find(rec => rec.date === today);
+                if (todayRecord) {
+                    setCheckInTime(todayRecord.clock_in_time || todayRecord.clock_in);
+                    setCheckOutTime(todayRecord.clock_out_time || todayRecord.clock_out);
+                } else {
+                    setCheckInTime(null);
+                    setCheckOutTime(null);
+                }
             }
         } catch (error) {
             console.error("Failed to fetch attendance:", error);
@@ -91,10 +102,12 @@ export const AttendanceProvider = ({ children }) => {
 
     const clockOut = async () => {
         try {
-            await attendanceService.clockOut();
+            const response = await attendanceService.clockOut();
             setIsCheckedIn(false);
-            setCheckInTime(null);
+            // Don't clear checkInTime, let Dashboard handle it
+            setCheckOutTime(response.clock_out_time || response.clock_out);
             await fetchAttendance(); // Refresh records
+            return response;
         } catch (error) {
             console.error("Clock-out failed:", error);
             throw error;
@@ -117,6 +130,7 @@ export const AttendanceProvider = ({ children }) => {
         loading,
         isCheckedIn,
         checkInTime,
+        checkOutTime,
         clockIn,
         clockOut,
         updateAttendanceRecord,

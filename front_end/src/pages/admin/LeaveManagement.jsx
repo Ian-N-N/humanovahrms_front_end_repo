@@ -3,12 +3,12 @@ import { useLeave } from '../../context/LeaveContext';
 
 const StatusBadge = ({ status }) => {
     const styles = {
-        "Pending": "bg-orange-50 text-orange-700 border-orange-100",
-        "Approved": "bg-green-50 text-green-700 border-green-100",
-        "Rejected": "bg-red-50 text-red-700 border-red-100",
+        "pending": "bg-orange-50 text-orange-700 border-orange-100",
+        "approved": "bg-green-50 text-green-700 border-green-100",
+        "rejected": "bg-red-50 text-red-700 border-red-100",
     };
     return (
-        <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${styles[status]}`}>
+        <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${styles[status?.toLowerCase()] || styles.pending}`}>
             {status}
         </span>
     );
@@ -22,8 +22,8 @@ const LeaveManagement = () => {
     const filteredLeaves = useMemo(() => {
         return leaves.filter(leave => {
             const matchesSearch = leave.employee?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                leave.type?.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesFilter = filter === 'All' || leave.status === filter;
+                leave.leave_type?.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesFilter = filter === 'All' || leave.status?.toLowerCase() === filter.toLowerCase();
             return matchesSearch && matchesFilter;
         });
     }, [leaves, searchTerm, filter]);
@@ -62,15 +62,15 @@ const LeaveManagement = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                     <p className="text-xs font-bold text-orange-500 uppercase">Pending Review</p>
-                    <h3 className="text-3xl font-bold text-gray-900 mt-1">{leaves.filter(l => l.status === 'Pending').length}</h3>
+                    <h3 className="text-3xl font-bold text-gray-900 mt-1">{leaves.filter(l => l.status?.toLowerCase() === 'pending').length}</h3>
                 </div>
                 <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                     <p className="text-xs font-bold text-green-600 uppercase">Approved Total</p>
-                    <h3 className="text-3xl font-bold text-gray-900 mt-1">{leaves.filter(l => l.status === 'Approved').length}</h3>
+                    <h3 className="text-3xl font-bold text-gray-900 mt-1">{leaves.filter(l => l.status?.toLowerCase() === 'approved').length}</h3>
                 </div>
                 <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                     <p className="text-xs font-bold text-red-500 uppercase">Requests Rejected</p>
-                    <h3 className="text-3xl font-bold text-gray-900 mt-1">{leaves.filter(l => l.status === 'Rejected').length}</h3>
+                    <h3 className="text-3xl font-bold text-gray-900 mt-1">{leaves.filter(l => l.status?.toLowerCase() === 'rejected').length}</h3>
                 </div>
             </div>
 
@@ -123,16 +123,16 @@ const LeaveManagement = () => {
                                             </div>
                                             <div>
                                                 <p className="font-bold text-gray-900 text-sm">{leave.employee?.name || 'Unknown'}</p>
-                                                <p className="text-[10px] text-gray-500 uppercase font-bold">{leave.employee?.role || 'N/A'}</p>
+                                                <p className="text-[10px] text-gray-500 uppercase font-bold">{leave.employee?.job_title || 'N/A'}</p>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="py-4 px-6">
-                                        <p className="text-sm font-medium text-gray-700">{leave.type}</p>
+                                        <p className="text-sm font-medium text-gray-700">{leave.leave_type}</p>
                                     </td>
                                     <td className="py-4 px-6">
                                         <div className="flex flex-col text-xs">
-                                            <span className="font-bold text-gray-900">{leave.startDate} - {leave.endDate}</span>
+                                            <span className="font-bold text-gray-900">{leave.start_date} to {leave.end_date}</span>
                                             <span className="text-gray-400">{leave.days} days</span>
                                         </div>
                                     </td>
@@ -143,7 +143,7 @@ const LeaveManagement = () => {
                                         <StatusBadge status={leave.status} />
                                     </td>
                                     <td className="py-4 px-6 text-right">
-                                        {leave.status === 'Pending' ? (
+                                        {leave.status?.toLowerCase() === 'pending' ? (
                                             <div className="flex items-center justify-end gap-2">
                                                 <button
                                                     onClick={() => handleAction(leave.id, 'Approved')}
