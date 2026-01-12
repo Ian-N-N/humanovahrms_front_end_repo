@@ -43,6 +43,10 @@ const DashboardOverview = () => {
     ];
   }, [employees, departments, leaves, records, navigate]);
 
+  const roleObj = user?.role;
+  const roleName = roleObj?.name ? roleObj.name : (typeof roleObj === 'string' ? roleObj : 'employee');
+  const isHR = roleName.toLowerCase().includes('hr');
+
   const displayName = user?.name || user?.email?.split('@')[0] || 'Administrator';
   const firstName = displayName.split(' ')[0];
 
@@ -67,10 +71,12 @@ const DashboardOverview = () => {
       </div>
 
       <div className="flex flex-wrap gap-4 mb-10">
-        <button onClick={() => navigate('/admin/new_employee')} className="flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-200 transition-all active:scale-95">
-          <span className="material-icons-round text-lg">person_add</span>
-          Onboard Talent
-        </button>
+        {!isHR && (
+          <button onClick={() => navigate('/admin/new_employee')} className="flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-200 transition-all active:scale-95">
+            <span className="material-icons-round text-lg">person_add</span>
+            Onboard Talent
+          </button>
+        )}
         <button onClick={() => navigate('/admin/departments')} className="flex items-center gap-3 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-sm transition-all active:scale-95">
           <span className="material-icons-round text-lg">domain</span>
           Org Structure

@@ -61,7 +61,6 @@ const Sidebar = () => {
       { to: '/hr/dashboard', icon: 'dashboard', label: 'Dashboard' },
       { to: '/hr/analytics', icon: 'insights', label: 'Insights' },
       { to: '/hr/employees', icon: 'people', label: 'Employees' },
-      { to: '/hr/departments', icon: 'business', label: 'Departments' },
       { to: '/hr/leaves', icon: 'event_available', label: 'Leave' },
       { to: '/hr/attendance', icon: 'schedule', label: 'Attendance' },
     ],

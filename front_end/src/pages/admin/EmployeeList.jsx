@@ -39,7 +39,8 @@ const groupEmployees = (flatList) => {
 };
 
 /* --- INTERNAL COMPONENT: LIST VIEW --- */
-const EmployeesList = ({ data, onAddNew, onViewProfile, onToggleStatus }) => {
+const EmployeesList = ({ data, onAddNew, onViewProfile, onToggleStatus, role }) => {
+  const isHR = role?.toLowerCase().includes('hr');
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
 
@@ -102,11 +103,13 @@ const EmployeesList = ({ data, onAddNew, onViewProfile, onToggleStatus }) => {
             </button>
           </div>
 
-          {/* Add Button */}
-          <button onClick={onAddNew} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow-sm transition-colors whitespace-nowrap">
-            <span className="material-icons-round text-lg">add</span>
-            <span className="hidden sm:inline">Add New</span>
-          </button>
+          {/* Add Button - Hidden for HR */}
+          {!isHR && (
+            <button onClick={onAddNew} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow-sm transition-colors whitespace-nowrap">
+              <span className="material-icons-round text-lg">add</span>
+              <span className="hidden sm:inline">Add New</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -210,7 +213,7 @@ const Employees = () => {
 
   // Fix: Handle role being an object { id, name } or a string
   const roleObj = user?.role;
-  const role = roleObj?.name ? roleObj.name.toLowerCase() : (typeof roleObj === 'string' ? roleObj : 'admin');
+  const role = roleObj?.name ? roleObj.name : (typeof roleObj === 'string' ? roleObj : 'admin');
 
   const groupedData = useMemo(() => groupEmployees(employees), [employees]);
 
@@ -298,6 +301,7 @@ const Employees = () => {
           onAddNew={handleAddNew}
           onViewProfile={handleViewProfile}
           onToggleStatus={handleToggleStatus}
+          role={role}
         />
       )}
 

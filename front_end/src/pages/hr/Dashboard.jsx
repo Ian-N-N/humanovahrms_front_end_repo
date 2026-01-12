@@ -97,12 +97,6 @@ const HRDashboard = () => {
                         <button className="px-6 py-3 bg-white border border-gray-200 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:bg-gray-50 transition-all shadow-sm">
                             Export PDF
                         </button>
-                        <button
-                            onClick={() => navigate('/hr/employees/new')}
-                            className="px-6 py-3 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-100"
-                        >
-                            + New Employee
-                        </button>
                     </div>
                 </header>
 
