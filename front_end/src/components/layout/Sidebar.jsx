@@ -125,13 +125,7 @@ const Sidebar = () => {
         </div>
 
         {/* Recuitment Section only for Admin/HR */}
-        {(menuKey === 'admin' || menuKey === 'hr') && (
-          <div className="mb-6">
-            <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Recruitment</p>
-            <NavLink to="/jobs" icon="work" label="Jobs" active={isActive('/jobs')} />
-            {(menuKey === 'admin') && <NavLink to="/candidates" icon="person_search" label="Candidates" badge="13" active={isActive('/candidates')} />}
-          </div>
-        )}
+
       </div>
 
       {/* Footer */}
