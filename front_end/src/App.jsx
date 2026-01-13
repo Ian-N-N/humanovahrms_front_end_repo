@@ -17,6 +17,7 @@ import Employees from "./pages/admin/EmployeeList";
 import EmployeeCreate from "./pages/admin/EmployeeCreate";
 import Departments from "./pages/admin/DepartmentManagement";
 import AuthPage from "./pages/auth/Login";
+import TrialRegister from "./pages/auth/TrialRegester";
 import Payroll from './pages/admin/Payroll';
 import LeaveManagement from './pages/admin/LeaveManagement';
 import Attendance from './pages/admin/AttendanceManagement';
