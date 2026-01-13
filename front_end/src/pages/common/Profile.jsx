@@ -6,26 +6,31 @@ import Button from '../../components/common/Button';
 import { useAuth } from '../../context/AuthContext';
 
 const Profile = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, updateUser } = useAuth(); // Destructure updateUser
+
     const [isEditing, setIsEditing] = useState(false);
 
-    // Initial State mocking user data
     const [formData, setFormData] = useState({
         name: user?.name || 'User',
         email: user?.email || 'user@humanova.co.ke',
-        phone: '+254 712 345 678',
-        address: 'P.O. Box 7894, Nairobi',
-        emergencyContact: 'Jane Doe (+254 722 000 111)'
+        phone: user?.phone || '+254 712 345 678',
+        address: user?.address || 'P.O. Box 7894, Nairobi',
+        emergencyContact: user?.emergency_contact || 'Jane Doe (+254 722 000 111)'
     });
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSave = () => {
-        setIsEditing(false);
-        // Here we would call API to update profile
-        alert('Profile Updated Successfully!');
+    const handleSave = async () => {
+        try {
+            await updateUser(formData);
+            setIsEditing(false);
+            alert('Profile Updated Successfully!');
+        } catch (error) {
+            console.error("Failed to update profile:", error);
+            alert('Failed to update profile. Please try again.');
+        }
     };
 
     return (
@@ -39,7 +44,9 @@ const Profile = () => {
                         {user?.name?.charAt(0) || 'U'}
                     </div>
                     <h3 className="text-xl font-bold text-gray-900">{user?.name}</h3>
-                    <p className="text-gray-500 capitalize">{user?.role}</p>
+                    <p className="text-gray-500 capitalize">
+                        {typeof user?.role === 'object' ? user.role.name || 'Employee' : user?.role || 'Employee'}
+                    </p>
                     <p className="text-gray-400 text-sm mt-1">{user?.id}</p>
 
                     <div className="mt-6 w-full space-y-2">
