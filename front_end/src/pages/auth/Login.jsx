@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Input from '../../components/common/Input';
 
-// Using the Unsplash image BUT WILL HAVE TO DOWNLOAD IT LATER FOR SECURITY REASONS
+// Using the Unsplash image
 const BACKGROUND_IMAGE_URL = "https://images.unsplash.com/photo-1497366811353-6870744d04b2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80";
 
 const AuthPage = () => {
@@ -16,29 +16,30 @@ const AuthPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value.toLowerCase();
-    // const password = document.getElementById('password').value; 
-
+    
     if (isLogin) {
       // --- LOGIN LOGIC ---
       try {
-        // 1. Call Context Login (Simulation)
         const user = await login(email);
-
-        // 2. Redirect based on local check or returned user role
-        if (user.role === 'admin') {
-          navigate('/dashboard');
-        } else if (user.role === 'hr') {
-          navigate('/hr/dashboard');
-        } else {
-          navigate('/employee/dashboard');
-        }
+        if (user.role === 'admin') navigate('/dashboard');
+        else if (user.role === 'hr') navigate('/hr/dashboard');
+        else navigate('/employee/dashboard');
       } catch (error) {
         console.error("Login failed", error);
-        alert("Login simulation failed. Try admin@company.com");
+        alert("Login simulation failed.");
       }
     } else {
-      // --- REGISTER LOGIC ---
-      alert("Registration successful! Please sign in.");
+      // --- REGISTER LOGIC (FORCED ADMIN) ---
+      // Here we assume the backend handles the default role, 
+      // or we send role: 'admin' explicitly.
+      const formData = {
+        email: email,
+        name: document.getElementById('name').value,
+        role: 'admin' // Forced Admin Role
+      };
+      
+      console.log("Registering as Default Admin:", formData);
+      alert("Admin Account Registered successfully! Please sign in.");
       setIsLogin(true);
     }
   };
@@ -65,12 +66,12 @@ const AuthPage = () => {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 font-serif">ecoHRMS</h1>
             <h2 className="text-xl font-semibold text-gray-800 mt-2">
-              {isLogin ? 'Login' : 'Join ecoHRMS'}
+              {isLogin ? 'Login' : 'Create Admin Account'}
             </h2>
             <p className="mt-1 text-sm text-gray-500">
               {isLogin
                 ? 'Login to your account.'
-                : 'Enter your details below to create your employee profile.'}
+                : 'Get full access to the platform as an Administrator.'}
             </p>
           </div>
 
@@ -88,15 +89,9 @@ const AuthPage = () => {
                     </div>
                   </div>
                   <p className="text-primary text-sm font-medium mt-2 cursor-pointer hover:text-primary-dark">Upload a new photo</p>
-                  <p className="text-xs text-gray-400 mt-1">JPG, GIF or PNG. Max size 800K</p>
                 </div>
 
-                <Input
-                  type="text"
-                  id="name"
-                  label="Full Name"
-                  placeholder="e.g. Jane Doe"
-                />
+                <Input type="text" id="name" label="Full Name" placeholder="e.g. Jane Doe" />
               </>
             )}
 
@@ -107,47 +102,14 @@ const AuthPage = () => {
               placeholder={isLogin ? "you@example.com" : "e.g. jane@ecohrms.com"}
             />
 
-            {!isLogin && (
-              <div className="flex flex-col">
-                <label htmlFor="role" className="text-sm font-medium text-gray-700 mb-1">Role</label>
-                <div className="relative">
-                  <select
-                    id="role"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-700 focus:ring-2 focus:ring-primary focus:border-primary appearance-none transition-colors"
-                  >
-                    <option value="" disabled selected>Select your role</option>
-                    <option value="hr">HR Manager</option>
-                    <option value="employee">Employee</option>
-                    <option value="candidate">Candidate</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                    <span className="material-icons-round text-gray-500">expand_more</span>
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* ROLE SELECTION REMOVED - DEFAULTS TO ADMIN IN LOGIC */}
 
             {isLogin ? (
-              <Input
-                type="password"
-                id="password"
-                label="Password"
-                placeholder="••••••••"
-              />
+              <Input type="password" id="password" label="Password" placeholder="••••••••" />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  type="password"
-                  id="password"
-                  label="Password"
-                  placeholder="••••••••"
-                />
-                <Input
-                  type="password"
-                  id="confirm_password"
-                  label="Confirm Password"
-                  placeholder="••••••••"
-                />
+                <Input type="password" id="password" label="Password" placeholder="••••••••" />
+                <Input type="password" id="confirm_password" label="Confirm Password" placeholder="••••••••" />
               </div>
             )}
 
@@ -164,7 +126,7 @@ const AuthPage = () => {
                 <label className="flex items-start text-gray-600 cursor-pointer mt-2">
                   <input type="checkbox" className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary mr-2 mt-0.5" />
                   <span>
-                    I agree to the <a href="#" className="text-primary hover:underline">Terms of Service</a> and <a href="#" className="text-primary hover:underline">Privacy Policy</a>.
+                    I agree to the <a href="#" className="text-primary hover:underline">Terms of Service</a>.
                   </span>
                 </label>
               )}
@@ -174,16 +136,16 @@ const AuthPage = () => {
               type="submit"
               className="w-full py-3.5 px-4 bg-primary hover:bg-primary-dark text-white font-bold rounded-lg shadow-md transition-all transform active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
             >
-              {isLogin ? 'Sign In' : 'Register Account'}
+              {isLogin ? 'Sign In' : 'Register as Admin'}
             </button>
           </form>
 
-          <div className="mt-8 pt-6 border-t border-gray-100 flex justify-center">
+          <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col items-center space-y-4">
             {isLogin ? (
               <p className="text-sm text-gray-600">
                 Don't have an account?{' '}
                 <button onClick={toggleView} className="font-semibold text-primary hover:text-primary-dark hover:underline transition-colors">
-                  Sign Up
+                  Sign Up Organisation
                 </button>
               </p>
             ) : (
@@ -191,9 +153,14 @@ const AuthPage = () => {
                 onClick={toggleView}
                 className="text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors"
               >
-                Cancel
+                Back to Login
               </button>
             )}
+
+            {/* Link to the Trial Mode Component */}
+            <Link to="/trial-register" className="text-xs text-gray-400 hover:text-primary transition-colors">
+              Looking for Trial Mode?
+            </Link>
           </div>
 
         </div>

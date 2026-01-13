@@ -13,6 +13,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import Employees from "./pages/admin/EmployeeList";
 import Departments from "./pages/admin/DepartmentManagement";
 import AuthPage from "./pages/auth/Login";
+import TrialRegister from "./pages/auth/TrialRegester";
 import Payroll from './pages/admin/PayrollManagement';
 import LeaveManagement from './pages/admin/LeaveApproval';
 import Attendance from './pages/admin/AttendanceManagement';
@@ -44,6 +45,7 @@ const App = () => {
                 {/* --- PUBLIC ROUTES (No Sidebar) --- */}
                 <Route path="/login" element={<AuthPage />} />
                 <Route path="/register" element={<AuthPage />} />
+                <Route path="/trial-register" element={<TrialRegister />} />
 
                 {/* Default Redirect to Login (First Page) */}
                 <Route path="/" element={<Navigate to="/login" replace />} />
