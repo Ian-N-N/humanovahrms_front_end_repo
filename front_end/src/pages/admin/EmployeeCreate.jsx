@@ -23,6 +23,7 @@ const EmployeeForm = () => {
     status: 'Active',
     supervisor: '',
     system_role: 'employee', // admin, hr, employee
+    salary: ''
   });
   const [users, setUsers] = useState([]); // List of users to link
 
@@ -50,10 +51,20 @@ const EmployeeForm = () => {
     try {
       setLoading(true);
 
-      let photo_url = '';
+      const data = new FormData();
+      data.append('first_name', formData.firstName);
+      data.append('last_name', formData.lastName);
+      data.append('phone_number', formData.phone);
+      data.append('department_id', formData.department);
+      if (formData.supervisor) data.append('supervisor_id', formData.supervisor);
+      data.append('job_title', formData.role);
+      data.append('basic_salary', formData.salary);
+      data.append('hire_date', formData.joined);
+      if (formData.user_id) data.append('user_id', formData.user_id);
+
+      // Append the file if it exists
       if (formData.photo) {
-        showNotification('Uploading profile photo...', 'info');
-        photo_url = await uploadImage(formData.photo);
+        data.append('image', formData.photo);
       }
 
       const safeInt = (val) => {

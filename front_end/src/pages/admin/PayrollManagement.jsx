@@ -4,12 +4,26 @@ import { formatKSh } from '../../utils/formatters';
 import { usePayroll } from '../../context/PayrollContext';
 
 const Payroll = () => {
-  const { payrolls, cycles, loading, createCycle, runPayroll } = usePayroll();
+  const { payrolls, cycles, loading, createCycle, runPayroll, deletePayroll } = usePayroll();
   const [activeTab, setActiveTab] = useState('current');
   const [selectedMonth, setSelectedMonth] = useState('January 2024');
 
   const [currentView, setCurrentView] = useState('list');
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+
+  const handleDeletePayroll = async (payrollId, employeeName) => {
+    if (!window.confirm(`Delete payroll record for ${employeeName}? This cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      await deletePayroll(payrollId);
+      alert('Payroll record deleted successfully');
+    } catch (error) {
+      alert('Failed to delete payroll record');
+    }
+  };
+
 
   // Filter payrolls for current month/cycle if needed
   const displayPayrolls = useMemo(() => {
@@ -71,7 +85,10 @@ const Payroll = () => {
                 <span className="material-icons-round text-gray-400 text-lg">calendar_today</span>
                 {selectedMonth}
               </button>
-              <button className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors shadow-sm whitespace-nowrap">
+              <button
+                onClick={handleRunPayroll}
+                className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors shadow-sm whitespace-nowrap"
+              >
                 <span className="material-icons-round text-lg">payments</span>
                 Run Payroll
               </button>
@@ -148,12 +165,18 @@ const Payroll = () => {
                           </span>
                         </td>
                         <td className="py-4 px-6 text-right">
-                          <button
-                            onClick={() => handleViewEmployee(row)}
-                            className="text-blue-600 hover:text-blue-800 text-xs font-bold hover:underline"
-                          >
-                            View Slip
-                          </button>
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleViewEmployee(row)}
+                              className="text-blue-600 hover:text-blue-800 text-xs font-bold hover:underline">
+                              View Slip
+                            </button>
+                            <button
+                              onClick={() => handleDeletePayroll(row.id, row.employee?.name || 'this employee')}
+                              className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-bold hover:bg-red-600 hover:text-white transition-all">
+                              <span className="material-icons-round text-sm">delete</span>
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );

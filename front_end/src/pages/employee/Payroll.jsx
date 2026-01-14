@@ -1,15 +1,18 @@
-import React, { useMemo } from 'react';
-import { usePayroll } from '../../context/PayrollContext';
+import Modal from '../../components/common/modal';
+import React, { useMemo, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { usePayroll } from '../../context/PayrollContext';
 import { formatKSh } from '../../utils/formatters';
 
 const PayrollEmployee = () => {
     const { user } = useAuth();
-    const { payrolls, cycles, loading } = usePayroll();
+    const { payrolls } = usePayroll();
+    const [selectedSlip, setSelectedSlip] = useState(null);
 
     const myPayrolls = useMemo(() => {
-        return payrolls.filter(p => p.user_id === user?.id || p.employee_id === user?.id);
-    }, [payrolls, user?.id]);
+        if (!user?.employee?.id) return [];
+        return (payrolls || []).filter(p => p.employee?.id === user.employee.id);
+    }, [payrolls, user?.employee?.id]);
 
     return (
         <main className="flex-1 bg-gray-50 h-full overflow-y-auto p-4 lg:p-10 font-sans custom-scrollbar">
@@ -25,7 +28,7 @@ const PayrollEmployee = () => {
                     </div>
                     <div>
                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Monthly Salary</p>
-                        <p className="text-xl font-black text-gray-900">{formatKSh(myPayrolls[0]?.gross_salary || 0)}</p>
+                        <p className="text-xl font-black text-gray-900">{formatKSh(myPayrolls[0]?.basic_salary || myPayrolls[0]?.gross_salary || 0)}</p>
                     </div>
                 </div>
             </div>
@@ -59,10 +62,10 @@ const PayrollEmployee = () => {
                                 {myPayrolls.map(pay => (
                                     <tr key={pay.id} className="hover:bg-gray-50/50 transition-colors">
                                         <td className="py-6 px-8">
-                                            <p className="font-black text-gray-900">{pay.cycle_name || 'Regular Cycle'}</p>
+                                            <p className="font-black text-gray-900">{pay.cycle?.name || 'Regular Cycle'}</p>
                                         </td>
                                         <td className="py-6 px-8 text-sm font-bold text-gray-600">
-                                            {pay.paid_at || new Date().toLocaleDateString()}
+                                            {pay.payment_date || pay.paid_at || new Date().toLocaleDateString()}
                                         </td>
                                         <td className="py-6 px-8 text-sm font-bold text-gray-600">
                                             {formatKSh(pay.gross_salary)}
@@ -71,7 +74,9 @@ const PayrollEmployee = () => {
                                             <span className="text-lg font-black text-green-600">{formatKSh(pay.net_salary)}</span>
                                         </td>
                                         <td className="py-6 px-8 text-right">
-                                            <button className="px-6 py-2 bg-blue-50 text-blue-600 font-black rounded-xl text-xs hover:bg-blue-600 hover:text-white transition-all">
+                                            <button
+                                                onClick={() => setSelectedSlip(pay)}
+                                                className="px-6 py-2 bg-blue-50 text-blue-600 font-black rounded-xl text-xs hover:bg-blue-600 hover:text-white transition-all">
                                                 View Slip
                                             </button>
                                         </td>
@@ -82,6 +87,80 @@ const PayrollEmployee = () => {
                     </div>
                 )}
             </div>
+
+            {/* Payslip Modal */}
+            <Modal
+                isOpen={!!selectedSlip}
+                onClose={() => setSelectedSlip(null)}
+                title="Payslip Details"
+                size="lg"
+            >
+                {selectedSlip && (
+                    <div className="space-y-6 font-mono text-sm">
+                        <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex justify-between items-center">
+                            <div>
+                                <p className="text-gray-500 text-xs uppercase">Pay Period</p>
+                                <p className="font-bold text-gray-900">{selectedSlip.pay_period_start} - {selectedSlip.pay_period_end}</p>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-gray-500 text-xs uppercase">Payment Date</p>
+                                <p className="font-bold text-gray-900">{selectedSlip.payment_date || 'Processing'}</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-8">
+                            <div className="space-y-4">
+                                <h4 className="font-bold text-gray-900 border-b pb-2">Earnings</h4>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600">Basic Salary</span>
+                                    <span className="font-bold">{formatKSh(selectedSlip.basic_salary)}</span>
+                                </div>
+                                {/* Add logic for allowances loop if JSON exists */}
+                                <div className="flex justify-between pt-2 border-t border-dashed">
+                                    <span className="font-bold text-gray-900">Total Gross</span>
+                                    <span className="font-bold text-gray-900">{formatKSh(selectedSlip.gross_salary)}</span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <h4 className="font-bold text-gray-900 border-b pb-2">Deductions</h4>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600">PAYE (Tax)</span>
+                                    <span className="font-bold text-red-600">-{formatKSh(selectedSlip.tax_paid)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600">NSSF</span>
+                                    <span className="font-bold text-red-600">-{formatKSh(selectedSlip.nssf)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600">SHIF (NHIF)</span>
+                                    <span className="font-bold text-red-600">-{formatKSh(selectedSlip.nhif)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600">Housing Levy</span>
+                                    <span className="font-bold text-red-600">-{formatKSh(selectedSlip.housing_levy)}</span>
+                                </div>
+                                <div className="flex justify-between pt-2 border-t border-dashed">
+                                    <span className="font-bold text-gray-900">Total Deductions</span>
+                                    <span className="font-bold text-red-600">
+                                        -{formatKSh(
+                                            Number(selectedSlip.tax_paid) +
+                                            Number(selectedSlip.nssf) +
+                                            Number(selectedSlip.nhif) +
+                                            Number(selectedSlip.housing_levy)
+                                        )}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-green-50 p-6 rounded-xl border border-green-100 flex justify-between items-center mt-6">
+                            <span className="font-black text-green-900 text-lg uppercase tracking-widest">Net Pay</span>
+                            <span className="font-black text-green-600 text-2xl">{formatKSh(selectedSlip.net_salary)}</span>
+                        </div>
+                    </div>
+                )}
+            </Modal>
 
             {/* Tax Info Banner */}
             <div className="mt-10 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl shadow-blue-200">

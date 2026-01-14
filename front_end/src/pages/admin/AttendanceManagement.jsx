@@ -19,6 +19,13 @@ const StatusBadge = ({ status }) => {
   );
 };
 
+const formatHours = (hours) => {
+  if (!hours || hours === 0) return "0h 00m";
+  const h = Math.floor(hours);
+  const m = Math.round((hours - h) * 60);
+  return `${h}h ${m.toString().padStart(2, '0')}m`;
+};
+
 const Attendance = () => {
   const { records, loading, refetch } = useAttendance();
   const { departments } = useDepartment();
@@ -45,7 +52,7 @@ const Attendance = () => {
         },
         checkIn: rec.clock_in_time || rec.clock_in || rec.clockIn || rec.checkIn || rec.check_in || "--:--",
         checkOut: rec.clock_out_time || rec.clock_out || rec.clockOut || rec.checkOut || rec.check_out || "--:--",
-        workHours: rec.work_hours || rec.workHours || "0h 00m",
+        workHours: formatHours(rec.hours_worked || rec.work_hours || rec.workHours || 0),
         status: rec.status || "On Time"
       };
     });

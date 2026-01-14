@@ -13,30 +13,47 @@ const EmployeeEdit = ({ employee, onCancel, onSave }) => {
   const [formData, setFormData] = useState({
     first_name: employee.first_name || derivedFirst,
     last_name: employee.last_name || derivedLast,
-    // email: employee.email || '', // Removed: Backend rejects this
-    // phone: employee.phone || '', // Removed: Backend rejects this
-    department_id: employee.department_id || 1, // Defaulting to 1 if unknown, strictly strictly strictly needs ID
+    department_id: employee.department_id || 1,
     job_title: employee.job_title || employee.role || '',
-    status: employee.status || 'Active'
+    status: employee.status || 'Active',
+    basic_salary: employee.basic_salary || 0
   });
+
+  // Add photo state
+  const [photoFile, setPhotoFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(employee.avatar || employee.image || employee.profile_photo_url || null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPhotoFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    
     // Construct CLEAN payload matching backend schema
     const payload = {
       first_name: formData.first_name,
       last_name: formData.last_name,
       department_id: parseInt(formData.department_id) || 1,
       job_title: formData.job_title,
-      // Backend seems to NOT accept 'status' updates on core profile, or it's 'status' field?
-      // We'll try sending it, but if it fails we might need an activation endpoint.
-      // status: formData.status 
+      basic_salary: formData.basic_salary,
+      status: formData.status
     };
+
+    // If photo file is provided, include it
+    if (photoFile) {
+      payload.photo = photoFile;
+    }
+
     onSave(payload);
   };
 
@@ -54,6 +71,27 @@ const EmployeeEdit = ({ employee, onCancel, onSave }) => {
         </div>
 
         <form className="p-8 space-y-6" onSubmit={handleSubmit}>
+
+          {/* Avatar Section */}
+          <div className="flex items-center gap-4 mb-6">
+            <img
+              src={previewUrl || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"}
+              alt="Avatar"
+              className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+            />
+            <div>
+              <label className="cursor-pointer text-sm font-bold text-blue-600 hover:underline">
+                Change Photo
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handlePhotoChange}
+                />
+              </label>
+              <p className="text-xs text-gray-400">JPG, PNG (Max 5MB)</p>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-1">
@@ -89,10 +127,36 @@ const EmployeeEdit = ({ employee, onCancel, onSave }) => {
             />
           </div>
 
-          {/* 
-            Email and Phone removed from edit form as backend rejects them.
-            Future: Link to User Account edit if needed.
-          */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700">Status</label>
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+              >
+                <option value="Active">Active</option>
+                <option value="On Leave">On Leave</option>
+                <option value="Terminated">Terminated</option>
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700">Basic Salary (KES)</label>
+              <input
+                type="number"
+                name="basic_salary"
+                value={formData.basic_salary}
+                onChange={handleChange}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          {/* Note: Email and Phone are tied to User Account, not editable here */}
+          <p className="text-xs text-gray-500 italic">
+            Note: Email and phone are managed through the user account settings.
+          </p>
 
           <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100 mt-6">
             <button type="button" onClick={onCancel} className="px-6 py-2.5 rounded-lg text-gray-600 font-medium hover:bg-gray-50 transition-colors">

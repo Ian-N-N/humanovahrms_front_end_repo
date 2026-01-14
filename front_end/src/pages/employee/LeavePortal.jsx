@@ -16,8 +16,11 @@ const LeavePortal = () => {
     });
 
     const myLeaves = useMemo(() => {
-        return leaves.filter(l => l.user_id === user?.id);
-    }, [leaves, user?.id]);
+        // Context already filters for employees via getPersonalHistory
+        // But for safety, if we are admin view, we might want to filter, 
+        // effectively request is for 'my' leaves so just return all leaves context gives us if we are employee
+        return leaves;
+    }, [leaves]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

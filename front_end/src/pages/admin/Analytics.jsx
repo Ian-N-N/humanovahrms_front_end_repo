@@ -3,6 +3,86 @@ import { useEmployee } from '../../context/EmployeeContext';
 import { useDepartment } from '../../context/DepartmentContext';
 import { useLeave } from '../../context/LeaveContext';
 
+
+const WorkforceGrowthChart = ({ employees }) => {
+    const growthData = useMemo(() => {
+        // Get last 12 months
+        const months = [];
+        const now = new Date();
+        for (let i = 11; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            months.push({
+                label: d.toLocaleDateString('en-US', { month: 'short' }),
+                date: d
+            });
+        }
+
+        // Calculate cumulative hires by month
+        let cumulative = 0;
+        const data = months.map(month => {
+            const monthEnd = new Date(month.date.getFullYear(), month.date.getMonth() + 1, 0);
+            const hiredByMonth = employees.filter(e => {
+                if (!e.hire_date) return false;
+                const hireDate = new Date(e.hire_date);
+                return hireDate <= monthEnd;
+            }).length;
+
+            return {
+                label: month.label,
+                count: hiredByMonth
+            };
+        });
+
+        const maxCount = Math.max(...data.map(d => d.count), 1);
+        return { data, maxCount };
+    }, [employees]);
+
+    if (growthData.data.length === 0 || growthData.maxCount === 0) {
+        return (
+            <div className="aspect-video bg-gray-50 rounded-xl flex items-center justify-center">
+                <p className="text-gray-400 text-sm">No hiring data available</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-4">
+            {/* Chart */}
+            <div className="flex items-end justify-between h-48 gap-2 px-4">
+                {growthData.data.map((item, i) => {
+                    const height = (item.count / growthData.maxCount) * 100;
+                    return (
+                        <div key={i} className="flex flex-col items-center gap-2 flex-1 group">
+                            <div className="relative w-full flex justify-center h-full items-end">
+                                <div
+                                    className="w-full max-w-[32px] bg-gradient-to-t from-blue-600 to-blue-400 rounded-t-lg transition-all duration-500 hover:from-blue-700 hover:to-blue-500 relative"
+                                    style={{ height: `${Math.max(height, 5)}%` }}
+                                >
+                                    <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs font-bold py-1 px-2 rounded transition-opacity whitespace-nowrap">
+                                        {item.count} employees
+                                    </div>
+                                </div>
+                            </div>
+                            <span className="text-[10px] font-bold text-gray-400 uppercase">{item.label}</span>
+                        </div>
+                    );
+                })}
+            </div>
+
+            {/* Summary */}
+            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-blue-600"></div>
+                    <span className="text-xs font-medium text-gray-600">Cumulative Headcount</span>
+                </div>
+                <span className="text-sm font-bold text-gray-900">
+                    {growthData.data[growthData.data.length - 1]?.count || 0} Total
+                </span>
+            </div>
+        </div>
+    );
+};
+
 const Analytics = () => {
     const { employees } = useEmployee();
     const { departments } = useDepartment();
@@ -90,16 +170,10 @@ const Analytics = () => {
                     </div>
                 </div>
 
-                {/* Recent Activity Placeholder */}
+                {/* Workforce Growth Chart */}
                 <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
                     <h3 className="text-lg font-bold text-gray-900 mb-6">Internal Workforce Growth</h3>
-                    <div className="aspect-video bg-gray-50 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-200">
-                        <div className="text-center p-6">
-                            <span className="material-icons-round text-4xl text-gray-300">bar_chart</span>
-                            <p className="text-sm font-bold text-gray-500 mt-2">Historical Growth Trends</p>
-                            <p className="text-xs text-gray-400 max-w-[200px] mt-1 mx-auto">This visualization will display cumulative hiring trends over the last 12 months.</p>
-                        </div>
-                    </div>
+                    <WorkforceGrowthChart employees={employees} />
                 </div>
             </div>
         </main>
