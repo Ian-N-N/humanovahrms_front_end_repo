@@ -77,10 +77,10 @@ const PayrollAdmin = () => {
                                         <td className="py-4 px-6 text-right">
                                             <button
                                                 onClick={() => handleRunPayroll(c.id)}
-                                                disabled={c.status === 'Completed'}
-                                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${c.status === 'Completed' ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}
+                                                disabled={c.status === 'Processed'}
+                                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${c.status === 'Processed' ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}
                                             >
-                                                {c.status === 'Completed' ? 'Processed' : 'Run Payroll'}
+                                                {c.status === 'Processed' ? 'Processed' : 'Run Payroll'}
                                             </button>
                                         </td>
                                     </tr>

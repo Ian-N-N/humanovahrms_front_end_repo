@@ -7,6 +7,8 @@ const payrollService = {
     getCycles: () => httpClient.get('/payroll/cycles'),
     createCycle: (cycleData) => httpClient.post('/payroll/cycles', cycleData),
     getReports: (params) => httpClient.get('/payroll/reports', { params }),
+    getPersonalHistory: () => httpClient.get('/payroll/history'),
+    deletePayroll: (id) => httpClient.delete(`/payroll/${id}`),
 };
 
 export default payrollService;

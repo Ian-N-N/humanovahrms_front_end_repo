@@ -13,26 +13,33 @@ export const PayrollProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     const fetchData = useCallback(async () => {
-        const roleObj = user?.role;
-        const roleName = (roleObj?.name || (typeof roleObj === 'string' ? roleObj : '')).toLowerCase();
-
-        const isAuthorized = roleName === 'admin' || roleName === 'hr' || roleName === 'hr manager';
-
-        if (!isAuthorized) {
+        if (!user) {
             setLoading(false);
             return;
         }
 
+        const roleObj = user.role;
+        const roleName = (roleObj?.name || (typeof roleObj === 'string' ? roleObj : '')).toLowerCase();
+
+        const isAuthorized = roleName === 'admin' || roleName === 'hr' || roleName === 'hr manager';
+
         try {
             setLoading(true);
-            const [payrollData, cyclesData] = await Promise.all([
-                payrollService.getAll(),
-                payrollService.getCycles()
-            ]);
-            setPayrolls(payrollData || []);
-            setCycles(cyclesData || []);
+            if (isAuthorized) {
+                const [payrollData, cyclesData] = await Promise.all([
+                    payrollService.getAll(),
+                    payrollService.getCycles()
+                ]);
+                setPayrolls(payrollData || []);
+                setCycles(cyclesData || []);
+            } else {
+                // Employee fetching their own data
+                const personalData = await payrollService.getPersonalHistory();
+                setPayrolls(personalData || []);
+            }
         } catch (error) {
             console.error("Failed to fetch payroll data:", error);
+            // Don't clear data on error to prevent flashing empty states if it was just a transient network error
         } finally {
             setLoading(false);
         }
@@ -64,12 +71,24 @@ export const PayrollProvider = ({ children }) => {
         }
     };
 
+    const deletePayroll = async (id) => {
+        try {
+            await payrollService.deletePayroll(id);
+            setPayrolls(prev => prev.filter(p => p.id !== id));
+            return true;
+        } catch (error) {
+            console.error("Failed to delete payroll:", error);
+            throw error;
+        }
+    };
+
     const value = {
         payrolls,
         cycles,
         loading,
         runPayroll,
         createCycle,
+        deletePayroll,
         refetch: fetchData
     };
 

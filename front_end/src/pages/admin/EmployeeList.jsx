@@ -20,7 +20,7 @@ const groupEmployees = (flatList) => {
       ...emp,
       id: emp.id || Math.random(),
       name: emp.name || 'Unknown',
-      avatar: emp.avatar || emp.image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=facearea&facepad=2&w=256&h=256&q=80',
+      avatar: emp.profile_photo_url || emp.avatar || emp.image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=facearea&facepad=2&w=256&h=256&q=80',
       joined: emp.joinDate || emp.joined || 'N/A'
     });
   });

@@ -23,6 +23,7 @@ const EmployeeForm = () => {
     status: 'Active',
     supervisor: '',
     system_role: 'employee', // admin, hr, employee
+    salary: ''
   });
   const [users, setUsers] = useState([]); // List of users to link
 
@@ -50,26 +51,23 @@ const EmployeeForm = () => {
     try {
       setLoading(true);
 
-      let photo_url = '';
+      const data = new FormData();
+      data.append('first_name', formData.firstName);
+      data.append('last_name', formData.lastName);
+      data.append('phone_number', formData.phone);
+      data.append('department_id', formData.department);
+      if (formData.supervisor) data.append('supervisor_id', formData.supervisor);
+      data.append('job_title', formData.role);
+      data.append('basic_salary', formData.salary);
+      data.append('hire_date', formData.joined);
+      if (formData.user_id) data.append('user_id', formData.user_id);
+
+      // Append the file if it exists
       if (formData.photo) {
-        showNotification('Uploading profile photo...', 'info');
-        photo_url = await uploadImage(formData.photo);
+        data.append('image', formData.photo);
       }
 
-      const employeeData = {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        phone_number: formData.phone,
-        profile_photo_url: photo_url,
-        department_id: formData.department,
-        supervisor_id: formData.supervisor || null,
-        job_title: formData.role,
-        basic_salary: formData.salary,
-        hire_date: formData.joined,
-        user_id: formData.user_id || null
-      };
-
-      await addEmployee(employeeData);
+      await addEmployee(data);
       showNotification('Employee created successfully!', 'success');
       navigate(-1);
     } catch (error) {

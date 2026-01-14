@@ -97,14 +97,29 @@ const Dashboard = () => {
     // --- REAL DATA CALCULATIONS ---
 
     // 1. Leave Balance
+    // Backend now provides leave_balance on employee model
+    // We assume 'user' object has this if updated, or we might need to fetch profile.
+    // For now, let's try to trust the user object or fall back to calculation if undefined.
+
+    // NOTE: 'user' context might not have the live balance if it only updates on login.
+    // Ideally we should fetch the employee profile. For this fix, let's optimistically use user.leave_balance
+    // checking if it exists, otherwise fall back to 21 - taken.
+
     const safeLeaves = Array.isArray(leaves) ? leaves : [];
     const approvedLeaves = safeLeaves.filter(l => l.status === 'Approved');
-    // Assuming a default allocation of 21 days if not from backend
+
     const totalLeaveDaysTaken = approvedLeaves.reduce((acc, curr) => {
-        // Simple 1 day per request logic if duration not present, ideally backend sends this
         return acc + (curr.duration || 1);
     }, 0);
-    const leaveBalance = 21 - totalLeaveDaysTaken;
+
+    // If backend provides a specific balance field on the user/employee object:
+    const backendBalance = user?.leave_balance ?? user?.employee?.leave_balance;
+
+    // If we have a backend balance, use it. Otherwise calc.
+    // Check for null or undefined (loose equality covers both)
+    const leaveBalance = (backendBalance != null)
+        ? backendBalance
+        : (21 - totalLeaveDaysTaken);
 
     // 2. Attendance Score (Based on records in the current month)
     const attendanceScore = useMemo(() => {
@@ -142,17 +157,24 @@ const Dashboard = () => {
             });
 
             // Calculate active level (height)
-            // If clocked in today, or has records, show some height
-            let height = "15%";
-            if (isToday && isCheckedIn) {
-                height = "85%";
-            } else if (dayRecords.length > 0) {
-                // If they have multiple records or long hours, height could vary
-                // For now, simple presence indicator
-                height = "60%";
+            let height = "5%";
+            let hours = 0;
+
+            if (dayRecords.length > 0) {
+                // Sum up hours (if multiple sessions in a day, though backend currently handles one main session per day logic potentially)
+                hours = dayRecords.reduce((acc, curr) => acc + (curr.hours_worked || 0), 0);
+
+                // If currently checked in today, assume some progress
+                if (isToday && isCheckedIn && hours === 0) {
+                    hours = 0.5; // Just started
+                }
+
+                // Max height 100% = 12 hours? Or 8? Let's say 9 hours is full bar.
+                const percentage = Math.min(100, (hours / 9) * 100);
+                height = `${Math.max(10, percentage)}%`; // Min 10% visibility
             }
 
-            return { day: dayName, height, active: isToday };
+            return { day: dayName, height, active: isToday, hours: hours.toFixed(1) };
         });
     }, [records, isCheckedIn]);
 
@@ -273,13 +295,13 @@ const Dashboard = () => {
                                 <div key={index} className="flex flex-col items-center gap-4 flex-1 group">
                                     <div className="relative w-full flex justify-center h-full items-end">
                                         <div
-                                            className={`w-full max-w-[40px] rounded-2xl transition-all duration-500 ease-out shadow-sm
+                                            className={`w-full max-w-[40px] rounded-2xl transition-all duration-500 ease-out shadow-sm relative
                                                 ${item.active ? 'bg-gradient-to-t from-blue-700 to-blue-500' : 'bg-gray-50 group-hover:bg-gray-100'}`}
                                             style={{ height: item.height }}
                                         >
-                                            {/* <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-[10px] font-black py-1 px-2 rounded-lg transition-all duration-300">
-                                                8.5h
-                                            </div> */}
+                                            <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-[10px] font-black py-1 px-2 rounded-lg transition-all duration-300">
+                                                {item.hours}h
+                                            </div>
                                         </div>
                                     </div>
                                     <span className={`text-[10px] font-black uppercase tracking-widest ${item.active ? 'text-blue-600' : 'text-gray-300'}`}>
