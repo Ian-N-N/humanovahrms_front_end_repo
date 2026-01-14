@@ -33,6 +33,10 @@ import LeaveReview from './pages/hr/LeaveReview';
 import AttendanceSummary from './pages/hr/AttendanceSummary';
 import DepartmentAnalytics from './pages/hr/DepartmentAnalytics';
 
+// 5. Notifications
+import PushNotifications from './pages/admin/PushNotifications';
+import Notifications from './pages/common/Notifications';
+
 // 4. Placeholder
 const PlaceholderPage = ({ title }) => (
   <div className="flex-1 p-10 h-screen overflow-y-auto bg-gray-50 flex items-center justify-center">
@@ -75,15 +79,18 @@ const App = () => {
                           }
                         >
                           {/* Admin Modules */}
+                          {/* Admin Modules */}
                           <Route path="/admin/dashboard" element={<Dashboard />} />
                           <Route path="/admin/analytics" element={<Analytics />} />
                           <Route path="/admin/roles" element={<RolePermission />} />
-                          <Route path="/employees" element={<Employees />} />
-                          <Route path="/employees/new" element={<EmployeeCreate />} />
-                          <Route path="/departments" element={<Departments />} />
-                          <Route path="/payroll" element={<Payroll />} />
-                          <Route path="/leave" element={<LeaveManagement />} />
-                          <Route path="/attendance" element={<Attendance />} />
+                          {/* Standardized Admin Routes */}
+                          <Route path="/admin/employees" element={<Employees />} />
+                          <Route path="/admin/new_employee" element={<EmployeeCreate />} />
+                          <Route path="/admin/departments" element={<Departments />} />
+                          <Route path="/admin/payroll" element={<Payroll />} />
+                          <Route path="/admin/leave" element={<LeaveManagement />} />
+                          <Route path="/admin/attendance" element={<Attendance />} />
+                          <Route path="/admin/push-notifications" element={<PushNotifications />} />
 
                           {/* HR Modules */}
                           <Route path="/hr/dashboard" element={<HRDashboard />} />
@@ -100,6 +107,7 @@ const App = () => {
                           <Route path="/employee/leave" element={<LeavePortal />} />
                           <Route path="/employee/payroll" element={<EmployeePayroll />} />
                           <Route path="/profile" element={<Profile />} />
+                          <Route path="/notifications" element={<Notifications />} />
 
                           {/* Settings & Extras */}
                           <Route path="/settings" element={<PlaceholderPage title="Settings" />} />

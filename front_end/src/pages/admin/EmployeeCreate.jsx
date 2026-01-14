@@ -8,7 +8,7 @@ import useCloudinary from '../../hooks/useCloudinary';
 const EmployeeForm = () => {
   const navigate = useNavigate();
   const { addEmployee, employees } = useEmployee();
-  const { departments } = useDepartment();
+  const { departments, refetch: refetchDepartments } = useDepartment();
   const { showNotification } = useNotification();
   const { uploadImage, uploading: uploadingImage } = useCloudinary();
   const [loading, setLoading] = useState(false);
@@ -67,12 +67,56 @@ const EmployeeForm = () => {
         data.append('image', formData.photo);
       }
 
-      await addEmployee(data);
+      const safeInt = (val) => {
+        const parsed = parseInt(val, 10);
+        return isNaN(parsed) ? 0 : parsed;
+      };
+
+      // Construct payload EXPLICITLY to avoid sending invalid keys like 'firstName' or 'name'
+      const employeeData = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        phone_number: formData.phone,
+        profile_photo_url: photo_url,
+        department_id: formData.department,
+        supervisor_id: formData.supervisor || null,
+        job_title: formData.role,
+        basic_salary: formData.salary,
+        hire_date: formData.joined,
+        user_id: formData.user_id || null
+      };
+
+      await addEmployee(employeeData);
+
+      // Refresh departments to update member counts
+      if (refetchDepartments) {
+        await refetchDepartments();
+      }
+
       showNotification('Employee created successfully!', 'success');
+      // Navigate based on role
+      const roleStr = formData.system_role === 'admin' ? 'admin' : 'hr'; // Or check current user's role if navigating back
       navigate(-1);
     } catch (error) {
       console.error("Failed to create employee:", error);
-      showNotification(error.response?.data?.error || 'Failed to create employee.', 'error');
+
+      const resData = error.response?.data;
+      let errorMessage = 'Failed to create employee.';
+
+      if (resData) {
+        // Check for various error formats
+        if (resData.error) {
+          errorMessage = typeof resData.error === 'object' ? (resData.error.message || JSON.stringify(resData.error)) : resData.error;
+        } else if (resData.message) {
+          errorMessage = resData.message;
+        } else if (resData.msg) {
+          errorMessage = resData.msg;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      showNotification(errorMessage, 'error');
     } finally {
       setLoading(false);
     }

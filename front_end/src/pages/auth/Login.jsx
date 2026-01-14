@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Input from '../../components/common/Input';
 
+// Using the Unsplash image
 const BACKGROUND_IMAGE_URL = "https://images.unsplash.com/photo-1497366811353-6870744d04b2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80";
 
 const AuthPage = () => {
@@ -89,12 +90,12 @@ const AuthPage = () => {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 font-serif">ecoHRMS</h1>
             <h2 className="text-xl font-semibold text-gray-800 mt-2">
-              {isLogin ? 'Login' : 'Join ecoHRMS'}
+              {isLogin ? 'Login' : 'Create Your Account'}
             </h2>
             <p className="mt-1 text-sm text-gray-500">
               {isLogin
                 ? 'Login to your account.'
-                : 'Enter your details below to create your employee profile.'}
+                : 'Join ecoHRMS to manage your professional journey.'}
             </p>
           </div>
 
@@ -201,7 +202,7 @@ const AuthPage = () => {
                 <label className="flex items-start text-gray-600 cursor-pointer mt-2">
                   <input type="checkbox" className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary mr-2 mt-0.5" required />
                   <span>
-                    I agree to the <a href="#" className="text-primary hover:underline">Terms of Service</a> and <a href="#" className="text-primary hover:underline">Privacy Policy</a>.
+                    I agree to the <a href="#" className="text-primary hover:underline">Terms of Service</a>.
                   </span>
                 </label>
               )}
@@ -216,12 +217,12 @@ const AuthPage = () => {
             </button>
           </form>
 
-          <div className="mt-8 pt-6 border-t border-gray-100 flex justify-center">
+          <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col items-center space-y-4">
             {isLogin ? (
               <p className="text-sm text-gray-600">
                 Don't have an account?{' '}
                 <button onClick={toggleView} className="font-semibold text-primary hover:text-primary-dark hover:underline transition-colors">
-                  Sign Up
+                  Sign Up Organisation
                 </button>
               </p>
             ) : (
@@ -229,11 +230,11 @@ const AuthPage = () => {
                 onClick={toggleView}
                 className="text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors"
               >
-                Cancel
+                Back to Login
               </button>
             )}
-          </div>
 
+          </div>
         </div>
       </div>
     </div>

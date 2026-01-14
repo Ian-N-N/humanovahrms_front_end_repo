@@ -4,6 +4,10 @@ const API_BASE_URL = '/api';
 
 const httpClient = axios.create({
     baseURL: API_BASE_URL,
+    timeout: 15000, // 15 seconds timeout
+    headers: {
+        'Content-Type': 'application/json',
+    },
 });
 
 // Request Interceptor
@@ -59,12 +63,9 @@ httpClient.interceptors.response.use(
         const originalRequest = error.config;
 
         if (status === 401) {
-            console.warn(`Unauthorized (401) on ${originalRequest.url}.`);
-
-            // OPTIONAL: Only clear token if it's a critical failure or repeated
-            // For now, we stopped auto-clearing to prevent "Ghost Logouts" 
-            // caused by background fetches hitting admin-only endpoints.
-            // localStorage.removeItem('token'); 
+            console.warn(`Unauthorized (401) on ${originalRequest.url}. Dispatching auth:unauthorized event.`);
+            // Dispatch a global event that AuthContext can listen to
+            window.dispatchEvent(new Event('auth:unauthorized'));
         }
         return Promise.reject(error);
     }

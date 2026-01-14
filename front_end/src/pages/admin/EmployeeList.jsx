@@ -10,18 +10,25 @@ const groupEmployees = (flatList) => {
   const depts = {};
   if (!Array.isArray(flatList)) return [];
   flatList.forEach(emp => {
-    const deptName = emp.department || 'Unassigned';
-    const roleName = emp.role || 'General';
+    const deptName = emp.department || (emp.department_id ? `Dept ${emp.department_id}` : 'Unassigned');
+    // Backend returns 'job_title', frontend used 'role'. Map them.
+    const roleName = emp.job_title || emp.role || 'General';
 
     if (!depts[deptName]) depts[deptName] = { department: deptName, groups: {} };
     if (!depts[deptName].groups[roleName]) depts[deptName].groups[roleName] = { role: roleName, members: [] };
 
+    // Construct full name if missing (Backend sends first_name, last_name)
+    const fullName = emp.name || (emp.first_name && emp.last_name ? `${emp.first_name} ${emp.last_name}` : 'Unknown');
+
     depts[deptName].groups[roleName].members.push({
       ...emp,
       id: emp.id || Math.random(),
-      name: emp.name || 'Unknown',
-      avatar: emp.profile_photo_url || emp.avatar || emp.image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=facearea&facepad=2&w=256&h=256&q=80',
-      joined: emp.joinDate || emp.joined || 'N/A'
+      name: fullName,
+      role: roleName, // Ensure role is populated for display
+      department: deptName, // Ensure department is populated
+      avatar: emp.photo_url || emp.avatar || emp.image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=facearea&facepad=2&w=256&h=256&q=80',
+      joined: emp.join_date || emp.joinDate || emp.joined || 'N/A',
+      status: emp.status || 'Active'
     });
   });
 
@@ -32,7 +39,8 @@ const groupEmployees = (flatList) => {
 };
 
 /* --- INTERNAL COMPONENT: LIST VIEW --- */
-const EmployeesList = ({ data, onAddNew, onViewProfile, onToggleStatus }) => {
+const EmployeesList = ({ data, onAddNew, onViewProfile, onToggleStatus, role }) => {
+  const isHR = role?.toLowerCase().includes('hr');
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
 
@@ -95,11 +103,13 @@ const EmployeesList = ({ data, onAddNew, onViewProfile, onToggleStatus }) => {
             </button>
           </div>
 
-          {/* Add Button */}
-          <button onClick={onAddNew} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow-sm transition-colors whitespace-nowrap">
-            <span className="material-icons-round text-lg">add</span>
-            <span className="hidden sm:inline">Add New</span>
-          </button>
+          {/* Add Button - Hidden for HR */}
+          {!isHR && (
+            <button onClick={onAddNew} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow-sm transition-colors whitespace-nowrap">
+              <span className="material-icons-round text-lg">add</span>
+              <span className="hidden sm:inline">Add New</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -201,9 +211,9 @@ const Employees = () => {
   const { user } = useAuth();
   const { employees, loading, addEmployee, updateEmployee, activateEmployee, deactivateEmployee } = useEmployee();
 
-  // Fix: Handle role being an object { id, name } or a string
+  // Fix: Handle role being an object { id, name } or a string safely
   const roleObj = user?.role;
-  const role = roleObj?.name ? roleObj.name.toLowerCase() : (typeof roleObj === 'string' ? roleObj : 'admin');
+  const role = (roleObj?.name || (typeof roleObj === 'string' ? roleObj : 'admin')).toLowerCase();
 
   const groupedData = useMemo(() => groupEmployees(employees), [employees]);
 
@@ -214,7 +224,12 @@ const Employees = () => {
   };
 
   const handleAddNew = () => {
-    navigate(`/${role}/employees/new`);
+    const normalizedRole = role.toLowerCase().trim();
+    if (normalizedRole === 'admin') {
+      navigate('/admin/new_employee');
+    } else {
+      navigate(`/${normalizedRole}/employees/new`);
+    }
   };
 
   const handleBackToList = () => {
@@ -243,10 +258,28 @@ const Employees = () => {
   const handleSaveEdit = async (updatedData) => {
     try {
       const updatedEmployee = await updateEmployee(selectedEmployee.id, updatedData);
-      setSelectedEmployee(updatedEmployee);
+
+      // The API returns snake_case fields (first_name, last_name).
+      // We need to merge this with the existing data and ensure 'name' is updated for the UI.
+      const newName = (updatedData.first_name && updatedData.last_name)
+        ? `${updatedData.first_name} ${updatedData.last_name}`
+        : (updatedEmployee.name || selectedEmployee.name);
+
+      const mergedEmployee = {
+        ...selectedEmployee,
+        ...updatedEmployee,
+        name: newName,
+        job_title: updatedData.job_title || updatedEmployee.job_title || selectedEmployee.job_title,
+        // Ensure other fields are preserved or mapped if the API returns them
+        department: updatedEmployee.department || selectedEmployee.department,
+        status: updatedEmployee.status || selectedEmployee.status
+      };
+
+      setSelectedEmployee(mergedEmployee);
       alert('Profile Updated Successfully!');
       setCurrentView('profile');
     } catch (error) {
+      console.error("Update failed:", error);
       alert('Failed to update profile.');
     }
   };
@@ -269,6 +302,7 @@ const Employees = () => {
           onAddNew={handleAddNew}
           onViewProfile={handleViewProfile}
           onToggleStatus={handleToggleStatus}
+          role={role}
         />
       )}
 
