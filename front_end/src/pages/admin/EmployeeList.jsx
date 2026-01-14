@@ -224,10 +224,11 @@ const Employees = () => {
   };
 
   const handleAddNew = () => {
-    if (role === 'admin') {
+    const normalizedRole = role.toLowerCase().trim();
+    if (normalizedRole === 'admin') {
       navigate('/admin/new_employee');
     } else {
-      navigate(`/${role}/employees/new`);
+      navigate(`/${normalizedRole}/employees/new`);
     }
   };
 

@@ -61,6 +61,7 @@ const App = () => {
                         {/* --- PUBLIC ROUTES --- */}
                         <Route path="/login" element={<AuthPage />} />
                         <Route path="/register" element={<AuthPage />} />
+                        <Route path="/trial-register" element={<TrialRegister />} />
 
                         <Route path="/" element={<Navigate to="/login" replace />} />
 
