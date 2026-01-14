@@ -17,7 +17,6 @@ import Employees from "./pages/admin/EmployeeList";
 import EmployeeCreate from "./pages/admin/EmployeeCreate";
 import Departments from "./pages/admin/DepartmentManagement";
 import AuthPage from "./pages/auth/Login";
-import TrialRegister from "./pages/auth/TrialRegester";
 import Payroll from './pages/admin/Payroll';
 import LeaveManagement from './pages/admin/LeaveManagement';
 import Attendance from './pages/admin/AttendanceManagement';
@@ -33,6 +32,10 @@ import HRDashboard from './pages/hr/Dashboard';
 import LeaveReview from './pages/hr/LeaveReview';
 import AttendanceSummary from './pages/hr/AttendanceSummary';
 import DepartmentAnalytics from './pages/hr/DepartmentAnalytics';
+
+// 5. Notifications
+import PushNotifications from './pages/admin/PushNotifications';
+import Notifications from './pages/common/Notifications';
 
 // 4. Placeholder
 const PlaceholderPage = ({ title }) => (
@@ -61,7 +64,6 @@ const App = () => {
                         {/* --- PUBLIC ROUTES --- */}
                         <Route path="/login" element={<AuthPage />} />
                         <Route path="/register" element={<AuthPage />} />
-                        <Route path="/trial-register" element={<TrialRegister />} />
 
                         <Route path="/" element={<Navigate to="/login" replace />} />
 
@@ -88,6 +90,7 @@ const App = () => {
                           <Route path="/admin/payroll" element={<Payroll />} />
                           <Route path="/admin/leave" element={<LeaveManagement />} />
                           <Route path="/admin/attendance" element={<Attendance />} />
+                          <Route path="/admin/push-notifications" element={<PushNotifications />} />
 
                           {/* HR Modules */}
                           <Route path="/hr/dashboard" element={<HRDashboard />} />
@@ -104,6 +107,7 @@ const App = () => {
                           <Route path="/employee/leave" element={<LeavePortal />} />
                           <Route path="/employee/payroll" element={<EmployeePayroll />} />
                           <Route path="/profile" element={<Profile />} />
+                          <Route path="/notifications" element={<Notifications />} />
 
                           {/* Settings & Extras */}
                           <Route path="/settings" element={<PlaceholderPage title="Settings" />} />

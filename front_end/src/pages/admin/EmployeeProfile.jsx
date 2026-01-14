@@ -2,7 +2,13 @@ import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 
 const EmployeeProfile = ({ employee, onBack, onEdit }) => {
+  const { user } = useAuth();
   if (!employee) return null;
+
+  // Extract role safely
+  const roleObj = user?.role;
+  const roleName = (roleObj?.name || (typeof roleObj === 'string' ? roleObj : '')).toLowerCase();
+  const isHR = roleName.includes('hr');
 
   return (
     <div className="animate-fade-in-up">
@@ -20,7 +26,7 @@ const EmployeeProfile = ({ employee, onBack, onEdit }) => {
         </div>
         <div className="flex-1 text-center md:text-left">
           <h1 className="text-2xl font-bold text-gray-900">{employee.name}</h1>
-          <p className="text-blue-600 font-medium">Senior Employee • {employee.status}</p>
+          <p className="text-blue-600 font-medium">{employee.job_title || 'Employee'} • {employee.status}</p>
           <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-4">
             {!isHR && <button onClick={onEdit} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold shadow-sm hover:bg-blue-700">Edit Profile</button>}
             <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-bold hover:bg-gray-50">Export CV</button>

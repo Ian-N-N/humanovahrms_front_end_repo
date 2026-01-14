@@ -90,12 +90,12 @@ const AuthPage = () => {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 font-serif">ecoHRMS</h1>
             <h2 className="text-xl font-semibold text-gray-800 mt-2">
-              {isLogin ? 'Login' : 'Create Admin Account'}
+              {isLogin ? 'Login' : 'Create Your Account'}
             </h2>
             <p className="mt-1 text-sm text-gray-500">
               {isLogin
                 ? 'Login to your account.'
-                : 'Get full access to the platform as an Administrator.'}
+                : 'Join ecoHRMS to manage your professional journey.'}
             </p>
           </div>
 
@@ -234,12 +234,7 @@ const AuthPage = () => {
               </button>
             )}
 
-            {/* Link to the Trial Mode Component */}
-            <Link to="/trial-register" className="text-xs text-gray-400 hover:text-primary transition-colors">
-              Looking for Trial Mode?
-            </Link>
           </div>
-
         </div>
       </div>
     </div>

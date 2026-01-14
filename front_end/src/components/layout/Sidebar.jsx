@@ -28,6 +28,8 @@ const NavLink = ({ icon, label, to = "#", active = false, badge = null }) => {
   );
 };
 
+import NotificationBell from '../notifications/NotificationBell';
+
 const Sidebar = () => {
   const location = useLocation();
   const { user, logout } = useAuth(); // Get user and logout
@@ -56,6 +58,7 @@ const Sidebar = () => {
       { to: '/admin/leave', icon: 'event_available', label: 'Leave' },
       { to: '/admin/attendance', icon: 'schedule', label: 'Attendance' },
       { to: '/admin/roles', icon: 'security', label: 'Roles' },
+      { to: '/admin/push-notifications', icon: 'campaign', label: 'Push Notifications' },
     ],
     hr: [
       { to: '/hr/dashboard', icon: 'dashboard', label: 'Dashboard' },
@@ -63,11 +66,13 @@ const Sidebar = () => {
       { to: '/hr/employees', icon: 'people', label: 'Employees' },
       { to: '/hr/leaves', icon: 'event_available', label: 'Leave' },
       { to: '/hr/attendance', icon: 'schedule', label: 'Attendance' },
+      { to: '/notifications', icon: 'notifications', label: 'Notifications' },
     ],
     employee: [
       { to: '/employee/dashboard', icon: 'dashboard', label: 'My Dashboard' },
       { to: '/employee/leave', icon: 'event_note', label: 'My Leave' },
       { to: '/employee/payroll', icon: 'receipt_long', label: 'My Payslips' },
+      { to: '/notifications', icon: 'notifications', label: 'Notifications' },
       { to: '/profile', icon: 'account_circle', label: 'My Profile' },
     ]
   };
@@ -78,13 +83,16 @@ const Sidebar = () => {
     <aside className="w-64 bg-white border-r border-gray-100 flex-shrink-0 flex flex-col h-screen font-sans z-20">
 
       {/* Brand Section */}
-      <div className="h-20 flex items-center px-6">
+      <div className="h-20 flex items-center justify-between px-6">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white">
             <span className="material-icons-round text-lg">grid_view</span>
           </div>
           <h1 className="text-xl font-bold text-gray-800 tracking-tight">ecoHRMS</h1>
         </div>
+
+        {/* Notification Bell */}
+        <NotificationBell />
       </div>
 
       {/* Profile Section */}
