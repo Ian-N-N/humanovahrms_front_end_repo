@@ -133,8 +133,8 @@ const PayrollEmployee = () => {
                                     <span className="font-bold text-red-600">-{formatKSh(selectedSlip.nssf)}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-gray-600">SHIF (NHIF)</span>
-                                    <span className="font-bold text-red-600">-{formatKSh(selectedSlip.nhif)}</span>
+                                    <span className="text-gray-600">SHIF (SHIF)</span>
+                                    <span className="font-bold text-red-600">-{formatKSh(selectedSlip.shif)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">Housing Levy</span>
@@ -160,6 +160,16 @@ const PayrollEmployee = () => {
                         </div>
                     </div>
                 )}
+
+                <div className="p-6 border-t border-gray-50 flex justify-end gap-3 no-print">
+                    <button
+                        onClick={() => window.print()}
+                        className="px-6 py-3 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all flex items-center gap-2"
+                    >
+                        <span className="material-icons-round text-sm">print</span>
+                        Print Payslip
+                    </button>
+                </div>
             </Modal>
 
             {/* Tax Info Banner */}

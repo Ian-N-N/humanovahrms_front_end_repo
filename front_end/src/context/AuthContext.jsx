@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import authService from '../api/authService';
 
 const AuthContext = createContext();
 
@@ -41,9 +41,11 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         try {
-            const response = await api.post('/auth/login', { email, password });
+            // Normalize email to lowercase
+            const normalizedEmail = String(email).toLowerCase().trim();
+            const response = await authService.login({ email: normalizedEmail, password });
             const access_token = response.access_token || response.token;
-            const user = response.user;
+            const userData = response.user;
 
             if (!access_token) {
                 console.error("Login response missing token:", response);
@@ -51,20 +53,31 @@ export const AuthProvider = ({ children }) => {
             }
 
             localStorage.setItem('token', access_token);
-            localStorage.setItem('user', JSON.stringify(user));
-            setUser(user);
-            return user;
+            localStorage.setItem('user', JSON.stringify(userData));
+            setUser(userData);
+            return userData;
         } catch (error) {
             console.error("Login failed:", error);
             throw error;
         }
     };
 
-    const register = async (name, username, email, password, role) => {
+    const register = async (nameOrData, username, email, password, role) => {
         try {
-            console.log("Registering with role:", role); // DEBUG LOG
-            // Register endpoint now accepts username
-            return await api.post('/auth/register', { name, username, email, password, role });
+            let payload;
+            if (typeof nameOrData === 'object' && nameOrData !== null) {
+                payload = { ...nameOrData };
+            } else {
+                payload = { name: nameOrData, username, email, password, role };
+            }
+
+            // Forced Normalization
+            payload.email = String(payload.email).toLowerCase().trim();
+            // Default role is admin per new requirements
+            payload.role = payload.role || 'admin';
+
+            console.log("Registering with payload:", payload);
+            return await authService.register(payload);
         } catch (error) {
             console.error("Registration failed:", error);
             throw error;
@@ -73,20 +86,14 @@ export const AuthProvider = ({ children }) => {
 
     const logout = () => {
         setUser(null);
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
+        authService.logout();
         navigate('/login');
     };
 
     const updateUser = async (data) => {
         try {
-            // Optimistically update local state first for speed
             setUser(prev => ({ ...prev, ...data }));
-
-            // Call API
-            const updatedUser = await api.put('/auth/profile', data);
-
-            // Update storage and state with confirmed data from backend
+            const updatedUser = await authService.updateProfile(data);
             localStorage.setItem('user', JSON.stringify(updatedUser));
             setUser(updatedUser);
             return updatedUser;

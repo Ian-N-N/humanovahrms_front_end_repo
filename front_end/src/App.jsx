@@ -17,6 +17,8 @@ import Employees from "./pages/admin/EmployeeList";
 import EmployeeCreate from "./pages/admin/EmployeeCreate";
 import Departments from "./pages/admin/DepartmentManagement";
 import AuthPage from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import TrialRegister from "./pages/auth/TrialRegister";
 import Payroll from './pages/admin/Payroll';
 import LeaveManagement from './pages/admin/LeaveManagement';
 import Attendance from './pages/admin/AttendanceManagement';
@@ -63,7 +65,8 @@ const App = () => {
                       <Routes>
                         {/* --- PUBLIC ROUTES --- */}
                         <Route path="/login" element={<AuthPage />} />
-                        <Route path="/register" element={<AuthPage />} />
+                        <Route path="/register" element={<Register />} />
+                        <Route path="/trial-register" element={<TrialRegister />} />
 
                         <Route path="/" element={<Navigate to="/login" replace />} />
 
@@ -97,8 +100,10 @@ const App = () => {
                           <Route path="/hr/employees" element={<Employees />} />
                           <Route path="/hr/employees/new" element={<EmployeeCreate />} />
                           <Route path="/hr/departments" element={<Departments />} />
+                          <Route path="/hr/payroll" element={<Payroll />} />
                           <Route path="/hr/leaves" element={<LeaveReview />} />
                           <Route path="/hr/attendance" element={<AttendanceSummary />} />
+                          <Route path="/hr/push-notifications" element={<PushNotifications />} />
                           <Route path="/hr/analytics" element={<DepartmentAnalytics />} />
                           <Route path="/hr" element={<Navigate to="/hr/dashboard" replace />} />
 

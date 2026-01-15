@@ -16,7 +16,8 @@ const EmployeeEdit = ({ employee, onCancel, onSave }) => {
     department_id: employee.department_id || 1,
     job_title: employee.job_title || employee.role || '',
     status: employee.status || 'Active',
-    basic_salary: employee.basic_salary || 0
+    basic_salary: employee.basic_salary || 0,
+    leave_balance: employee.leave_balance || 0
   });
 
   // Add photo state
@@ -38,7 +39,7 @@ const EmployeeEdit = ({ employee, onCancel, onSave }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Construct CLEAN payload matching backend schema
     const payload = {
       first_name: formData.first_name,
@@ -46,6 +47,7 @@ const EmployeeEdit = ({ employee, onCancel, onSave }) => {
       department_id: parseInt(formData.department_id) || 1,
       job_title: formData.job_title,
       basic_salary: formData.basic_salary,
+      leave_balance: parseInt(formData.leave_balance) || 0,
       status: formData.status
     };
 
@@ -151,6 +153,18 @@ const EmployeeEdit = ({ employee, onCancel, onSave }) => {
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
             </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-gray-700">Leave Balance (Days)</label>
+            <input
+              type="number"
+              name="leave_balance"
+              value={formData.leave_balance}
+              onChange={handleChange}
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="Assign leave days..."
+            />
           </div>
 
           {/* Note: Email and Phone are tied to User Account, not editable here */}

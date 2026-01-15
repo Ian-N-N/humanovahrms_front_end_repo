@@ -22,13 +22,29 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [errors, setErrors] = useState({});
+
   const toggleView = () => {
     setIsLogin(!isLogin);
     setError('');
+    setErrors({});
+  };
+
+  const validate = () => {
+    const newErrors = {};
+    if (!email) newErrors.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Invalid email format";
+
+    if (!password) newErrors.password = "Password is required";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validate()) return;
+
     setError('');
     setLoading(true);
 
@@ -221,7 +237,7 @@ const AuthPage = () => {
             {isLogin ? (
               <p className="text-sm text-gray-600">
                 Don't have an account?{' '}
-                <button onClick={toggleView} className="font-semibold text-primary hover:text-primary-dark hover:underline transition-colors">
+                <button onClick={() => navigate('/register')} className="font-semibold text-primary hover:text-primary-dark hover:underline transition-colors">
                   Sign Up Organisation
                 </button>
               </p>

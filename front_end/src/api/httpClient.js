@@ -6,7 +6,8 @@ const httpClient = axios.create({
     baseURL: API_BASE_URL,
     timeout: 15000, // 15 seconds timeout
     headers: {
-        'Content-Type': 'application/json',
+        // Axios will automatically set the correct Content-Type 
+        // including boundary for FormData.
     },
 });
 
@@ -63,9 +64,15 @@ httpClient.interceptors.response.use(
         const originalRequest = error.config;
 
         if (status === 401) {
-            console.warn(`Unauthorized (401) on ${originalRequest.url}. Dispatching auth:unauthorized event.`);
-            // Dispatch a global event that AuthContext can listen to
-            window.dispatchEvent(new Event('auth:unauthorized'));
+            // Skip global logout event if it's a login attempt
+            const isLoginRequest = originalRequest.url?.includes('/auth/login');
+
+            if (!isLoginRequest) {
+                console.warn(`Unauthorized (401) on ${originalRequest.url}. Dispatching auth:unauthorized event.`);
+                window.dispatchEvent(new Event('auth:unauthorized'));
+            } else {
+                console.warn(`Login failed (401). Skipping global unauthorized event.`);
+            }
         }
         return Promise.reject(error);
     }

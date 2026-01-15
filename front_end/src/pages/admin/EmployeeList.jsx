@@ -10,7 +10,7 @@ const groupEmployees = (flatList) => {
   const depts = {};
   if (!Array.isArray(flatList)) return [];
   flatList.forEach(emp => {
-    const deptName = emp.department || (emp.department_id ? `Dept ${emp.department_id}` : 'Unassigned');
+    const deptName = emp.department_name || emp.department || (emp.department_id ? `Dept ${emp.department_id}` : 'Unassigned');
     // Backend returns 'job_title', frontend used 'role'. Map them.
     const roleName = emp.job_title || emp.role || 'General';
 

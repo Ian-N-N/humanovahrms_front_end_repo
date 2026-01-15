@@ -14,10 +14,11 @@ const Register = () => {
         name: '',
         username: '',
         email: '',
-        role: '',
+        role: 'admin',
         password: '',
         confirmPassword: ''
     });
+    const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
@@ -25,20 +26,47 @@ const Register = () => {
             ...formData,
             [e.target.name]: e.target.value
         });
+        // Clear error when user types
+        if (errors[e.target.name]) {
+            setErrors({ ...errors, [e.target.name]: null });
+        }
+    };
+
+    const validate = () => {
+        const newErrors = {};
+
+        // Email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            newErrors.email = "Please enter a valid email address.";
+        }
+
+        // Password
+        const password = formData.password;
+        if (password.length < 8) {
+            newErrors.password = "Password must be at least 8 characters.";
+        } else if (!/[A-Z]/.test(password)) {
+            newErrors.password = "Must contain an uppercase letter.";
+        } else if (!/[a-z]/.test(password)) {
+            newErrors.password = "Must contain a lowercase letter.";
+        } else if (!/[0-9]/.test(password)) {
+            newErrors.password = "Must contain a number.";
+        } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+            newErrors.password = "Must contain a special character.";
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+            newErrors.confirmPassword = "Passwords do not match!";
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (formData.password !== formData.confirmPassword) {
-            alert("Passwords do not match!");
-            return;
-        }
-
-        if (!formData.role) {
-            alert("Please select a role!");
-            return;
-        }
+        if (!validate()) return;
 
         setLoading(true);
         try {
@@ -53,7 +81,7 @@ const Register = () => {
                 name: formData.name,
                 username: formData.username,
                 email: formData.email.toLowerCase(),
-                role: formData.role,
+                role: 'admin',
                 password: formData.password
             });
 
@@ -63,10 +91,12 @@ const Register = () => {
             console.error("Registration failed detail:", error);
 
             if (!error.response) {
-                alert("Could not connect to the backend server. Please ensure your Flask app is running at http://127.0.0.1:5000");
+                alert("Could not connect to the backend server.");
             } else {
-                const serverError = error.response?.data?.error || error.response?.data?.message || "Registration failed.";
-                alert(`Server Error: ${serverError}`);
+                const serverError = error.response?.data?.message || error.response?.data?.error || "Registration failed.";
+                if (serverError.toLowerCase().includes('email')) setErrors(p => ({ ...p, email: serverError }));
+                else if (serverError.toLowerCase().includes('password')) setErrors(p => ({ ...p, password: serverError }));
+                else alert(`Server Error: ${serverError}`);
             }
         } finally {
             setLoading(false);
@@ -100,7 +130,7 @@ const Register = () => {
                             <img src="/logo.svg" alt="ecoHRMS" className="h-full w-full" />
                         </div>
                         <h2 className="text-3xl font-extrabold text-gray-900">
-                            Create new account
+                            Organization Admin Registration
                         </h2>
                         <p className="mt-2 text-sm text-gray-600">
                             Already have an account? <Link to="/login" className="font-medium text-primary hover:text-blue-500">Sign in here</Link>
@@ -137,26 +167,12 @@ const Register = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 placeholder="e.g. jane@ecoHRMS.com"
+                                error={errors.email}
                                 required
                             />
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                                <select
-                                    name="role"
-                                    value={formData.role}
-                                    onChange={handleChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-white"
-                                    required
-                                >
-                                    <option value="">Select your role</option>
-                                    <option value="employee">Employee</option>
-                                    <option value="hr">HR Manager</option>
-                                    <option value="admin">Admin</option>
-                                </select>
-                            </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <Input
                                     label="Password"
                                     name="password"
@@ -164,6 +180,7 @@ const Register = () => {
                                     value={formData.password}
                                     onChange={handleChange}
                                     placeholder="••••••••"
+                                    error={errors.password}
                                     required
                                 />
                                 <Input
@@ -173,6 +190,7 @@ const Register = () => {
                                     value={formData.confirmPassword}
                                     onChange={handleChange}
                                     placeholder="••••••••"
+                                    error={errors.confirmPassword}
                                     required
                                 />
                             </div>
