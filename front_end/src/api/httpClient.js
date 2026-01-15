@@ -4,7 +4,7 @@ const API_BASE_URL = '/api';
 
 const httpClient = axios.create({
     baseURL: API_BASE_URL,
-    timeout: 15000, // 15 seconds timeout
+    timeout: 60000, // 60 seconds timeout
     headers: {
         // Axios will automatically set the correct Content-Type 
         // including boundary for FormData.

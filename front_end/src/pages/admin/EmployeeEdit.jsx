@@ -40,23 +40,22 @@ const EmployeeEdit = ({ employee, onCancel, onSave }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Construct CLEAN payload matching backend schema
-    const payload = {
-      first_name: formData.first_name,
-      last_name: formData.last_name,
-      department_id: parseInt(formData.department_id) || 1,
-      job_title: formData.job_title,
-      basic_salary: formData.basic_salary,
-      leave_balance: parseInt(formData.leave_balance) || 0,
-      status: formData.status
-    };
+    // Use FormData to handle file upload correctly
+    const data = new FormData();
+    data.append('first_name', formData.first_name);
+    data.append('last_name', formData.last_name);
+    data.append('department_id', parseInt(formData.department_id) || 1);
+    data.append('job_title', formData.job_title);
+    data.append('basic_salary', formData.basic_salary);
+    data.append('leave_balance', parseInt(formData.leave_balance) || 0);
+    data.append('status', formData.status);
 
-    // If photo file is provided, include it
+    // If photo file is provided, include it with the key 'image'
     if (photoFile) {
-      payload.photo = photoFile;
+      data.append('image', photoFile);
     }
 
-    onSave(payload);
+    onSave(data);
   };
 
   return (

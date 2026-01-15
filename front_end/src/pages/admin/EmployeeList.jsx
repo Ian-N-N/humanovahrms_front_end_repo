@@ -26,7 +26,7 @@ const groupEmployees = (flatList) => {
       name: fullName,
       role: roleName, // Ensure role is populated for display
       department: deptName, // Ensure department is populated
-      avatar: emp.photo_url || emp.avatar || emp.image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=facearea&facepad=2&w=256&h=256&q=80',
+      avatar: emp.profile_photo_url || emp.photo_url || emp.avatar || emp.image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=facearea&facepad=2&w=256&h=256&q=80',
       joined: emp.join_date || emp.joinDate || emp.joined || 'N/A',
       status: emp.status || 'Active'
     });
@@ -265,14 +265,22 @@ const Employees = () => {
         ? `${updatedData.first_name} ${updatedData.last_name}`
         : (updatedEmployee.name || selectedEmployee.name);
 
+      // Map job_title correctly based on payload type
+      let jobTitle = selectedEmployee.job_title;
+      if (updatedData instanceof FormData) {
+        jobTitle = updatedData.get('job_title') || updatedEmployee.job_title || jobTitle;
+      } else {
+        jobTitle = updatedData.job_title || updatedEmployee.job_title || jobTitle;
+      }
+
       const mergedEmployee = {
         ...selectedEmployee,
         ...updatedEmployee,
         name: newName,
-        job_title: updatedData.job_title || updatedEmployee.job_title || selectedEmployee.job_title,
-        // Ensure other fields are preserved or mapped if the API returns them
+        job_title: jobTitle,
         department: updatedEmployee.department || selectedEmployee.department,
-        status: updatedEmployee.status || selectedEmployee.status
+        status: updatedEmployee.status || selectedEmployee.status,
+        avatar: updatedEmployee.profile_photo_url || updatedEmployee.avatar || selectedEmployee.avatar
       };
 
       setSelectedEmployee(mergedEmployee);
