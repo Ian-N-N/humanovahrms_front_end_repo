@@ -1,6 +1,6 @@
 import React from 'react';
 
-const DepartmentDetails = ({ department, onBack, onEdit }) => {
+const DepartmentDetails = ({ department, onBack, onEdit, onDelete }) => {
   if (!department) return null;
 
   return (
@@ -25,13 +25,24 @@ const DepartmentDetails = ({ department, onBack, onEdit }) => {
               <p className="text-gray-500 mt-1">{department.employee_count || 0} Active Members</p>
             </div>
           </div>
-          <button
-            onClick={onEdit}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 font-bold rounded-lg hover:bg-gray-50 shadow-sm transition-colors"
-          >
-            <span className="material-icons-round text-sm">edit</span>
-            Edit Details
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onEdit}
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 font-bold rounded-lg hover:bg-gray-50 shadow-sm transition-colors"
+            >
+              <span className="material-icons-round text-sm">edit</span>
+              Edit Details
+            </button>
+            {onDelete && (
+              <button
+                onClick={onDelete}
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-red-100 text-red-600 font-bold rounded-lg hover:bg-red-50 shadow-sm transition-colors"
+              >
+                <span className="material-icons-round text-sm">delete</span>
+                Delete
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8 border-t border-gray-100 pt-8">

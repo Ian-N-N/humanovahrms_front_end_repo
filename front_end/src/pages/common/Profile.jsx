@@ -57,7 +57,13 @@ const Profile = () => {
                     <p className="text-gray-500 capitalize">
                         {typeof user?.role === 'object' ? user.role.name || 'Employee' : user?.role || 'Employee'}
                     </p>
-                    <p className="text-gray-400 text-sm mt-1">{user?.id}</p>
+                    {user?.employee?.employee_number && (
+                        <p className="mt-2">
+                            <span className="font-mono text-sm bg-blue-100 text-blue-700 px-2.5 py-1 rounded-md font-semibold">
+                                {user.employee.employee_number}
+                            </span>
+                        </p>
+                    )}
 
                     <div className="mt-6 w-full space-y-2">
                         <Button variant="outline" className="w-full" onClick={logout}>Sign Out</Button>

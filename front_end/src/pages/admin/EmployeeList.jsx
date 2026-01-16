@@ -24,6 +24,7 @@ const groupEmployees = (flatList) => {
       ...emp,
       id: emp.id || Math.random(),
       name: fullName,
+      employeeNumber: emp.employee_number || null,  // Auto-generated employee ID
       role: roleName, // Ensure role is populated for display
       department: deptName, // Ensure department is populated
       avatar: emp.profile_photo_url || emp.photo_url || emp.avatar || emp.image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=facearea&facepad=2&w=256&h=256&q=80',
@@ -39,8 +40,9 @@ const groupEmployees = (flatList) => {
 };
 
 /* --- INTERNAL COMPONENT: LIST VIEW --- */
-const EmployeesList = ({ data, onAddNew, onViewProfile, onToggleStatus, role }) => {
+const EmployeesList = ({ data, onAddNew, onViewProfile, onToggleStatus, onDelete, role }) => {
   const isHR = role?.toLowerCase().includes('hr');
+  const isAdmin = role?.toLowerCase() === 'admin';
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
 
@@ -149,6 +151,9 @@ const EmployeesList = ({ data, onAddNew, onViewProfile, onToggleStatus, role }) 
                           />
                           <div className={viewMode === 'grid' ? 'text-center' : 'text-left'}>
                             <h4 className="font-bold text-gray-900 text-sm">{member.name}</h4>
+                            {member.employeeNumber && (
+                              <p className="text-[10px] font-mono text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded inline-block mt-0.5">{member.employeeNumber}</p>
+                            )}
                             <p className="text-[10px] text-gray-400">{member.email}</p>
                           </div>
                         </div>
@@ -181,6 +186,20 @@ const EmployeesList = ({ data, onAddNew, onViewProfile, onToggleStatus, role }) 
                           >
                             {member.status === 'Active' ? 'Deactivate' : 'Activate'}
                           </button>
+
+                          {/* Delete Button - Admin Only */}
+                          {isAdmin && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); onDelete(member); }}
+                              className={viewMode === 'grid'
+                                ? "py-2 px-3 rounded-lg border border-red-100 text-red-600 text-[10px] font-bold hover:bg-red-50 transition-colors"
+                                : "px-3 py-1.5 rounded-lg border border-red-100 text-red-600 text-[10px] font-bold hover:bg-red-50 transition-colors"
+                              }
+                              title="Delete Employee"
+                            >
+                              <span className="material-icons-round text-sm">delete</span>
+                            </button>
+                          )}
                         </div>
 
                       </div>
@@ -209,7 +228,7 @@ const Employees = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { employees, loading, addEmployee, updateEmployee, activateEmployee, deactivateEmployee } = useEmployee();
+  const { employees, loading, addEmployee, updateEmployee, activateEmployee, deactivateEmployee, deleteEmployee } = useEmployee();
 
   // Fix: Handle role being an object { id, name } or a string safely
   const roleObj = user?.role;
@@ -252,6 +271,19 @@ const Employees = () => {
       }
     } catch (error) {
       alert('Failed to update employee status.');
+    }
+  };
+
+  const handleDelete = async (employee) => {
+    const confirmed = window.confirm(`Are you sure you want to permanently delete ${employee.name}? This will also delete their user account and cannot be undone.`);
+    if (!confirmed) return;
+
+    try {
+      await deleteEmployee(employee.id);
+      alert(`${employee.name} deleted successfully.`);
+      setCurrentView('list');
+    } catch (error) {
+      alert('Failed to delete employee. ' + (error.response?.data?.message || ''));
     }
   };
 
@@ -310,6 +342,7 @@ const Employees = () => {
           onAddNew={handleAddNew}
           onViewProfile={handleViewProfile}
           onToggleStatus={handleToggleStatus}
+          onDelete={handleDelete}
           role={role}
         />
       )}

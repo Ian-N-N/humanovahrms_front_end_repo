@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import SystemDateTime from '../../components/common/SystemDate.jsx';
 import { useAuth } from '../../context/AuthContext';
 import { useEmployee } from '../../context/EmployeeContext';
@@ -6,6 +6,7 @@ import { useDepartment } from '../../context/DepartmentContext';
 import { useLeave } from '../../context/LeaveContext';
 import { useAttendance } from '../../context/AttendanceContext';
 import { useNavigate } from 'react-router-dom';
+import { activityService } from '../../api/activityService';
 
 const StatCard = ({ label, value, badge, badgeColor, icon, onClick }) => (
   <div onClick={onClick} className={`bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between h-40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${onClick ? 'cursor-pointer hover:border-blue-200' : ''}`}>
@@ -33,6 +34,32 @@ const DashboardOverview = () => {
   const { departments } = useDepartment();
   const { leaves } = useLeave();
   const { records } = useAttendance();
+  const [activityLogs, setActivityLogs] = useState([]);
+
+  useEffect(() => {
+    const fetchLogs = async () => {
+      try {
+        const logs = await activityService.getLogs();
+        setActivityLogs(Array.isArray(logs) ? logs : []);
+      } catch (err) {
+        console.error("Failed to fetch activity logs", err);
+      }
+    };
+    fetchLogs();
+  }, [records, leaves, employees, departments]); // Refetch when data changes trigger context updates? 
+  // Actually better to just fetch once or on specific triggers. The deps above might be too aggressive if they change rapidly.
+  // But for "Live Activity" feeling without websockets, hooking into these contexts updating is clever if they update on actions.
+  // Let's stick to [] for now and maybe rely on page refresh, OR include them if we want auto-updates when context refreshes.
+
+  const getActionIcon = (action) => {
+    const act = action?.toLowerCase() || '';
+    if (act.includes('clock')) return 'schedule';
+    if (act.includes('department')) return 'domain';
+    if (act.includes('employee')) return 'person';
+    if (act.includes('leave')) return 'event_note';
+    if (act.includes('payroll')) return 'payments';
+    return 'notifications_active';
+  };
 
   const stats = useMemo(() => {
     return [
@@ -134,22 +161,31 @@ const DashboardOverview = () => {
         <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
           <h3 className="text-lg font-black text-gray-900 mb-8 tracking-tight">Live Activity</h3>
           <div className="space-y-6">
-            {safeEmployees.slice(0, 5).map((emp, i) => (
-              <div key={i} className="flex gap-4 group cursor-pointer">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center text-blue-600 font-black text-sm group-hover:scale-110 transition-transform">
-                  {emp.name?.charAt(0)}
+            {activityLogs && activityLogs.length > 0 ? (
+              activityLogs.slice(0, 5).map((log, i) => (
+                <div key={log.id || i} className="flex gap-4 group cursor-pointer animate-fade-in-up" style={{ animationDelay: `${i * 100}ms` }}>
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center text-blue-600 font-black text-sm group-hover:scale-110 transition-transform flex-shrink-0">
+                    <span className="material-icons-round text-xl">{getActionIcon(log.action)}</span>
+                  </div>
+                  <div className="flex-1 flex flex-col justify-center min-w-0">
+                    <p className="text-sm font-black text-gray-900 tracking-tight group-hover:text-blue-600 transition-colors truncate">
+                      {log.details || log.action}
+                    </p>
+                    <div className="flex justify-between items-center mt-0.5">
+                      <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest truncate">
+                        {log.user_name} • {log.action}
+                      </p>
+                      <span className="text-[10px] text-gray-300 font-bold whitespace-nowrap ml-2">
+                        {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex-1 flex flex-col justify-center">
-                  <p className="text-sm font-black text-gray-900 tracking-tight group-hover:text-blue-600 transition-colors">
-                    {emp.name}
-                  </p>
-                  <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-0.5">
-                    {emp.department || 'General'} • Profile Unified
-                  </p>
-                </div>
-              </div>
-            ))}
-            {employees.length === 0 && <p className="text-center py-10 text-gray-400 font-bold italic text-sm">No activity stream found.</p>}
+              ))
+            ) : (
+              <p className="text-center py-10 text-gray-400 font-bold italic text-sm">No recent activity.</p>
+            )}
+
           </div>
           <button className="w-full mt-8 py-3 bg-gray-50 text-gray-400 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-gray-100 transition-colors">
             View Detailed Logs

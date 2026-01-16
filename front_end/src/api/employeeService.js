@@ -8,6 +8,7 @@ const employeeService = {
     deactivate: (id) => httpClient.patch(`/employees/${id}`, { status: 'Inactive' }),
     activate: (id) => httpClient.patch(`/employees/${id}`, { status: 'Active' }),
     updatePhoto: (id, photoUrl) => httpClient.patch(`/employees/${id}/photo`, { photo_url: photoUrl }),
+    delete: (id) => httpClient.delete(`/employees/${id}`),
 };
 
 export default employeeService;

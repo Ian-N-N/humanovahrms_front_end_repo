@@ -2,12 +2,21 @@
 import React, { useMemo } from 'react';
 import { useDepartment } from '../../context/DepartmentContext';
 import { useEmployee } from '../../context/EmployeeContext';
+import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 
 const Departments = () => {
-    const { departments, loading: deptLoading } = useDepartment();
+    const { departments, loading: deptLoading, deleteDepartment } = useDepartment();
     const { employees, loading: empLoading } = useEmployee();
+    const { user } = useAuth();
+
+    const roleObj = user?.role;
+    const role = (roleObj?.name || (typeof roleObj === 'string' ? roleObj : '')).toLowerCase();
+    const isAdmin = role.includes('admin');
+
+    // Debug: Log role to console to verify
+    console.log('Departments - User role:', roleObj, '| Extracted:', role, '| isAdmin:', isAdmin);
 
     // Calculate member count for each department
     const departmentsWithCounts = useMemo(() => {
@@ -41,6 +50,23 @@ const Departments = () => {
         return icons[name] || '🏢';
     };
 
+    const handleDelete = async (dept) => {
+        if (dept.count > 0) {
+            alert(`Cannot delete "${dept.name}" department. It has ${dept.count} employee(s). Please reassign them first.`);
+            return;
+        }
+
+        const confirmed = window.confirm(`Are you sure you want to delete the "${dept.name}" department? This action cannot be undone.`);
+        if (!confirmed) return;
+
+        try {
+            await deleteDepartment(dept.id);
+            alert(`Department "${dept.name}" deleted successfully.`);
+        } catch (error) {
+            alert('Failed to delete department. ' + (error.response?.data?.message || ''));
+        }
+    };
+
     if (deptLoading || empLoading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -66,9 +92,20 @@ const Departments = () => {
                             <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center text-xl">
                                 {dept.icon}
                             </div>
-                            <button className="text-gray-400 hover:text-gray-600">
-                                <span className="material-icons-round text-sm">more_vert</span>
-                            </button>
+                            <div className="flex items-center gap-2">
+                                {isAdmin && (
+                                    <button
+                                        onClick={() => handleDelete(dept)}
+                                        className="text-red-400 hover:text-red-600 transition-colors"
+                                        title="Delete Department"
+                                    >
+                                        <span className="material-icons-round text-sm">delete</span>
+                                    </button>
+                                )}
+                                <button className="text-gray-400 hover:text-gray-600">
+                                    <span className="material-icons-round text-sm">more_vert</span>
+                                </button>
+                            </div>
                         </div>
                         <h3 className="text-lg font-medium text-gray-900">{dept.name}</h3>
                         <p className="text-sm text-gray-500 mt-1 mb-4">

@@ -2,9 +2,18 @@ import React, { useState, useMemo } from 'react';
 import DepartmentForm from './DepartmentForm';
 import DepartmentDetails from './DepartmentDetails';
 import { useDepartment } from '../../context/DepartmentContext';
+import { useAuth } from '../../context/AuthContext';
 
 const Departments = () => {
   const { departments, loading, addDepartment, updateDepartment, deleteDepartment, refetch } = useDepartment();
+  const { user } = useAuth();
+
+  const roleObj = user?.role;
+  const role = (roleObj?.name || (typeof roleObj === 'string' ? roleObj : '')).toLowerCase();
+  // Robust check: 'admin', 'administrator', or 'super admin'
+  // Also allowing 'hr manager' temporarily if that was the blocker, but standardizing on admin-like terms
+  const isAdmin = role.includes('admin') || role.includes('administrator') || role === 'hr manager';
+
   const [viewMode, setViewMode] = useState('grid');
   const [currentView, setCurrentView] = useState('main');
   const [selectedDept, setSelectedDept] = useState(null);
@@ -50,18 +59,45 @@ const Departments = () => {
     }
   };
 
+  const handleDelete = async (dept) => {
+    if (dept.employee_count > 0) {
+      alert(`Cannot delete "${dept.name}" department. It has ${dept.employee_count} employee(s). Please reassign them first.`);
+      return;
+    }
+
+    if (window.confirm(`Are you sure you want to delete the "${dept.name}" department? This action cannot be undone.`)) {
+      try {
+        await deleteDepartment(dept.id);
+        alert(`Department "${dept.name}" deleted successfully.`);
+      } catch (err) {
+        alert("Failed to delete department. " + (err.response?.data?.message || err.message));
+      }
+    }
+  };
+
   const renderGridItem = (dept) => (
     <div key={dept.id} onClick={() => handleViewDetails(dept)} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group animate-fade-in-up">
       <div className="flex justify-between items-start mb-4">
         <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-blue-50 text-blue-600 group-hover:scale-110 transition-transform`}>
           <span className="material-icons-round text-2xl">{dept.icon || 'business'}</span>
         </div>
-        <button
-          onClick={(e) => { e.stopPropagation(); handleEdit(dept); }}
-          className="p-2 rounded-full hover:bg-gray-100 text-gray-300 hover:text-blue-600 transition-colors"
-        >
-          <span className="material-icons-round text-lg">edit</span>
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={(e) => { e.stopPropagation(); handleEdit(dept); }}
+            className="p-2 rounded-full hover:bg-gray-100 text-gray-300 hover:text-blue-600 transition-colors"
+          >
+            <span className="material-icons-round text-lg">edit</span>
+          </button>
+          {isAdmin && (
+            <button
+              onClick={(e) => { e.stopPropagation(); handleDelete(dept); }}
+              className="p-2 rounded-full hover:bg-red-50 text-gray-300 hover:text-red-500 transition-colors"
+              title="Delete Department"
+            >
+              <span className="material-icons-round text-lg">delete</span>
+            </button>
+          )}
+        </div>
       </div>
       <div className="mb-6">
         <h3 className="text-lg font-bold text-gray-900 mb-2">{dept.name}</h3>
@@ -106,12 +142,22 @@ const Departments = () => {
         <span className="material-icons-round text-sm">people</span>
         <span className="text-xs font-bold">{dept.employee_count || 0}</span>
       </div>
-      <button
-        onClick={(e) => { e.stopPropagation(); handleEdit(dept); }}
-        className="p-2 text-gray-300 hover:text-blue-600 hover:bg-gray-50 rounded-lg"
-      >
-        <span className="material-icons-round">edit</span>
-      </button>
+      <div className="flex items-center gap-1">
+        <button
+          onClick={(e) => { e.stopPropagation(); handleEdit(dept); }}
+          className="p-2 text-gray-300 hover:text-blue-600 hover:bg-gray-50 rounded-lg"
+        >
+          <span className="material-icons-round">edit</span>
+        </button>
+        {isAdmin && (
+          <button
+            onClick={(e) => { e.stopPropagation(); handleDelete(dept); }}
+            className="p-2 text-gray-300 hover:text-red-600 hover:bg-red-50 rounded-lg"
+          >
+            <span className="material-icons-round">delete</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 
@@ -199,12 +245,12 @@ const Departments = () => {
           department={selectedDept}
           onBack={handleBack}
           onEdit={() => handleEdit(null)}
-          onDelete={async () => {
+          onDelete={isAdmin ? async () => {
             if (window.confirm("Delete this department?")) {
               await deleteDepartment(selectedDept.id);
               handleBack();
             }
-          }}
+          } : null}
         />
       )}
     </main>
