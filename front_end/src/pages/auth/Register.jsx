@@ -18,6 +18,7 @@ const Register = () => {
         password: '',
         confirmPassword: ''
     });
+    const [image, setImage] = useState(null);
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
 
@@ -77,13 +78,24 @@ const Register = () => {
                 role: formData.role
             });
 
-            await register({
+            const registrationPayload = {
                 name: formData.name,
                 username: formData.username,
                 email: formData.email.toLowerCase(),
                 role: 'admin',
                 password: formData.password
-            });
+            };
+
+            // If there's an image, we need to send as FormData
+            let finalData = registrationPayload;
+            if (image) {
+                const fd = new FormData();
+                Object.keys(registrationPayload).forEach(key => fd.append(key, registrationPayload[key]));
+                fd.append('image', image);
+                finalData = fd;
+            }
+
+            await register(finalData);
 
             alert("Registration successful! Please login with your email and password.");
             navigate('/login');
@@ -140,7 +152,7 @@ const Register = () => {
                     <div className="bg-white py-2 px-0 shadow-none sm:rounded-lg">
                         <form className="space-y-6" onSubmit={handleSubmit}>
 
-                            <ImageUpload label="Upload a new photo" />
+                            <ImageUpload label="Upload a new photo" onImageChange={setImage} />
 
                             <Input
                                 label="Full Name"

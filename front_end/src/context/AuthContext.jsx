@@ -71,7 +71,14 @@ export const AuthProvider = ({ children }) => {
                 payload = { name: nameOrData, username, email, password, role };
             }
 
-            // Forced Normalization
+            // Handle FormData for multipart/image uploads
+            if (payload instanceof FormData) {
+                console.log("Registering with FormData (detected photo upload)");
+                // No normalization safe on FormData, assume sanitized or handled by caller/backend
+                return await authService.register(payload);
+            }
+
+            // Forced Normalization for JSON payloads
             payload.email = String(payload.email).toLowerCase().trim();
             // Default role is admin per new requirements
             payload.role = payload.role || 'admin';
