@@ -133,7 +133,7 @@ const PayrollEmployee = () => {
                                     <span className="font-bold text-red-600">-{formatKSh(selectedSlip.nssf)}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-gray-600">SHIF (SHIF)</span>
+                                    <span className="text-gray-600">SHIF</span>
                                     <span className="font-bold text-red-600">-{formatKSh(selectedSlip.shif)}</span>
                                 </div>
                                 <div className="flex justify-between">
@@ -146,7 +146,7 @@ const PayrollEmployee = () => {
                                         -{formatKSh(
                                             Number(selectedSlip.tax_paid) +
                                             Number(selectedSlip.nssf) +
-                                            Number(selectedSlip.nhif) +
+                                            Number(selectedSlip.shif) +
                                             Number(selectedSlip.housing_levy)
                                         )}
                                     </span>

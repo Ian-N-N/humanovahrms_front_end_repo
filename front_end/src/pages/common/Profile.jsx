@@ -40,9 +40,19 @@ const Profile = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Left Col: Photo & Main Info */}
                 <Card className="md:col-span-1 flex flex-col items-center text-center">
-                    <div className="h-32 w-32 rounded-full bg-primary flex items-center justify-center text-4xl font-bold text-white mb-4">
-                        {user?.name?.charAt(0) || 'U'}
-                    </div>
+                    {user?.employee?.profile_photo_url ? (
+                        <div className="relative group mb-4">
+                            <img
+                                src={user.employee.profile_photo_url}
+                                alt={user.name}
+                                className="h-32 w-32 rounded-full object-cover border-4 border-white shadow-lg"
+                            />
+                        </div>
+                    ) : (
+                        <div className="h-32 w-32 rounded-full bg-primary flex items-center justify-center text-4xl font-bold text-white mb-4 shadow-lg">
+                            {user?.name?.charAt(0) || 'U'}
+                        </div>
+                    )}
                     <h3 className="text-xl font-bold text-gray-900">{user?.name}</h3>
                     <p className="text-gray-500 capitalize">
                         {typeof user?.role === 'object' ? user.role.name || 'Employee' : user?.role || 'Employee'}

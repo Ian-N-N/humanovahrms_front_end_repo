@@ -46,19 +46,39 @@ const EmployeeProfile = ({ employee, onBack, onEdit }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4">
             <div>
               <p className="text-xs text-gray-400 uppercase tracking-wide">Full Name</p>
-              <p className="font-medium text-gray-800 mt-1">{employee.name}</p>
+              <p className="font-medium text-gray-800 mt-1">{employee.name || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-gray-400 uppercase tracking-wide">Email Address</p>
-              <p className="font-medium text-gray-800 mt-1">{employee.email}</p>
+              <p className="font-medium text-gray-800 mt-1">{employee.email || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-gray-400 uppercase tracking-wide">Phone</p>
-              <p className="font-medium text-gray-800 mt-1">{employee.phone}</p>
+              <p className="font-medium text-gray-800 mt-1">{employee.phone_number || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-gray-400 uppercase tracking-wide">Date Joined</p>
-              <p className="font-medium text-gray-800 mt-1">{employee.joined}</p>
+              <p className="font-medium text-gray-800 mt-1">{employee.hire_date || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-wide">Department</p>
+              <p className="font-medium text-gray-800 mt-1">{employee.department_name || employee.department || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-wide">Job Title</p>
+              <p className="font-medium text-gray-800 mt-1">{employee.job_title || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-wide">Basic Salary</p>
+              <p className="font-medium text-gray-800 mt-1">KSh {employee.basic_salary ? Number(employee.basic_salary).toLocaleString() : 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-wide">Status</p>
+              <p className="font-medium text-gray-800 mt-1">
+                <span className={`px-2 py-1 rounded-full text-xs ${employee.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                  {employee.status || 'N/A'}
+                </span>
+              </p>
             </div>
           </div>
         </div>
@@ -68,12 +88,8 @@ const EmployeeProfile = ({ employee, onBack, onEdit }) => {
           <h3 className="font-bold text-gray-800 mb-4">Leave Balance</h3>
           <div className="flex gap-4 mb-6">
             <div className="flex-1 bg-blue-50 rounded-xl p-4 text-center">
-              <span className="block text-2xl font-bold text-blue-600">12</span>
-              <span className="text-xs text-gray-500">Casual</span>
-            </div>
-            <div className="flex-1 bg-orange-50 rounded-xl p-4 text-center">
-              <span className="block text-2xl font-bold text-orange-600">08</span>
-              <span className="text-xs text-gray-500">Sick</span>
+              <span className="block text-2xl font-bold text-blue-600">{employee.leave_balance || 0}</span>
+              <span className="text-xs text-gray-500">Days Available</span>
             </div>
           </div>
         </div>

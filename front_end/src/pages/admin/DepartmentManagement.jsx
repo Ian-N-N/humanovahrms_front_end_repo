@@ -70,18 +70,18 @@ const Departments = () => {
       <div className="flex items-center justify-between pt-4 border-t border-gray-50">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500">
-            {dept.manager ? dept.manager.first_name.charAt(0) : 'N'}
+            {dept.manager?.name ? dept.manager.name.charAt(0) : 'N'}
           </div>
           <div>
             <p className="text-[10px] text-gray-400 uppercase font-semibold">Head</p>
             <p className="text-xs font-bold text-gray-700">
-              {dept.manager ? `${dept.manager.first_name} ${dept.manager.last_name}` : 'Not Assigned'}
+              {dept.manager?.name || 'Not Assigned'}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md text-gray-500">
           <span className="material-icons-round text-sm">people</span>
-          <span className="text-xs font-bold uppercase tracking-tighter">{dept.members || 0}</span>
+          <span className="text-xs font-bold uppercase tracking-tighter">{dept.employee_count || 0}</span>
         </div>
       </div>
     </div>
@@ -99,12 +99,12 @@ const Departments = () => {
       <div className="hidden md:block text-right pr-4">
         <p className="text-[10px] text-gray-400 uppercase font-semibold">Head</p>
         <p className="text-sm font-medium text-gray-700">
-          {dept.manager ? `${dept.manager.first_name} ${dept.manager.last_name}` : 'N/A'}
+          {dept.manager?.name || 'N/A'}
         </p>
       </div>
       <div className="hidden sm:flex items-center gap-1 bg-gray-50 px-3 py-1 rounded-md text-gray-500">
         <span className="material-icons-round text-sm">people</span>
-        <span className="text-xs font-bold">{dept.members || 0}</span>
+        <span className="text-xs font-bold">{dept.employee_count || 0}</span>
       </div>
       <button
         onClick={(e) => { e.stopPropagation(); handleEdit(dept); }}

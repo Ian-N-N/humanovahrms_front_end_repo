@@ -39,16 +39,19 @@ const Attendance = () => {
 
   const transformedRecords = useMemo(() => {
     return records.map(rec => {
-      // Find matching employee by user_id or employee_id
-      const empId = rec.user_id || rec.employee_id || rec.user?.id;
-      const matchedEmployee = employees.find(e => e.id === empId || e.user_id === empId);
+      // Use employee data from backend if available
+      const employeeData = rec.employee || {
+        name: "Unknown Employee",
+        job_title: "Unknown",
+        profile_photo_url: null
+      };
 
       return {
         ...rec,
-        employee: rec.employee || matchedEmployee || {
-          name: "Unknown Employee",
-          role: "Unknown",
-          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(rec.user_id || 'U')}&background=random`
+        employee: {
+          name: employeeData.name || "Unknown Employee",
+          role: employeeData.job_title || "Unknown",
+          avatar: employeeData.profile_photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(employeeData.name || 'U')}&background=random`
         },
         checkIn: rec.clock_in_time || rec.clock_in || rec.clockIn || rec.checkIn || rec.check_in || "--:--",
         checkOut: rec.clock_out_time || rec.clock_out || rec.clockOut || rec.checkOut || rec.check_out || "--:--",
@@ -56,7 +59,7 @@ const Attendance = () => {
         status: rec.status || "On Time"
       };
     });
-  }, [records, employees]);
+  }, [records]);
 
   const filteredData = useMemo(() => {
     return transformedRecords.filter(item => {
@@ -68,12 +71,17 @@ const Attendance = () => {
   }, [transformedRecords, searchQuery, filterDept, currentDate]);
 
   const stats = useMemo(() => {
-    const total = transformedRecords.length;
-    const present = transformedRecords.filter(i => i.status !== 'Absent').length;
+    const totalLogged = transformedRecords.length;
+    const present = transformedRecords.filter(i => i.status !== 'Late').length; // Assuming 'Late' is the only other active status for now
     const late = transformedRecords.filter(i => i.status === 'Late').length;
-    const absent = transformedRecords.filter(i => i.status === 'Absent').length;
-    return { total, present, late, absent };
-  }, [transformedRecords]);
+
+    // Absent is Total Active Employees - Total Logged
+    // Ensure we have a valid employee count
+    const totalEmployees = employees ? employees.length : 0;
+    const absent = Math.max(0, totalEmployees - totalLogged);
+
+    return { total: totalLogged, present, late, absent };
+  }, [transformedRecords, employees]);
 
   const handleViewDetails = (record) => {
     setSelectedRecord({ ...record, date: record.date || currentDate });

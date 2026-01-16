@@ -16,7 +16,7 @@ const PayrollDetails = ({ employee, onBack }) => {
   // Initial Deductions as an Array for dynamic adding/removing
   const [deductions, setDeductions] = useState([
     { id: 1, name: 'PAYE Tax', amount: 12500 },
-    { id: 2, name: 'NHIF', amount: 1700 },
+    { id: 2, name: 'SHIF', amount: 1700 },
     { id: 3, name: 'NSSF', amount: 1080 },
     { id: 4, name: 'Pension Scheme', amount: 3220 },
   ]);
@@ -145,7 +145,7 @@ const PayrollDetails = ({ employee, onBack }) => {
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-600">SHIF</span>
-                    <span className="font-bold text-rose-600">-{formatKSh(employee.nhif)}</span>
+                    <span className="font-bold text-rose-600">-{formatKSh(employee.shif)}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-600">Housing Levy</span>

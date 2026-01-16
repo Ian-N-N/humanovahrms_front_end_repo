@@ -5,6 +5,8 @@ import { useLeave } from '../../context/LeaveContext';
 
 
 const WorkforceGrowthChart = ({ employees }) => {
+    const [hoveredIndex, setHoveredIndex] = React.useState(null);
+
     const growthData = useMemo(() => {
         // Get last 12 months
         const months = [];
@@ -13,15 +15,26 @@ const WorkforceGrowthChart = ({ employees }) => {
             const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
             months.push({
                 label: d.toLocaleDateString('en-US', { month: 'short' }),
+                monthKey: d.getMonth(),
+                year: d.getFullYear(),
                 date: d
             });
         }
 
-        // Calculate cumulative hires by month
-        let cumulative = 0;
+        // Calculate data
         const data = months.map(month => {
+            const monthStart = new Date(month.date.getFullYear(), month.date.getMonth(), 1);
             const monthEnd = new Date(month.date.getFullYear(), month.date.getMonth() + 1, 0);
-            const hiredByMonth = employees.filter(e => {
+
+            // New hires this month
+            const newHires = employees.filter(e => {
+                if (!e.hire_date) return false;
+                const hireDate = new Date(e.hire_date);
+                return hireDate >= monthStart && hireDate <= monthEnd;
+            }).length;
+
+            // Cumulative headcount up to this month
+            const cumulative = employees.filter(e => {
                 if (!e.hire_date) return false;
                 const hireDate = new Date(e.hire_date);
                 return hireDate <= monthEnd;
@@ -29,55 +42,190 @@ const WorkforceGrowthChart = ({ employees }) => {
 
             return {
                 label: month.label,
-                count: hiredByMonth
+                newHires,
+                cumulative
             };
         });
 
-        const maxCount = Math.max(...data.map(d => d.count), 1);
-        return { data, maxCount };
+        const maxCumulative = Math.max(...data.map(d => d.cumulative), 1);
+        const maxNewHires = Math.max(...data.map(d => d.newHires), 1);
+
+        // Find top hiring month
+        let topHiringMonth = data[0];
+        data.forEach(m => {
+            if (m.newHires > topHiringMonth.newHires) topHiringMonth = m;
+        });
+
+        return { data, maxCumulative, maxNewHires, topHiringMonth };
     }, [employees]);
 
-    if (growthData.data.length === 0 || growthData.maxCount === 0) {
-        return (
-            <div className="aspect-video bg-gray-50 rounded-xl flex items-center justify-center">
-                <p className="text-gray-400 text-sm">No hiring data available</p>
-            </div>
-        );
-    }
+    if (growthData.data.length === 0) return null;
+
+    // SVG scaling constants
+    const width = 1000;
+    const height = 300;
+    const padding = 40;
+    const chartWidth = width - padding * 2;
+    const chartHeight = height - padding * 2;
+
+    // Generate Area Path
+    const areaPoints = growthData.data.map((item, i) => {
+        const x = padding + (i * (chartWidth / (growthData.data.length - 1)));
+        const y = padding + chartHeight - (item.cumulative / growthData.maxCumulative) * chartHeight;
+        return `${x},${y}`;
+    }).join(' ');
+
+    const areaPath = `M ${padding},${height - padding} L ${areaPoints} L ${width - padding},${height - padding} Z`;
+    const linePath = `M ${areaPoints}`;
+
+    const totalGrowth = growthData.data[11].cumulative - growthData.data[0].cumulative;
+    const growthRate = growthData.data[0].cumulative > 0
+        ? ((totalGrowth / growthData.data[0].cumulative) * 100).toFixed(1)
+        : totalGrowth > 0 ? '100+' : '0';
 
     return (
-        <div className="space-y-4">
-            {/* Chart */}
-            <div className="flex items-end justify-between h-48 gap-2 px-4">
-                {growthData.data.map((item, i) => {
-                    const height = (item.count / growthData.maxCount) * 100;
-                    return (
-                        <div key={i} className="flex flex-col items-center gap-2 flex-1 group">
-                            <div className="relative w-full flex justify-center h-full items-end">
-                                <div
-                                    className="w-full max-w-[32px] bg-gradient-to-t from-blue-600 to-blue-400 rounded-t-lg transition-all duration-500 hover:from-blue-700 hover:to-blue-500 relative"
-                                    style={{ height: `${Math.max(height, 5)}%` }}
-                                >
-                                    <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs font-bold py-1 px-2 rounded transition-opacity whitespace-nowrap">
-                                        {item.count} employees
-                                    </div>
-                                </div>
-                            </div>
-                            <span className="text-[10px] font-bold text-gray-400 uppercase">{item.label}</span>
-                        </div>
-                    );
-                })}
+        <div className="space-y-6">
+            {/* Top Metrics Row */}
+            <div className="grid grid-cols-2 gap-4 mb-2">
+                <div className="bg-blue-50/50 p-3 rounded-xl border border-blue-100/50">
+                    <p className="text-[10px] uppercase font-bold text-blue-500 tracking-wider">Hiring Momentum</p>
+                    <p className="text-lg font-bold text-blue-900 mt-1">+{totalGrowth} <span className="text-xs font-medium text-blue-600">Since {growthData.data[0].label}</span></p>
+                </div>
+                <div className="bg-indigo-50/50 p-3 rounded-xl border border-indigo-100/50">
+                    <p className="text-[10px] uppercase font-bold text-indigo-500 tracking-wider">Top Month</p>
+                    <p className="text-lg font-bold text-indigo-900 mt-1">{growthData.topHiringMonth.label} <span className="text-xs font-medium text-indigo-600">(+{growthData.topHiringMonth.newHires})</span></p>
+                </div>
             </div>
 
-            {/* Summary */}
-            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-blue-600"></div>
-                    <span className="text-xs font-medium text-gray-600">Cumulative Headcount</span>
+            {/* SVG Chart Container */}
+            <div className="relative group/chart h-64 bg-white">
+                <svg
+                    viewBox={`0 0 ${width} ${height}`}
+                    className="w-full h-full overflow-visible"
+                    preserveAspectRatio="none"
+                >
+                    {/* Gradients */}
+                    <defs>
+                        <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.15" />
+                            <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+                        </linearGradient>
+                    </defs>
+
+                    {/* Horizontal Grid lines */}
+                    {[0, 0.25, 0.5, 0.75, 1].map(v => (
+                        <line
+                            key={v}
+                            x1={padding} y1={padding + v * chartHeight}
+                            x2={width - padding} y2={padding + v * chartHeight}
+                            stroke="#f1f5f9" strokeWidth="1"
+                        />
+                    ))}
+
+                    {/* Area fill */}
+                    <path d={areaPath} fill="url(#areaGradient)" className="transition-all duration-700" />
+
+                    {/* Main growth line */}
+                    <path d={linePath} fill="none" stroke="#3b82f6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="transition-all duration-700" />
+
+                    {/* Interactive Columns/Bars for New Hires */}
+                    {growthData.data.map((item, i) => {
+                        const x = padding + (i * (chartWidth / (growthData.data.length - 1)));
+                        const barWidth = 30;
+                        const barHeight = (item.newHires / Math.max(growthData.maxNewHires, 1)) * (chartHeight * 0.4);
+                        const isHovered = hoveredIndex === i;
+
+                        return (
+                            <g key={i} onMouseEnter={() => setHoveredIndex(i)} onMouseLeave={() => setHoveredIndex(null)}>
+                                {/* Invisible touch/hover area */}
+                                <rect
+                                    x={x - (chartWidth / (growthData.data.length - 1)) / 2}
+                                    y={padding}
+                                    width={chartWidth / (growthData.data.length - 1)}
+                                    height={chartHeight}
+                                    fill="transparent"
+                                    className="cursor-pointer"
+                                />
+
+                                {/* Vertical Guideline on hover */}
+                                {isHovered && (
+                                    <line x1={x} y1={padding} x2={x} y2={height - padding} stroke="#3b82f6" strokeWidth="1" strokeDasharray="4 4" />
+                                )}
+
+                                {/* Monthly Hire Bar */}
+                                <rect
+                                    x={x - barWidth / 2}
+                                    y={height - padding - barHeight}
+                                    width={barWidth}
+                                    height={barHeight}
+                                    rx="4"
+                                    fill={isHovered ? '#1d4ed8' : '#cbd5e1'}
+                                    className="transition-all duration-300"
+                                />
+
+                                {/* Data Point dot */}
+                                <circle
+                                    cx={x}
+                                    cy={padding + chartHeight - (item.cumulative / growthData.maxCumulative) * chartHeight}
+                                    r={isHovered ? 6 : 4}
+                                    fill={isHovered ? "#1d4ed8" : "#3b82f6"}
+                                    stroke="white"
+                                    strokeWidth="2"
+                                    className="transition-all duration-300"
+                                />
+                            </g>
+                        );
+                    })}
+                </svg>
+
+                {/* Legend/Labels Overlays */}
+                <div className="absolute bottom-0 left-0 right-0 flex justify-between px-[3.5%] pointer-events-none">
+                    {growthData.data.map((item, i) => (
+                        <span key={i} className={`text-[10px] font-bold tracking-tighter ${hoveredIndex === i ? 'text-blue-600' : 'text-gray-400'} transition-colors uppercase`}>
+                            {item.label}
+                        </span>
+                    ))}
                 </div>
-                <span className="text-sm font-bold text-gray-900">
-                    {growthData.data[growthData.data.length - 1]?.count || 0} Total
-                </span>
+
+                {/* Premium Floating Tooltip */}
+                {hoveredIndex !== null && (
+                    <div
+                        className="absolute z-10 bg-white/90 backdrop-blur-md border border-blue-100 shadow-xl rounded-xl p-3 pointer-events-none transition-all duration-200 animate-fade-in"
+                        style={{
+                            left: `${(hoveredIndex / (growthData.data.length - 1)) * 90 + 5}%`,
+                            bottom: '100%',
+                            marginBottom: '10px',
+                            transform: 'translateX(-50%)'
+                        }}
+                    >
+                        <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">{growthData.data[hoveredIndex].label} Snapshot</p>
+                        <div className="flex flex-col gap-1">
+                            <div className="flex items-center justify-between gap-4">
+                                <span className="text-xs text-gray-600">Total Workforce:</span>
+                                <span className="text-xs font-bold text-blue-600">{growthData.data[hoveredIndex].cumulative}</span>
+                            </div>
+                            <div className="flex items-center justify-between gap-4 pt-1 border-t border-gray-50">
+                                <span className="text-xs text-gray-600">New Monthly Hires:</span>
+                                <span className="text-xs font-bold text-gray-900">+{growthData.data[hoveredIndex].newHires}</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Bottom Legend */}
+            <div className="flex flex-wrap items-center gap-6 pt-2">
+                <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <span className="text-xs font-medium text-gray-500">Cumulative Headcount (Line)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-sm bg-gray-300"></div>
+                    <span className="text-xs font-medium text-gray-500">Monthly Net Hires (Bars)</span>
+                </div>
+                <div className="ml-auto text-[11px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-lg">
+                    {growthRate}% Yearly Delta
+                </div>
             </div>
         </div>
     );

@@ -68,7 +68,7 @@ const PayrollAdmin = () => {
                                 {cycles.map((c) => (
                                     <tr key={c.id}>
                                         <td className="py-4 px-6 font-bold text-gray-900">{c.name}</td>
-                                        <td className="py-4 px-6 text-sm text-gray-600">{c.startDate} to {c.endDate}</td>
+                                        <td className="py-4 px-6 text-sm text-gray-600">{c.start_date} to {c.end_date}</td>
                                         <td className="py-4 px-6">
                                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${c.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
                                                 {c.status || 'Active'}

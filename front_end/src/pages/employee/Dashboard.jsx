@@ -137,46 +137,66 @@ const Dashboard = () => {
     }, [records]);
 
     // 3. Weekly Engagement (Chart Data based on actual hours)
+    // 3. Weekly Engagement (Chart Data based on actual hours)
     const weeklyHours = useMemo(() => {
         const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         const today = new Date();
         const safeRecords = Array.isArray(records) ? records : [];
 
-        // Get the start of the current week (Sunday)
-        const startOfWeek = new Date(today);
-        startOfWeek.setDate(today.getDate() - today.getDay());
-        startOfWeek.setHours(0, 0, 0, 0);
+        // Helper to formatting dates as YYYY-MM-DD for comparison
+        const formatDate = (date) => {
+            return date.toISOString().split('T')[0];
+        };
 
-        return days.map((dayName, index) => {
-            const isToday = index === today.getDay();
+        // Generate the 7 days of the current week (starting Sunday)
+        const currentWeekDays = Array.from({ length: 7 }, (_, i) => {
+            const d = new Date(today);
+            const dayOfWeek = d.getDay();
+            const diff = d.getDate() - dayOfWeek + i; // Adjust to Sunday-based index
+            d.setDate(diff);
+            return d;
+        });
 
-            // Find records for this specific day of the current week
-            const dayRecords = safeRecords.filter(r => {
-                const recDate = new Date(r.date || r.clock_in);
-                return recDate.getDay() === index && recDate >= startOfWeek;
-            });
+        return currentWeekDays.map((dateObj) => {
+            const dayName = days[dateObj.getDay()];
+            const dateStr = formatDate(dateObj);
+            const isToday = dateStr === formatDate(today);
 
-            // Calculate active level (height)
-            let height = "5%";
+            // Find record for this specific date
+            const record = safeRecords.find(r => (r.date === dateStr) || (r.clock_in && r.clock_in.startsWith(dateStr)));
+
             let hours = 0;
-
-            if (dayRecords.length > 0) {
-                // Sum up hours (if multiple sessions in a day, though backend currently handles one main session per day logic potentially)
-                hours = dayRecords.reduce((acc, curr) => acc + (curr.hours_worked || 0), 0);
-
-                // If currently checked in today, assume some progress
-                if (isToday && isCheckedIn && hours === 0) {
-                    hours = 0.5; // Just started
-                }
-
-                // Max height 100% = 12 hours? Or 8? Let's say 9 hours is full bar.
-                const percentage = Math.min(100, (hours / 9) * 100);
-                height = `${Math.max(10, percentage)}%`; // Min 10% visibility
+            if (record) {
+                hours = parseFloat(record.hours_worked || record.work_hours || 0);
             }
 
-            return { day: dayName, height, active: isToday, hours: hours.toFixed(1) };
+            // Live update for today if checked in
+            if (isToday && isCheckedIn && hours === 0) {
+                // Calculate simplified elapsed time since check-in for visual feedback
+                if (checkInTime) {
+                    // This is a rough visual estimate if real-time calculation isn't available
+                    hours = 0.5;
+                }
+            }
+
+            // Max height calculation (assuming 9 hours is 100%)
+            const percentage = Math.min(100, (hours / 9) * 100);
+
+            // Should show at least a tiny bar if 0 but represents a day, 
+            // but for "dynamic" feel, empty days should be flat or minimal.
+            // If hours > 0, ensure at least 15% height for visibility so text fits.
+            const height = hours > 0 ? `${Math.max(15, percentage)}%` : '4%';
+
+            return {
+                day: dayName,
+                fullDate: dateStr,
+                height,
+                active: isToday,
+                hours: hours.toFixed(1),
+                hasData: hours > 0
+            };
         });
-    }, [records, isCheckedIn]);
+    }, [records, isCheckedIn, checkInTime]);
 
     // Safe defaults for user
     const displayName = user?.name || user?.email?.split('@')[0] || 'Member';
@@ -187,7 +207,7 @@ const Dashboard = () => {
 
             {/* Header */}
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
-                <div className="animate-fade-in">
+                <div>
                     <h1 className="text-3xl font-black text-gray-900 tracking-tight">Howdy, {firstName}! 👋</h1>
                     <p className="text-gray-400 text-sm mt-1 font-medium">It's a great day to be productive. Here's your status.</p>
                 </div>
@@ -290,21 +310,32 @@ const Dashboard = () => {
                         </div>
 
                         {/* Bar Chart Container */}
-                        <div className="flex items-end justify-between h-48 px-2 gap-4">
+                        <div className="flex items-end justify-between h-48 px-2 gap-4 relative">
+                            {/* Goal Line (8 hours approx 88% of 9h) */}
+                            <div className="absolute top-[11%] left-0 right-0 border-t border-dashed border-gray-200 w-full pointer-events-none z-0">
+                                <span className="absolute -top-3 right-0 text-[10px] font-bold text-gray-300 bg-white px-1">8h Goal</span>
+                            </div>
+
                             {weeklyHours.map((item, index) => (
-                                <div key={index} className="flex flex-col items-center gap-4 flex-1 group">
+                                <div key={index} className="relative z-10 flex flex-col items-center gap-4 flex-1 group cursor-default">
                                     <div className="relative w-full flex justify-center h-full items-end">
                                         <div
-                                            className={`w-full max-w-[40px] rounded-2xl transition-all duration-500 ease-out shadow-sm relative
-                                                ${item.active ? 'bg-gradient-to-t from-blue-700 to-blue-500' : 'bg-gray-50 group-hover:bg-gray-100'}`}
+                                            className={`w-full max-w-[40px] rounded-2xl transition-all duration-1000 ease-out shadow-sm relative group-hover:scale-110
+                                                ${item.active
+                                                    ? 'bg-gradient-to-t from-blue-700 to-blue-500 shadow-blue-200 shadow-lg'
+                                                    : 'bg-gray-50 hover:bg-gray-100'}
+                                                ${item.active ? 'animate-pulse' : ''}
+                                            `}
                                             style={{ height: item.height }}
                                         >
-                                            <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-[10px] font-black py-1 px-2 rounded-lg transition-all duration-300">
-                                                {item.hours}h
+                                            {/* Tooltip */}
+                                            <div className="opacity-0 group-hover:opacity-100 absolute -top-10 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-[10px] font-black py-1.5 px-3 rounded-xl transition-all duration-300 whitespace-nowrap z-20 shadow-xl pointer-events-none">
+                                                {item.hours} hrs
+                                                <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
                                             </div>
                                         </div>
                                     </div>
-                                    <span className={`text-[10px] font-black uppercase tracking-widest ${item.active ? 'text-blue-600' : 'text-gray-300'}`}>
+                                    <span className={`text-[10px] font-black uppercase tracking-widest transition-colors duration-300 ${item.active ? 'text-blue-600 scale-110' : 'text-gray-300 group-hover:text-gray-400'}`}>
                                         {item.day}
                                     </span>
                                 </div>

@@ -73,9 +73,9 @@ const App = () => {
                         {/* --- PROTECTED ROUTES --- */}
                         <Route
                           element={
-                            <div className="flex h-screen bg-gray-50 overflow-hidden">
+                            <div className="flex h-screen bg-gray-50">
                               <Sidebar />
-                              <div className="flex-1 flex flex-col h-full relative overflow-hidden">
+                              <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden">
                                 <Outlet />
                               </div>
                             </div>

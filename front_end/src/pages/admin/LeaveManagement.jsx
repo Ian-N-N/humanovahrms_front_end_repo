@@ -51,10 +51,11 @@ const LeaveManagement = () => {
 
                 <button
                     onClick={() => refetch()}
-                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all shadow-sm"
+                    disabled={loading}
+                    className={`flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all shadow-sm ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
-                    <span className="material-icons-round text-lg">refresh</span>
-                    Refresh
+                    <span className={`material-icons-round text-lg ${loading ? 'animate-spin' : ''}`}>refresh</span>
+                    {loading ? 'Refreshing...' : 'Refresh'}
                 </button>
             </div>
 

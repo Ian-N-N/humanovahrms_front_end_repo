@@ -32,7 +32,7 @@ const Payroll = () => {
   }, [payrolls]);
 
   // Totals Calculation
-  const totalDeductions = displayPayrolls.reduce((acc, curr) => acc + (Number(curr.tax_paid) + Number(curr.nssf) + Number(curr.nhif) + Number(curr.housing_levy)), 0);
+  const totalDeductions = displayPayrolls.reduce((acc, curr) => acc + (Number(curr.tax_paid) + Number(curr.nssf) + Number(curr.shif) + Number(curr.housing_levy)), 0);
   const totalNet = displayPayrolls.reduce((acc, curr) => acc + Number(curr.net_salary), 0);
   const totalGross = displayPayrolls.reduce((acc, curr) => acc + Number(curr.gross_salary), 0);
 
@@ -97,7 +97,7 @@ const Payroll = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
             <StatCard label="Total Net Pay" value={formatKES(totalNet)} subtext="+2.4% vs last month" icon="account_balance_wallet" color="bg-blue-50 text-blue-600" />
-            <StatCard label="Total Deductions" value={formatKES(totalDeductions)} subtext="Tax, NHIF, NSSF" icon="content_cut" color="bg-orange-50 text-orange-600" />
+            <StatCard label="Total Deductions" value={formatKES(totalDeductions)} subtext="Tax, SHIF, NSSF" icon="content_cut" color="bg-orange-50 text-orange-600" />
             <StatCard label="Allowances" value={formatKES(totalAllowances)} subtext="Bonuses & Overtime" icon="trending_up" color="bg-green-50 text-green-600" />
             <StatCard label="Status" value="2 / 5 Paid" subtext="3 Pending Processing" icon="pie_chart" color="bg-purple-50 text-purple-600" />
           </div>
@@ -138,7 +138,7 @@ const Payroll = () => {
                 </thead>
                 <tbody className="divide-y divide-gray-50">
                   {displayPayrolls.map((row, index) => {
-                    const totalDeds = Number(row.tax_paid) + Number(row.nssf) + Number(row.nhif) + Number(row.housing_levy);
+                    const totalDeds = Number(row.tax_paid) + Number(row.nssf) + Number(row.shif) + Number(row.housing_levy);
                     return (
                       <tr key={index} className="hover:bg-gray-50/80 transition-colors">
                         <td className="py-4 px-6">
@@ -187,7 +187,7 @@ const Payroll = () => {
 
             <div className="block lg:hidden bg-gray-50 p-4 space-y-4">
               {displayPayrolls.map((row, index) => {
-                const totalDeds = Number(row.tax_paid) + Number(row.nssf) + Number(row.nhif) + Number(row.housing_levy);
+                const totalDeds = Number(row.tax_paid) + Number(row.nssf) + Number(row.shif) + Number(row.housing_levy);
                 return (
                   <div key={index} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
                     <div className="flex justify-between items-start mb-4">

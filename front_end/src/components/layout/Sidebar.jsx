@@ -64,6 +64,7 @@ const Sidebar = () => {
       { to: '/hr/dashboard', icon: 'dashboard', label: 'Dashboard' },
       { to: '/hr/analytics', icon: 'insights', label: 'Insights' },
       { to: '/hr/employees', icon: 'people', label: 'Employees' },
+      { to: '/hr/departments', icon: 'business', label: 'Departments' },
       { to: '/hr/payroll', icon: 'payments', label: 'Payroll' },
       { to: '/hr/leaves', icon: 'event_available', label: 'Leave' },
       { to: '/hr/attendance', icon: 'schedule', label: 'Attendance' },
@@ -82,7 +83,7 @@ const Sidebar = () => {
   const currentMenu = menus[menuKey] || menus['employee'];
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-100 flex-shrink-0 flex flex-col h-screen font-sans z-20">
+    <aside className="w-64 bg-white border-r border-gray-100 flex-shrink-0 flex flex-col h-screen font-sans relative">
 
       {/* Brand Section */}
       <div className="h-20 flex items-center justify-between px-6">
@@ -102,7 +103,7 @@ const Sidebar = () => {
         <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
           <div className="w-10 h-10 rounded-full bg-blue-100 flex-shrink-0 overflow-hidden border border-gray-200">
             <img
-              src={user?.avatar || "https://i.pravatar.cc/150?u=default"}
+              src={user?.employee?.profile_photo_url || user?.avatar || "https://i.pravatar.cc/150?u=default"}
               alt={roleName}
               className="w-full h-full object-cover"
             />
