@@ -71,17 +71,33 @@ const Attendance = () => {
   }, [transformedRecords, searchQuery, filterDept, currentDate]);
 
   const stats = useMemo(() => {
-    const totalLogged = transformedRecords.length;
-    const present = transformedRecords.filter(i => i.status !== 'Late').length; // Assuming 'Late' is the only other active status for now
-    const late = transformedRecords.filter(i => i.status === 'Late').length;
+    // Filter records by DATE and DEPARTMENT for the stats (ignoring Search)
+    const dailyRecords = transformedRecords.filter(item => {
+      const matchesDate = !item.date || item.date === currentDate;
+      const matchesDept = filterDept === 'All' || (item.employee.dept && item.employee.dept === filterDept) || (item.department && item.department === filterDept);
+      return matchesDate && matchesDept;
+    });
 
-    // Absent is Total Active Employees - Total Logged
-    // Ensure we have a valid employee count
-    const totalEmployees = employees ? employees.length : 0;
+    const totalLogged = dailyRecords.length;
+    const present = dailyRecords.filter(i => i.status !== 'Late').length;
+    const late = dailyRecords.filter(i => i.status === 'Late').length;
+
+    // Filter employees by DEPARTMENT to get accurate Absent count basis
+    const relevantEmployees = employees ? employees.filter(e => {
+      if (filterDept === 'All') return true;
+      // Check if employee department matches. 
+      // Note: filteredData logic checked item.employee.dept or item.department.
+      // Assuming employee object has 'department' or 'department_name' or similar.
+      // Let's use loose matching if needed, but 'department' key is standard.
+      return e.department === filterDept || e.department_name === filterDept;
+    }) : [];
+
+    // Absent is Total Relevant Employees - Total Logged (Daily)
+    const totalEmployees = relevantEmployees.length;
     const absent = Math.max(0, totalEmployees - totalLogged);
 
     return { total: totalLogged, present, late, absent };
-  }, [transformedRecords, employees]);
+  }, [transformedRecords, employees, currentDate, filterDept]);
 
   const handleViewDetails = (record) => {
     setSelectedRecord({ ...record, date: record.date || currentDate });
@@ -180,10 +196,10 @@ const Attendance = () => {
                 <thead>
                   <tr className="bg-gray-50/50 border-b border-gray-100">
                     <th className="py-4 px-6 text-xs font-bold text-gray-400 uppercase">Employee</th>
-                    <th className="py-4 px-6 text-xs font-bold text-gray-400 uppercase">Clock In</th>
-                    <th className="py-4 px-6 text-xs font-bold text-gray-400 uppercase">Clock Out</th>
-                    <th className="py-4 px-6 text-xs font-bold text-gray-400 uppercase">Duration</th>
-                    <th className="py-4 px-6 text-xs font-bold text-gray-400 uppercase text-center">Status</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Clock In</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Clock Out</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Overtime</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
                     <th className="py-4 px-6 text-xs font-bold text-gray-400 uppercase text-right">Action</th>
                   </tr>
                 </thead>
@@ -201,7 +217,15 @@ const Attendance = () => {
                       </td>
                       <td className="py-4 px-6 text-sm font-medium text-gray-900">{row.checkIn}</td>
                       <td className="py-4 px-6 text-sm font-medium text-gray-500">{row.checkOut}</td>
-                      <td className="py-4 px-6 text-sm text-gray-600">{row.workHours}</td>
+                      <td className="py-4 px-6 text-sm text-gray-600">
+                        {row.overtime > 0 ? (
+                          <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-100">
+                            +{row.overtime}h
+                          </span>
+                        ) : (
+                          <span className="text-sm text-gray-400">-</span>
+                        )}
+                      </td>
                       <td className="py-4 px-6 text-center"><StatusBadge status={row.status} /></td>
                       <td className="py-4 px-6 text-right">
                         <span className="material-icons-round text-gray-300 group-hover:text-blue-500">chevron_right</span>

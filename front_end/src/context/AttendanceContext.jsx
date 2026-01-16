@@ -18,24 +18,39 @@ export const AttendanceProvider = ({ children }) => {
         const role = user?.role;
         if (!role) return;
 
+        let roleStr = '';
+        if (typeof role === 'string') {
+            roleStr = role;
+        } else if (typeof role === 'object' && role !== null && role.name) {
+            roleStr = role.name;
+        } else {
+            console.warn("AttendanceContext: Unknown role format", role);
+            return;
+        }
+
+        const r = roleStr.toLowerCase();
+        // alert(`Debug: Role detected as "${role}". Lower case: "${r}". Starting fetch...`);
+
         try {
             setLoading(true);
             let data = [];
 
-            if (role === 'admin' || role === 'hr') {
+            if (r.includes('admin') || r.includes('hr') || r.includes('manager')) {
+                // alert("Debug: Utilizing getAll() route due to Admin/HR/Manager privileges.");
                 data = await attendanceService.getAll();
             } else {
                 try {
                     data = await attendanceService.getPersonalHistory();
                 } catch (err) {
                     if (err.response?.status === 404) {
-                        console.log("Personal history endpoint (404) not found. Falling back to base /attendance GET.");
                         data = await attendanceService.getAll();
                     } else {
                         throw err;
                     }
                 }
             }
+
+            // alert(`Debug: Fetch complete. Received ${Array.isArray(data) ? data.length : 'invalid'} records.`);
 
             // Ensure data is an array
             if (!Array.isArray(data)) {
@@ -45,8 +60,8 @@ export const AttendanceProvider = ({ children }) => {
 
             setRecords(data);
 
-            // Logic to determine if user is checked in based on records
-            // Look for a record with no clockOut/checkOut time
+            // ... rest of logic
+
             const activeRecord = data.find(rec => !rec.clock_out && !rec.clockOut && !rec.checkOut && !rec.check_out);
 
             if (activeRecord) {
@@ -55,7 +70,6 @@ export const AttendanceProvider = ({ children }) => {
                 setCheckOutTime(null);
             } else {
                 setIsCheckedIn(false);
-                // If not checked in, check if there's a record for today to show the last session
                 const today = new Date().toISOString().split('T')[0];
                 const todayRecord = data.find(rec => rec.date === today);
                 if (todayRecord) {
@@ -68,6 +82,7 @@ export const AttendanceProvider = ({ children }) => {
             }
         } catch (error) {
             console.error("Failed to fetch attendance:", error);
+            // alert(`Debug: Error fetching attendance: ${error.message}`);
         } finally {
             setLoading(false);
         }

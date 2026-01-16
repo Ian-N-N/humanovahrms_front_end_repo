@@ -38,6 +38,7 @@ import DepartmentAnalytics from './pages/hr/DepartmentAnalytics';
 // 5. Notifications
 import PushNotifications from './pages/admin/PushNotifications';
 import Notifications from './pages/common/Notifications';
+import Settings from './pages/admin/Settings';
 
 // 4. Placeholder
 const PlaceholderPage = ({ title }) => (
@@ -115,7 +116,7 @@ const App = () => {
                           <Route path="/notifications" element={<Notifications />} />
 
                           {/* Settings & Extras */}
-                          <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
+                          <Route path="/settings" element={<Settings />} />
 
                           {/* 404 Fallback */}
                           <Route path="*" element={<PlaceholderPage title="404 - Not Found" />} />
