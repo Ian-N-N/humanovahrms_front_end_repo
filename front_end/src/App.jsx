@@ -19,6 +19,7 @@ import Departments from "./pages/admin/DepartmentManagement";
 import AuthPage from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import TrialRegister from "./pages/auth/TrialRegister";
+import Landing from "./pages/public/Landing";
 import Payroll from './pages/admin/Payroll';
 import LeaveManagement from './pages/admin/LeaveManagement';
 import Attendance from './pages/admin/AttendanceManagement';
@@ -69,7 +70,7 @@ const App = () => {
                         <Route path="/register" element={<Register />} />
                         <Route path="/trial-register" element={<TrialRegister />} />
 
-                        <Route path="/" element={<Navigate to="/login" replace />} />
+                        <Route path="/" element={<Landing />} />
 
                         {/* --- PROTECTED ROUTES --- */}
                         <Route

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Input from '../../components/common/Input';
+import Modal from '../../components/common/Modal';
 
 // Using the Unsplash image
 const BACKGROUND_IMAGE_URL = "https://images.unsplash.com/photo-1497366811353-6870744d04b2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80";
@@ -21,12 +22,15 @@ const AuthPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [forgotPasswordModal, setForgotPasswordModal] = useState(false);
 
   const [errors, setErrors] = useState({});
 
   const toggleView = () => {
     setIsLogin(!isLogin);
     setError('');
+    setSuccessMessage('');
     setErrors({});
   };
 
@@ -71,7 +75,7 @@ const AuthPage = () => {
           throw new Error("Passwords do not match");
         }
         await register(name, username, email, password, role);
-        alert("Registration successful! Please sign in.");
+        setSuccessMessage("Registration successful! Please sign in.");
         setIsLogin(true);
         setPassword('');
         setConfirmPassword('');
@@ -116,6 +120,12 @@ const AuthPage = () => {
           </div>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
+
+            {successMessage && (
+              <div className="p-3 bg-green-100 border border-green-200 text-green-700 rounded-lg text-sm text-center">
+                {successMessage}
+              </div>
+            )}
 
             {error && (
               <div className="p-3 bg-red-100 border border-red-200 text-red-700 rounded-lg text-sm text-center">
@@ -212,7 +222,7 @@ const AuthPage = () => {
                     <input type="checkbox" className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary mr-2" />
                     Remember me
                   </label>
-                  <a href="#" className="font-medium text-primary hover:text-primary-dark hover:underline">Reset Password?</a>
+                  <button type="button" onClick={() => setForgotPasswordModal(true)} className="font-medium text-primary hover:text-primary-dark hover:underline">Forgot password?</button>
                 </>
               ) : (
                 <label className="flex items-start text-gray-600 cursor-pointer mt-2">
@@ -253,6 +263,29 @@ const AuthPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      <Modal
+        isOpen={forgotPasswordModal}
+        onClose={() => setForgotPasswordModal(false)}
+        title="Forgot Password"
+        footer={
+          <button
+            onClick={() => setForgotPasswordModal(false)}
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm font-medium"
+          >
+            Close
+          </button>
+        }
+      >
+        <div className="flex flex-col items-center gap-3 py-2 text-center">
+          <span className="material-icons-round text-5xl text-primary">lock_reset</span>
+          <p className="text-gray-700">
+            Password reset functionality is coming soon. Please contact your administrator
+            to reset your password in the meantime.
+          </p>
+        </div>
+      </Modal>
     </div>
   );
 };
